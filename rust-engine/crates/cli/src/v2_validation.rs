@@ -476,12 +476,7 @@ fn resolve_sibling_filepath(target_filepath: &str, from_part: &str) -> String {
     }
 
     let parent_parts = &parts[..parts.len() - 1];
-    let is_init = target_filepath.ends_with("__init__.py") || target_filepath.ends_with("__init__.pyc");
-    let pop_count = if is_init {
-        num_dots.saturating_sub(1)
-    } else {
-        num_dots
-    };
+    let pop_count = num_dots.saturating_sub(1);
 
     let keep_parts = if pop_count >= parent_parts.len() {
         if !parent_parts.is_empty() {
@@ -540,6 +535,7 @@ fn run_v2_analysis_safe(
     siblings: &[(String, String)],
     base_dir: &Path,
     entry_filter: Option<&str>,
+    target_path: Option<String>,
 ) -> (bool, bool, Vec<taint::interproc::SuppressedFlowDiagnostic>) {
     let code_clone = code.to_string();
     let lang_clone = language.to_string();
@@ -549,12 +545,15 @@ fn run_v2_analysis_safe(
     let siblings_clone = siblings.to_vec();
     let base_dir_clone = base_dir.to_path_buf();
     let filter_clone = entry_filter.map(|s| s.to_string());
+    let target_path_clone = target_path;
 
     let result = panic::catch_unwind(move || {
         let mut program = ir::Program::new();
         let mut gst = symbols::global::GlobalSymbolTable::new();
 
-        let filename = if lang_clone.to_lowercase() == "java" {
+        let filename = if let Some(path) = target_path_clone {
+            path
+        } else if lang_clone.to_lowercase() == "java" {
             format!("Test_{}.java", cwe_clone.replace("-", "_"))
         } else if !repo_clone.is_empty() && repo_clone != "unknown" {
             get_target_filename(&repo_clone, &commit_clone, &code_clone)
@@ -564,10 +563,37 @@ fn run_v2_analysis_safe(
 
         let t0 = std::time::Instant::now();
         // Pre-populate program.source_files for generic package-root discovery
+        let mut virtual_inits_count = 0;
+        let mut insert_virtual_inits = |program: &mut ir::Program, filepath: &str| {
+            let normalized = filepath.replace('\\', "/");
+            let parts: Vec<&str> = normalized.split('/').filter(|s| !s.is_empty()).collect();
+            if parts.len() > 1 {
+                for i in 1..parts.len() {
+                    let parent_dir = parts[..i].join("/");
+                    let init_py = format!("{}/__init__.py", parent_dir);
+                    if !program.source_files.contains_key(&init_py) {
+                        program.source_files.insert(init_py, "".to_string());
+                        virtual_inits_count += 1;
+                    }
+                }
+            }
+        };
+
         program.source_files.insert(filename.clone(), code_clone.clone());
+        insert_virtual_inits(&mut program, &filename);
+
         for (sib_code, sib_filename) in &siblings_clone {
             program.source_files.insert(sib_filename.clone(), sib_code.clone());
+            insert_virtual_inits(&mut program, sib_filename);
         }
+
+        if !repo_clone.is_empty() && repo_clone != "unknown" {
+            println!(
+                "[RC108A_DIAGNOSTIC] Repo: {}, Filename: {}, Virtual __init__.py Count: {}",
+                repo_clone, filename, virtual_inits_count
+            );
+        }
+
         let target_loaded = gst.load_file(&mut program, &code_clone, &filename, &lang_clone).is_ok();
         let t_load_target = t0.elapsed();
 
@@ -953,97 +979,160 @@ fn main() {
             };
 
             let mut siblings = Vec::new();
+            let mut target_path = None;
+
             if name == "GitHub" {
-                let target_filename = get_target_filename(&sample.repo, &sample.commit, &sample.code);
-                
-                // 1. Collect all other sibling candidates
-                let mut unresolved: Vec<String> = Vec::new();
+                let mut cohort_codes = vec![sample.code.clone()];
                 for other in samples {
                     if other.repo == sample.repo 
                         && other.commit == sample.commit 
                         && other.vulnerable == sample.vulnerable 
                         && other.code != sample.code 
                     {
-                        unresolved.push(other.code.clone());
+                        cohort_codes.push(other.code.clone());
                     }
                 }
+
+                let repo_name = sample.repo.split('/').last().unwrap_or("").trim_end_matches(".git");
+                let repo_normalized = repo_name.replace('-', "_").to_lowercase();
                 
-                // 2. Resolved list (filepath, code)
-                let mut resolved: Vec<(String, String)> = Vec::new();
-                resolved.push((target_filename.clone(), sample.code.clone()));
-                
-                // 3. Loop until fixpoint
-                let mut resolved_any = true;
-                while resolved_any {
-                    resolved_any = false;
-                    let mut newly_resolved = Vec::new();
-                    let mut remaining_unresolved = Vec::new();
-                    
-                    for unresolved_code in &unresolved {
-                        let mut resolved_path = None;
-                        // Search for any importing file in the currently resolved list
-                        for (importing_path, importing_code) in &resolved {
-                            let imports = extract_imported_symbols(importing_code);
-                            for (from_part, symbol) in &imports {
-                                let mut matched = false;
-                                if code_defines_symbol(unresolved_code, symbol) {
-                                    matched = true;
-                                } else if let Some(last_mod) = from_part.split('.').last() {
-                                    for line in unresolved_code.lines() {
-                                        let line = line.trim();
-                                        let defined_name = if line.starts_with("def ") {
-                                            line["def ".len()..].split('(').next().map(|s| s.trim())
-                                        } else if line.starts_with("class ") {
-                                            line["class ".len()..].split(|c| c == ':' || c == '(').next().map(|s| s.trim())
-                                        } else {
-                                            None
-                                        };
-                                        if let Some(dn) = defined_name {
-                                            if !dn.is_empty() {
-                                                let access_pattern = format!("{}.{}", last_mod, dn);
-                                                if importing_code.contains(&access_pattern) {
-                                                    matched = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                if matched {
-                                    resolved_path = Some(resolve_sibling_filepath(importing_path, from_part));
+                let mut import_roots = std::collections::HashSet::new();
+                for code in &cohort_codes {
+                    for (from_part, _) in extract_imported_symbols(code) {
+                        if !from_part.starts_with('.') {
+                            if let Some(first) = from_part.split('.').next() {
+                                import_roots.insert(first.to_string());
+                            }
+                        }
+                    }
+                }
+
+                let mut package_root = repo_normalized.clone();
+                for root in &import_roots {
+                    let root_lower = root.to_lowercase();
+                    if repo_normalized.contains(&root_lower) || root_lower.contains(&repo_normalized) {
+                        package_root = root.clone();
+                        break;
+                    }
+                }
+
+                let mut resolved_paths: std::collections::HashMap<usize, String> = std::collections::HashMap::new();
+                for (i, code) in cohort_codes.iter().enumerate() {
+                    for (j, other_code) in cohort_codes.iter().enumerate() {
+                        if i == j { continue; }
+                        for (from_part, symbol) in extract_imported_symbols(other_code) {
+                            if !from_part.starts_with('.') && from_part.starts_with(&package_root) {
+                                if code_defines_symbol(code, &symbol) {
+                                    resolved_paths.insert(i, format!("{}.py", from_part.replace('.', "/")));
                                     break;
                                 }
                             }
-                            if resolved_path.is_some() {
-                                break;
-                            }
                         }
-                        
-                        if let Some(path) = resolved_path {
-                            newly_resolved.push((path, unresolved_code.clone()));
-                            resolved_any = true;
-                        } else {
-                            remaining_unresolved.push(unresolved_code.clone());
+                        if resolved_paths.contains_key(&i) { break; }
+                    }
+                }
+
+                if !resolved_paths.contains_key(&0) {
+                    let mut max_dots = 1;
+                    for (from_part, _) in extract_imported_symbols(&sample.code) {
+                        if from_part.starts_with('.') {
+                            let dots = from_part.chars().take_while(|&c| c == '.').count();
+                            if dots > max_dots {
+                                max_dots = dots;
+                            }
                         }
                     }
                     
-                    unresolved = remaining_unresolved;
-                    resolved.extend(newly_resolved);
+                    let mut path = package_root.clone();
+                    for depth in 1..max_dots {
+                        path = format!("{}/sub{}", path, depth);
+                    }
+                    path = format!("{}/target.py", path);
+                    resolved_paths.insert(0, path);
                 }
-                
-                // 4. Assign fallback names to remaining unresolved siblings to avoid collisions
-                let mut sibling_idx = 1;
-                for unresolved_code in unresolved {
-                    let filename = format!("sibling_{}.py", sibling_idx);
-                    sibling_idx += 1;
-                    siblings.push((unresolved_code, filename));
+
+                let mut resolved_any = true;
+                while resolved_any {
+                    resolved_any = false;
+                    for i in 1..cohort_codes.len() {
+                        if resolved_paths.contains_key(&i) { continue; }
+                        let code = &cohort_codes[i];
+                        let mut resolved_path = None;
+
+                        for (&j, path_j) in &resolved_paths {
+                            let other_code = &cohort_codes[j];
+                            for (from_part, symbol) in extract_imported_symbols(other_code) {
+                                if code_defines_symbol(code, &symbol) {
+                                    if from_part.starts_with('.') {
+                                        resolved_path = Some(resolve_sibling_filepath(&path_j, &from_part));
+                                    } else {
+                                        resolved_path = Some(format!("{}.py", from_part.replace('.', "/")));
+                                    }
+                                    break;
+                                }
+                            }
+                            if resolved_path.is_some() { break; }
+                        }
+
+                        if resolved_path.is_none() {
+                            for (&j, path_j) in &resolved_paths {
+                                let other_code = &cohort_codes[j];
+                                for (from_part, symbol) in extract_imported_symbols(code) {
+                                    if code_defines_symbol(other_code, &symbol) {
+                                        if from_part.starts_with('.') {
+                                            let num_dots = from_part.chars().take_while(|&c| c == '.').count();
+                                            let normalized = path_j.replace('\\', "/");
+                                            let parts: Vec<&str> = normalized.split('/').filter(|s| !s.is_empty()).collect();
+                                            if parts.len() > 1 {
+                                                let parent_parts = &parts[..parts.len() - 1];
+                                                let pop_count = num_dots.saturating_sub(1);
+                                                let keep_parts = if pop_count >= parent_parts.len() {
+                                                    &[]
+                                                } else {
+                                                    &parent_parts[..parent_parts.len() - pop_count]
+                                                };
+                                                let base_dir = keep_parts.join("/");
+                                                if base_dir.is_empty() {
+                                                    resolved_path = Some(format!("sibling_{}.py", i));
+                                                } else {
+                                                    resolved_path = Some(format!("{}/sibling_{}.py", base_dir, i));
+                                                }
+                                            }
+                                        } else {
+                                            resolved_path = Some(format!("{}.py", from_part.replace('.', "/")));
+                                        }
+                                        break;
+                                    }
+                                }
+                                if resolved_path.is_some() { break; }
+                            }
+                        }
+
+                        if let Some(path) = resolved_path {
+                            resolved_paths.insert(i, path);
+                            resolved_any = true;
+                        }
+                    }
                 }
-                
-                // 5. Add all resolved siblings (excluding the target file itself which is index 0)
-                for (path, code) in resolved.into_iter().skip(1) {
+
+                for i in 1..cohort_codes.len() {
+                    if !resolved_paths.contains_key(&i) {
+                        let path = format!("{}/sibling_{}.py", package_root, i);
+                        resolved_paths.insert(i, path);
+                    }
+                }
+
+                target_path = resolved_paths.get(&0).cloned();
+                for i in 1..cohort_codes.len() {
+                    let code = cohort_codes[i].clone();
+                    let path = resolved_paths.get(&i).unwrap().clone();
                     siblings.push((code, path));
                 }
+
+                println!(
+                    "[RC108A_DIAGNOSTIC] Repo: {}, Target Path: {:?}, Package Root: {}, Resolved Siblings: {}",
+                    sample.repo, target_path, package_root, siblings.len()
+                );
             }
 
             if name == "Vul4J" {
@@ -1060,6 +1149,7 @@ fn main() {
                 &siblings,
                 base_dir,
                 filter,
+                target_path,
             );
             if pred {
                 split.flow_found_correct_cwe += 1;
