@@ -1,0 +1,49 @@
+{
+  "model_type": "LightGBM",
+  "threshold": 0.45,
+  "features": [
+    "taint_paths_norm",
+    "sources_norm",
+    "sinks_norm",
+    "sanitizers_norm",
+    "findings_norm",
+    "CWE_matches_norm",
+    "cross_function_taint_depth_norm",
+    "call_chain_depth_norm",
+    "sink_reachability_depth_norm",
+    "sanitizer_distance_norm",
+    "multi_hop_taint_count_norm",
+    "sanitizer_coverage_ratio",
+    "sink_to_sanitizer_ratio",
+    "taint_termination_rate",
+    "validated_path_density",
+    "trusted_source_ratio"
+  ],
+  "mapping": {
+    "taint_paths_norm": "f0",
+    "sources_norm": "f1",
+    "sinks_norm": "f2",
+    "sanitizers_norm": "f3",
+    "findings_norm": "f4",
+    "CWE_matches_norm": "f5",
+    "cross_function_taint_depth_norm": "f6",
+    "call_chain_depth_norm": "f7",
+    "sink_reachability_depth_norm": "f8",
+    "sanitizer_distance_norm": "f9",
+    "multi_hop_taint_count_norm": "f10",
+    "sanitizer_coverage_ratio": "f11",
+    "sink_to_sanitizer_ratio": "f12",
+    "taint_termination_rate": "f13",
+    "validated_path_density": "f14",
+    "trusted_source_ratio": "f15"
+  },
+  "parameters": {
+    "n_estimators": 122,
+    "learning_rate": 0.07909661235339795,
+    "num_leaves": 29,
+    "max_depth": 3,
+    "min_child_samples": 34,
+    "subsample": 0.7811755061953549,
+    "colsample_bytree": 0.8260174847838089
+  }
+}

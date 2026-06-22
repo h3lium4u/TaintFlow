@@ -1,0 +1,33 @@
+[package]
+name = "taintflow-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+parser = { path = "../parser" }
+normalizer = { path = "../normalizer" }
+symbols = { path = "../symbols" }
+cfg = { path = "../cfg" }
+taint = { path = "../taint" }
+rules = { path = "../rules" }
+features = { path = "../features" }
+ir = { path = "../ir" }
+semantic_rules = { path = "../semantic_rules" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[[bin]]
+name = "v2-validation"
+path = "src/v2_validation.rs"
+
+[[bin]]
+name = "debug_transfer"
+path = "src/bin/debug_transfer.rs"
+
+[[bin]]
+name = "debug_holdout"
+path = "src/bin/debug_holdout.rs"
+
+[[bin]]
+name = "check_callgraph_edges"
+path = "src/bin/check_callgraph_edges.rs"

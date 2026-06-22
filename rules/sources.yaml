@@ -1,0 +1,95 @@
+# TaintFlow+ Sources Catalog
+
+python:
+  - name: flask_request_args
+    pattern: "request.args"
+    type: HTTP_PARAMETER
+  - name: flask_request_form
+    pattern: "request.form"
+    type: HTTP_PARAMETER
+  - name: flask_request_json
+    pattern: "request.json"
+    type: HTTP_PARAMETER
+  - name: flask_request_values
+    pattern: "request.values"
+    type: HTTP_PARAMETER
+  - name: flask_request_query_string
+    pattern: "request.query_string"
+    type: HTTP_PARAMETER
+  - name: flask_request_get_json
+    pattern: "request.get_json"
+    type: HTTP_METHOD_CALL
+  - name: django_request_get
+    pattern: "request.GET"
+    type: HTTP_PARAMETER
+  - name: django_request_post
+    pattern: "request.POST"
+    type: HTTP_PARAMETER
+  - name: django_request_body
+    pattern: "request.body"
+    type: HTTP_PARAMETER
+  - name: standard_input
+    pattern: "input"
+    type: SYSTEM_INPUT
+  - name: sys_argv
+    pattern: "sys.argv"
+    type: CLI_ARGUMENT
+  - name: os_environ
+    pattern: "os.environ"
+    type: ENV_VARIABLE
+  - name: os_getenv
+    pattern: "os.getenv"
+    type: ENV_VARIABLE
+
+java:
+  - name: servlet_get_parameter
+    pattern: "HttpServletRequest.getParameter"
+    type: HTTP_PARAMETER
+  - name: servlet_get_parameter_values
+    pattern: "HttpServletRequest.getParameterValues"
+    type: HTTP_PARAMETER
+  - name: servlet_get_parameter_map
+    pattern: "HttpServletRequest.getParameterMap"
+    type: HTTP_PARAMETER
+  - name: servlet_get_header
+    pattern: "HttpServletRequest.getHeader"
+    type: HTTP_HEADER
+  - name: servlet_get_query_string
+    pattern: "HttpServletRequest.getQueryString"
+    type: HTTP_PARAMETER
+  - name: servlet_get_reader
+    pattern: "HttpServletRequest.getReader"
+    type: HTTP_BODY
+  - name: servlet_get_input_stream
+    pattern: "HttpServletRequest.getInputStream"
+    type: HTTP_BODY
+  - name: jaxrs_query_param
+    pattern: "@QueryParam"
+    type: ANNOTATION
+  - name: jaxrs_path_param
+    pattern: "@PathParam"
+    type: ANNOTATION
+  - name: jaxrs_form_param
+    pattern: "@FormParam"
+    type: ANNOTATION
+  - name: jaxrs_header_param
+    pattern: "@HeaderParam"
+    type: ANNOTATION
+  - name: spring_request_param
+    pattern: "@RequestParam"
+    type: ANNOTATION
+  - name: spring_path_variable
+    pattern: "@PathVariable"
+    type: ANNOTATION
+  - name: spring_request_body
+    pattern: "@RequestBody"
+    type: ANNOTATION
+  - name: spring_request_header
+    pattern: "@RequestHeader"
+    type: ANNOTATION
+  - name: system_get_property
+    pattern: "System.getProperty"
+    type: ENV_VARIABLE
+  - name: system_getenv
+    pattern: "System.getenv"
+    type: ENV_VARIABLE

@@ -1,0 +1,90 @@
+{
+  "name": "taintflow",
+  "displayName": "TaintFlow Security Scanner",
+  "description": "AI-powered static security analysis for Python and Java. Detects CWE-89, CWE-78, CWE-22, CWE-918, CWE-502, CWE-798, CWE-327 and more using the TaintFlow RC2 taint-analysis engine.",
+  "version": "1.0.0",
+  "publisher": "taintflow",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Other"],
+  "keywords": ["security", "static analysis", "taint analysis", "CWE", "vulnerability", "SAST"],
+  "icon": "assets/icon.png",
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:java",
+    "onCommand:taintflow.scanFile",
+    "onCommand:taintflow.scanWorkspace",
+    "onCommand:taintflow.clearDiagnostics"
+  ],
+  "main": "./client/out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "taintflow.scanFile",
+        "title": "TaintFlow: Scan Current File",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "taintflow.scanWorkspace",
+        "title": "TaintFlow: Scan Workspace",
+        "icon": "$(search-view-icon)"
+      },
+      {
+        "command": "taintflow.clearDiagnostics",
+        "title": "TaintFlow: Clear All Findings",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "taintflow.scanFile",
+          "when": "resourceLangId == python || resourceLangId == java",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "taintflow.scanFile",
+          "when": "resourceLangId == python || resourceLangId == java"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "TaintFlow",
+      "properties": {
+        "taintflow.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter used to run taintflow.py"
+        },
+        "taintflow.taintflowScriptPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to taintflow.py script. Leave empty to auto-detect."
+        },
+        "taintflow.autoScanOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically scan files on save."
+        },
+        "taintflow.showInformationMessages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show information messages after scanning."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

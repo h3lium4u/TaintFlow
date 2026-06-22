@@ -1,0 +1,50 @@
+# TaintFlow+ Sanitizer Matrix Catalog
+
+python:
+  - cwe: "CWE-89"
+    sanitizers:
+      - pattern: "int"
+      - pattern: "float"
+      - pattern: "bool"
+      - pattern: "escape_string"
+      - pattern: "sqlite3.register_adapter"
+
+  - cwe: "CWE-78"
+    sanitizers:
+      - pattern: "shlex.quote"
+      - pattern: "pipes.quote"
+
+  - cwe: "CWE-22"
+    sanitizers:
+      - pattern: "os.path.basename"
+      - pattern: "werkzeug.utils.secure_filename"
+
+  - cwe: "CWE-918"
+    sanitizers:
+      - pattern: "urllib.parse.quote"
+      - pattern: "urllib.parse.quote_plus"
+
+  - cwe: "CWE-502"
+    sanitizers:
+      - pattern: "yaml.safe_load"
+
+java:
+  - cwe: "CWE-89"
+    sanitizers:
+      - pattern: "Integer.parseInt"
+      - pattern: "Double.parseDouble"
+      - pattern: "Float.parseFloat"
+      - pattern: "Boolean.parseBoolean"
+      - pattern: "StringEscapeUtils.escapeSql"
+
+  - cwe: "CWE-78"
+    sanitizers:
+      - pattern: "StringEscapeUtils.escapeHtml"
+
+  - cwe: "CWE-22"
+    sanitizers:
+      - pattern: "FilenameUtils.getName"
+
+  - cwe: "CWE-918"
+    sanitizers:
+      - pattern: "URLEncoder.encode"

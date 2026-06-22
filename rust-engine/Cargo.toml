@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/parser",
+    "crates/normalizer",
+    "crates/symbols",
+    "crates/cfg",
+    "crates/taint",
+    "crates/rules",
+    "crates/features",
+    "crates/ml",
+    "crates/rpc",
+    "crates/cli",
+    "crates/ir",
+    "crates/semantic_rules"
+]

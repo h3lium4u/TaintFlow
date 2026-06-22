@@ -1,0 +1,11 @@
+{
+  "total_files_copied": 111,
+  "total_size_bytes": 52316897,
+  "total_size_mb": 49.89,
+  "excluded_count": 5342,
+  "rust_build": "PASS",
+  "validation_runnable": "PASS",
+  "models_present": "PASS",
+  "vscode_buildable": "PASS",
+  "is_self_contained": "YES"
+}

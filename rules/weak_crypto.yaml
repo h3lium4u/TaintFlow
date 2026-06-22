@@ -1,0 +1,49 @@
+# TaintFlow+ Weak Cryptography (CWE-327) Catalog
+
+python:
+  - name: hashlib_md5
+    pattern: "hashlib.md5"
+    algorithm: "MD5"
+    severity: "MEDIUM"
+  - name: hashlib_sha1
+    pattern: "hashlib.sha1"
+    algorithm: "SHA-1"
+    severity: "LOW"
+  - name: cryptography_blowfish
+    pattern: "Blowfish.new"
+    algorithm: "Blowfish"
+    severity: "HIGH"
+  - name: cryptography_des
+    pattern: "DES.new"
+    algorithm: "DES"
+    severity: "HIGH"
+  - name: cryptography_rc4
+    pattern: "ARC4.new"
+    algorithm: "RC4"
+    severity: "HIGH"
+
+java:
+  - name: message_digest_md5
+    pattern: "MessageDigest.getInstance(\"MD5\")"
+    algorithm: "MD5"
+    severity: "MEDIUM"
+  - name: message_digest_sha1
+    pattern: "MessageDigest.getInstance(\"SHA-1\")"
+    algorithm: "SHA-1"
+    severity: "LOW"
+  - name: message_digest_sha
+    pattern: "MessageDigest.getInstance(\"SHA\")"
+    algorithm: "SHA-1"
+    severity: "LOW"
+  - name: cipher_des
+    pattern: "Cipher.getInstance(\"DES\")"
+    algorithm: "DES"
+    severity: "HIGH"
+  - name: cipher_rc4
+    pattern: "Cipher.getInstance(\"RC4\")"
+    algorithm: "RC4"
+    severity: "HIGH"
+  - name: cipher_blowfish
+    pattern: "Cipher.getInstance(\"Blowfish\")"
+    algorithm: "Blowfish"
+    severity: "HIGH"

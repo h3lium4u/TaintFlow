@@ -1,0 +1,148 @@
+# TaintFlow+ Sinks Catalog
+
+python:
+  - cwe: "CWE-89"
+    name: sql_injection
+    sinks:
+      - pattern: "cursor.execute"
+        arg_index: 0
+      - pattern: "cursor.executemany"
+        arg_index: 0
+      - pattern: "conn.execute"
+        arg_index: 0
+      - pattern: "db.engine.execute"
+        arg_index: 0
+      - pattern: "session.execute"
+        arg_index: 0
+
+  - cwe: "CWE-78"
+    name: command_injection
+    sinks:
+      - pattern: "subprocess.run"
+        arg_index: 0
+      - pattern: "subprocess.Popen"
+        arg_index: 0
+      - pattern: "subprocess.call"
+        arg_index: 0
+      - pattern: "subprocess.check_call"
+        arg_index: 0
+      - pattern: "subprocess.check_output"
+        arg_index: 0
+      - pattern: "os.system"
+        arg_index: 0
+      - pattern: "os.popen"
+        arg_index: 0
+
+  - cwe: "CWE-22"
+    name: path_traversal
+    sinks:
+      - pattern: "open"
+        arg_index: 0
+      - pattern: "os.open"
+        arg_index: 0
+      - pattern: "shutil.copyfile"
+        arg_index: 0
+      - pattern: "shutil.move"
+        arg_index: 0
+
+  - cwe: "CWE-918"
+    name: ssrf
+    sinks:
+      - pattern: "requests.get"
+        arg_index: 0
+      - pattern: "requests.post"
+        arg_index: 0
+      - pattern: "requests.request"
+        arg_index: 1
+      - pattern: "urllib.request.urlopen"
+        arg_index: 0
+      - pattern: "httpx.get"
+        arg_index: 0
+
+  - cwe: "CWE-502"
+    name: unsafe_deserialization
+    sinks:
+      - pattern: "pickle.loads"
+        arg_index: 0
+      - pattern: "pickle.load"
+        arg_index: 0
+      - pattern: "marshal.loads"
+        arg_index: 0
+      - pattern: "shelve.open"
+        arg_index: 0
+      - pattern: "yaml.load"
+        arg_index: 0
+
+java:
+  - cwe: "CWE-89"
+    name: sql_injection
+    sinks:
+      - pattern: "Statement.executeQuery"
+        arg_index: 0
+      - pattern: "Statement.execute"
+        arg_index: 0
+      - pattern: "Statement.executeUpdate"
+        arg_index: 0
+      - pattern: "Connection.prepareStatement"
+        arg_index: 0
+      - pattern: "JdbcTemplate.query"
+        arg_index: 0
+      - pattern: "JdbcTemplate.update"
+        arg_index: 0
+
+  - cwe: "CWE-78"
+    name: command_injection
+    sinks:
+      - pattern: "Runtime.exec"
+        arg_index: 0
+      - pattern: "ProcessBuilder"
+        arg_index: 0
+
+  - cwe: "CWE-22"
+    name: path_traversal
+    sinks:
+      - pattern: "new File"
+        arg_index: 0
+      - pattern: "new FileInputStream"
+        arg_index: 0
+      - pattern: "new FileOutputStream"
+        arg_index: 0
+      - pattern: "Paths.get"
+        arg_index: 0
+
+  - cwe: "CWE-918"
+    name: ssrf
+    sinks:
+      - pattern: "new URL"
+        arg_index: 0
+      - pattern: "new URI"
+        arg_index: 0
+      - pattern: "HttpClient.send"
+        arg_index: 0
+      - pattern: "HttpURLConnection.openConnection"
+        arg_index: 0
+
+  - cwe: "CWE-502"
+    name: unsafe_deserialization
+    sinks:
+      - pattern: "ObjectInputStream.readObject"
+        arg_index: 0
+      - pattern: "XMLDecoder.readObject"
+        arg_index: 0
+
+  - cwe: "CWE-501"
+    name: trust_boundary_violation
+    sinks:
+      - pattern: "HttpSession.setAttribute"
+        arg_index: 1
+      - pattern: "HttpSession.putValue"
+        arg_index: 1
+      - pattern: "ServletContext.setAttribute"
+        arg_index: 1
+      - pattern: "ServletContext.setInitParameter"
+        arg_index: 1
+      - pattern: "request.getSession().setAttribute"
+        arg_index: 1
+      - pattern: "request.getSession().putValue"
+        arg_index: 1
+

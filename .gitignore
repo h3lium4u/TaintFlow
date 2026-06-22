@@ -1,0 +1,14 @@
+# Ignore validation logs
+*.log
+
+# Ignore rust build artifacts
+**/target/
+
+# Ignore scratch directory
+scratch/
+.gemini/
+.agents/
+
+# Ignore node_modules
+node_modules/
+**/node_modules/

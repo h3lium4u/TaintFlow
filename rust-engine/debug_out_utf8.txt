@@ -1,0 +1,552 @@
+﻿--- Source Code (before) ---
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.lang3.StringEscapeUtils;
+            try {
+                String unescapedURL = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+                /*
+                    StringEscapeUtils is deprecated starting with version 3.6 of commons-lang3, however the indicated replacement comes from
+                    commons-text, which is not an OSGi bundle
+                */
+                unescapedURL = StringEscapeUtils.unescapeXml(unescapedURL);
+                // Percent-encode characters that are not allowed in unquoted
+                // HTML attributes: ", ', >, <, ` and space. We don't encode =
+                // since this would break links with query parameters.
+                String encodedUrl = unescapedURL.replaceAll("\"", "%22")
+                        .replaceAll("'", "%27")
+                        .replaceAll(">", "%3E")
+                        .replaceAll("<", "%3C")
+                        .replaceAll("`", "%60")
+                        .replaceAll(" ", "%20");
+                int qMarkIx = encodedUrl.indexOf('?');
+                if (qMarkIx > 0) {
+                    encodedUrl = encodedUrl.substring(0, qMarkIx) + encodedUrl.substring(qMarkIx).replaceAll(":", "%3A");
+                }
+
+                encodedUrl = mangleNamespaces(encodedUrl);
+                if (xssFilter.isValidHref(encodedUrl)) {
+                    return encodedUrl;
+                }
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("Unable to decode url: {}.", url);
+                    "/base?backHref=javascript%3Aalert(1)"
+                {"%2Fscripts%2Ftest.js", "/scripts/test.js"},
+-------------------
+Running sample 2 | repo=apache/sling-org-apache-sling-xss | cwe=CWE-79...
+
+=== Types in Symbol Table ===
+
+=== Methods in Symbol Table ===
+  MethodId(MethodId(1)) | FQN: Test_CWE_79.main | Parameters: ["url", "input", "data", "p"]
+
+=== All Instructions in Program ===
+  InstructionId(1) | Call { dest: Some("unescapedURL"), callee: "URLDecoder.decode", args: ["url", "StandardCharsets.UTF_8.name()"] }
+  InstructionId(2) | Call { dest: Some("unescapedURL"), callee: "StringEscapeUtils.unescapeXml", args: ["unescapedURL"] }
+  InstructionId(3) | Call { dest: Some("encodedUrl"), callee: "unescapedURL.replaceAll(\"\\\"\", \"%22\")\n                        .replaceAll(\"'\", \"%27\")\n                        .replaceAll(\">\", \"%3E\")\n                        .replaceAll(\"<\", \"%3C\")\n                        .replaceAll(\"`\", \"%60\")\n                        .replaceAll", args: ["\" \"", "\"%20\""] }
+  InstructionId(4) | Call { dest: Some("qMarkIx"), callee: "encodedUrl.indexOf", args: ["'?'"] }
+  InstructionId(5) | Call { dest: None, callee: "encodedUrl.substring", args: ["0", "qMarkIx"] }
+  InstructionId(6) | Call { dest: None, callee: "encodedUrl.substring(qMarkIx).replaceAll", args: ["\":\"", "\"%3A\""] }
+  InstructionId(7) | Call { dest: None, callee: "encodedUrl.substring", args: ["qMarkIx"] }
+  InstructionId(8) | Assign { dest: "encodedUrl", src: "encodedUrl.substring(0, qMarkIx) + encodedUrl.substring(qMarkIx).replaceAll(\":\", \"%3A\")" }
+  InstructionId(9) | Branch { cond: "(qMarkIx > 0)", then_block: [InstructionId(5), InstructionId(6), InstructionId(7), InstructionId(8)], else_block: None }
+  InstructionId(10) | Call { dest: Some("encodedUrl"), callee: "mangleNamespaces", args: ["encodedUrl"] }
+  InstructionId(11) | Call { dest: None, callee: "xssFilter.isValidHref", args: ["encodedUrl"] }
+  InstructionId(12) | Return { val: Some("encodedUrl") }
+  InstructionId(13) | Branch { cond: "(xssFilter.isValidHref(encodedUrl))", then_block: [InstructionId(12)], else_block: None }
+  InstructionId(14) | Call { dest: None, callee: "LOGGER.error", args: ["\"Unable to decode url: {}.\"", "url"] }
+
+=== Call Graph Edges ===
+
+=== Seeded Taint Facts ===
+  var='url' domain=Generic
+  var='input' domain=Generic
+  var='data' domain=Generic
+  var='p' domain=Generic
+[ENGINE] finished after 241 iterations
+
+=== Tainted Facts after run ===
+  node=4 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder -> 5:URLDecoder -> 4:URLDecoder
+  node=8 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url
+  node=14 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils -> 16:StringEscapeUtils -> 15:StringEscapeUtils -> 14:StringEscapeUtils
+  node=5 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url
+  node=15 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url -> 16:url -> 15:url
+  node=7 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl
+  node=6 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx -> 5:qMarkIx -> 6:qMarkIx
+  node=13 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl -> 15:encodedUrl -> 14:encodedUrl -> 13:encodedUrl
+  node=3 method='main' var='LOGGER'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 4:LOGGER -> 3:LOGGER
+  node=14 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx)
+  node=22 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data
+  node=8 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl
+  node=4 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter -> 5:xssFilter -> 4:xssFilter
+  node=16 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url -> 16:url
+  node=9 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url
+  node=9 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data
+  node=25 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url
+  node=25 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data
+  node=23 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url
+  node=6 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder -> 5:URLDecoder -> 6:URLDecoder
+  node=13 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input -> 16:input -> 15:input -> 14:input -> 13:input
+  node=3 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL -> 5:unescapedURL -> 4:unescapedURL -> 3:unescapedURL
+  node=9 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils
+  node=15 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input -> 16:input -> 15:input
+  node=21 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url
+  node=4 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data -> 5:data -> 4:data
+  node=20 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL
+  node=7 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder
+  node=24 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL
+  node=10 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder
+  node=24 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p
+  node=23 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils
+  node=2 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p -> 5:p -> 6:p -> 2:p
+  node=3 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx -> 5:qMarkIx -> 4:qMarkIx -> 3:qMarkIx
+  node=19 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url
+  node=22 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder
+  node=6 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx) -> 5:encodedUrl.substring(qMarkIx) -> 6:encodedUrl.substring(qMarkIx)
+  node=22 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input
+  node=12 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl
+  node=2 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data -> 5:data -> 6:data -> 2:data
+  node=16 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx -> 16:qMarkIx
+  node=17 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx
+  node=5 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data -> 5:data
+  node=1 method='main' var='url'
+    Path: 1:url
+  node=24 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:StringEscapeUtils
+  node=6 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter -> 5:xssFilter -> 6:xssFilter
+  node=7 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx)
+  node=19 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl
+  node=21 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder
+  node=8 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data
+  node=4 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input -> 5:input -> 4:input
+  node=1 method='main' var='p'
+    Path: 1:p
+  node=22 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL
+  node=15 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx -> 16:qMarkIx -> 15:qMarkIx
+  node=13 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils -> 16:StringEscapeUtils -> 15:StringEscapeUtils -> 14:StringEscapeUtils -> 13:StringEscapeUtils
+  node=16 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL -> 16:unescapedURL
+  node=14 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p -> 16:p -> 15:p -> 14:p
+  node=20 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils
+  node=11 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url
+  node=12 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx -> 16:qMarkIx -> 15:qMarkIx -> 14:qMarkIx -> 13:qMarkIx -> 12:qMarkIx
+  node=1 method='main' var='data'
+    Path: 1:data
+  node=20 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder
+  node=4 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils -> 5:StringEscapeUtils -> 4:StringEscapeUtils
+  node=16 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input -> 16:input
+  node=3 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx) -> 5:encodedUrl.substring(qMarkIx) -> 4:encodedUrl.substring(qMarkIx) -> 3:encodedUrl.substring(qMarkIx)
+  node=6 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils -> 5:StringEscapeUtils -> 6:StringEscapeUtils
+  node=2 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder -> 5:URLDecoder -> 6:URLDecoder -> 2:URLDecoder
+  node=14 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data -> 16:data -> 15:data -> 14:data
+  node=13 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx)
+  node=4 method='main' var='LOGGER'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 4:LOGGER
+  node=13 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data -> 16:data -> 15:data -> 14:data -> 13:data
+  node=12 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input -> 16:input -> 15:input -> 14:input -> 13:input -> 12:input
+  node=11 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL
+  node=13 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p -> 16:p -> 15:p -> 14:p -> 13:p
+  node=7 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p
+  node=12 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url -> 16:url -> 15:url -> 14:url -> 13:url -> 12:url
+  node=11 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data
+  node=13 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder -> 16:URLDecoder -> 15:URLDecoder -> 14:URLDecoder -> 13:URLDecoder
+  node=26 method='main' var='unescapedURL'
+    Path: 1:url -> 26:unescapedURL
+  node=21 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data
+  node=16 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data -> 16:data
+  node=18 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl
+  node=5 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input -> 5:input
+  node=5 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils -> 5:StringEscapeUtils
+  node=17 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data
+  node=18 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils
+  node=15 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx)
+  node=12 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils -> 16:StringEscapeUtils -> 15:StringEscapeUtils -> 14:StringEscapeUtils -> 13:StringEscapeUtils -> 12:StringEscapeUtils
+  node=25 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder
+  node=7 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL
+  node=6 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL -> 5:unescapedURL -> 6:unescapedURL
+  node=14 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url -> 16:url -> 15:url -> 14:url
+  node=12 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx)
+  node=12 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL -> 16:unescapedURL -> 15:unescapedURL -> 14:unescapedURL -> 13:unescapedURL -> 12:unescapedURL
+  node=26 method='main' var='input'
+    Path: 1:input -> 26:input
+  node=24 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data
+  node=8 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input
+  node=3 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data -> 5:data -> 4:data -> 3:data
+  node=25 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input
+  node=26 method='main' var='data'
+    Path: 1:data -> 26:data
+  node=18 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data
+  node=5 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p -> 5:p
+  node=8 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx
+  node=23 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL
+  node=15 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder -> 16:URLDecoder -> 15:URLDecoder
+  node=3 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils -> 5:StringEscapeUtils -> 4:StringEscapeUtils -> 3:StringEscapeUtils
+  node=20 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data
+  node=6 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 6:url
+  node=11 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx
+  node=24 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input
+  node=19 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p
+  node=26 method='main' var='p'
+    Path: 1:p -> 26:p
+  node=18 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url
+  node=9 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input
+  node=11 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder
+  node=10 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils
+  node=10 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL
+  node=2 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl -> 5:encodedUrl -> 6:encodedUrl -> 2:encodedUrl
+  node=15 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p -> 16:p -> 15:p
+  node=1 method='main' var='input'
+    Path: 1:input
+  node=19 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL
+  node=22 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url
+  node=9 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p
+  node=12 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p -> 16:p -> 15:p -> 14:p -> 13:p -> 12:p
+  node=13 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL -> 16:unescapedURL -> 15:unescapedURL -> 14:unescapedURL -> 13:unescapedURL
+  node=11 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input
+  node=15 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data -> 16:data -> 15:data
+  node=14 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl -> 15:encodedUrl -> 14:encodedUrl
+  node=2 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx) -> 5:encodedUrl.substring(qMarkIx) -> 6:encodedUrl.substring(qMarkIx) -> 2:encodedUrl.substring(qMarkIx)
+  node=15 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl -> 15:encodedUrl
+  node=10 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input
+  node=9 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder
+  node=7 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url
+  node=18 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder
+  node=7 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter
+  node=2 method='main' var='LOGGER'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 4:LOGGER -> 3:LOGGER -> 2:LOGGER
+  node=16 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder -> 16:URLDecoder
+  node=4 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p -> 5:p -> 4:p
+  node=7 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data
+  node=25 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL
+  node=23 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder
+  node=20 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url
+  node=17 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl
+  node=2 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input -> 5:input -> 6:input -> 2:input
+  node=7 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx
+  node=4 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx) -> 5:encodedUrl.substring(qMarkIx) -> 4:encodedUrl.substring(qMarkIx)
+  node=16 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx)
+  node=23 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p
+  node=3 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder -> 5:URLDecoder -> 4:URLDecoder -> 3:URLDecoder
+  node=11 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p
+  node=5 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx) -> 7:encodedUrl.substring(qMarkIx) -> 5:encodedUrl.substring(qMarkIx)
+  node=19 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input
+  node=2 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 6:url -> 2:url
+  node=24 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url
+  node=15 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL -> 16:unescapedURL -> 15:unescapedURL
+  node=5 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL -> 5:unescapedURL
+  node=18 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input
+  node=17 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input
+  node=2 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter -> 5:xssFilter -> 6:xssFilter -> 2:xssFilter
+  node=6 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl -> 5:encodedUrl -> 6:encodedUrl
+  node=3 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p -> 5:p -> 4:p -> 3:p
+  node=2 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils -> 5:StringEscapeUtils -> 6:StringEscapeUtils -> 2:StringEscapeUtils
+  node=22 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils
+  node=19 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils
+  node=16 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p -> 16:p
+  node=14 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 18:input -> 17:input -> 16:input -> 15:input -> 14:input
+  node=8 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx) -> 8:encodedUrl.substring(qMarkIx)
+  node=18 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx
+  node=7 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input
+  node=3 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter -> 5:xssFilter -> 4:xssFilter -> 3:xssFilter
+  node=13 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url -> 16:url -> 15:url -> 14:url -> 13:url
+  node=10 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx
+  node=3 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 4:url -> 3:url
+  node=14 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx -> 16:qMarkIx -> 15:qMarkIx -> 14:qMarkIx
+  node=21 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl
+  node=7 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils -> 7:StringEscapeUtils
+  node=4 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl -> 5:encodedUrl -> 4:encodedUrl
+  node=23 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input
+  node=10 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx)
+  node=9 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL
+  node=8 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL
+  node=10 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl
+  node=19 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data
+  node=16 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils -> 16:StringEscapeUtils
+  node=5 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter -> 7:xssFilter -> 5:xssFilter
+  node=10 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data
+  node=2 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx -> 5:qMarkIx -> 6:qMarkIx -> 2:qMarkIx
+  node=20 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input
+  node=22 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:encodedUrl
+  node=12 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 18:data -> 17:data -> 16:data -> 15:data -> 14:data -> 13:data -> 12:data
+  node=17 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 18:url -> 17:url
+  node=12 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder -> 16:URLDecoder -> 15:URLDecoder -> 14:URLDecoder -> 13:URLDecoder -> 12:URLDecoder
+  node=24 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder
+  node=17 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder
+  node=26 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder
+  node=2 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL -> 5:unescapedURL -> 6:unescapedURL -> 2:unescapedURL
+  node=17 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL
+  node=5 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx -> 5:qMarkIx
+  node=5 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl -> 5:encodedUrl
+  node=22 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p
+  node=8 method='main' var='xssFilter'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:xssFilter
+  node=15 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils -> 16:StringEscapeUtils -> 15:StringEscapeUtils
+  node=19 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder
+  node=14 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL -> 17:unescapedURL -> 16:unescapedURL -> 15:unescapedURL -> 14:unescapedURL
+  node=18 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p
+  node=21 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p
+  node=21 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils
+  node=17 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 18:p -> 17:p
+  node=3 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl -> 8:encodedUrl -> 7:encodedUrl -> 5:encodedUrl -> 4:encodedUrl -> 3:encodedUrl
+  node=20 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:qMarkIx
+  node=4 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url -> 9:url -> 8:url -> 7:url -> 5:url -> 4:url
+  node=6 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input -> 5:input -> 6:input
+  node=20 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl
+  node=10 method='main' var='url'
+    Path: 1:url -> 26:url -> 25:url -> 24:url -> 23:url -> 22:url -> 21:url -> 20:url -> 19:url -> 11:url -> 10:url
+  node=21 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input
+  node=16 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl
+  node=21 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL
+  node=26 method='main' var='url'
+    Path: 1:url -> 26:url
+  node=11 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils
+  node=4 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 10:unescapedURL -> 9:unescapedURL -> 8:unescapedURL -> 7:unescapedURL -> 5:unescapedURL -> 4:unescapedURL
+  node=5 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder -> 7:URLDecoder -> 5:URLDecoder
+  node=19 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx
+  node=23 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data
+  node=13 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:qMarkIx -> 17:qMarkIx -> 16:qMarkIx -> 15:qMarkIx -> 14:qMarkIx -> 13:qMarkIx
+  node=18 method='main' var='unescapedURL'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:unescapedURL -> 20:unescapedURL -> 19:unescapedURL -> 11:unescapedURL -> 18:unescapedURL
+  node=8 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 10:URLDecoder -> 9:URLDecoder -> 8:URLDecoder
+  node=20 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p
+  node=25 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p
+  node=9 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx
+  node=14 method='main' var='URLDecoder'
+    Path: 1:url -> 26:URLDecoder -> 25:URLDecoder -> 24:URLDecoder -> 23:URLDecoder -> 22:URLDecoder -> 21:URLDecoder -> 20:URLDecoder -> 19:URLDecoder -> 11:URLDecoder -> 18:URLDecoder -> 17:URLDecoder -> 16:URLDecoder -> 15:URLDecoder -> 14:URLDecoder
+  node=3 method='main' var='input'
+    Path: 1:input -> 26:input -> 25:input -> 24:input -> 23:input -> 22:input -> 21:input -> 20:input -> 19:input -> 11:input -> 10:input -> 9:input -> 8:input -> 7:input -> 5:input -> 4:input -> 3:input
+  node=6 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p -> 7:p -> 5:p -> 6:p
+  node=10 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p
+  node=11 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl
+  node=9 method='main' var='encodedUrl'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:encodedUrl -> 11:encodedUrl -> 10:encodedUrl -> 9:encodedUrl
+  node=9 method='main' var='encodedUrl.substring(qMarkIx)'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 18:encodedUrl -> 17:encodedUrl -> 16:encodedUrl.substring(qMarkIx) -> 15:encodedUrl.substring(qMarkIx) -> 14:encodedUrl.substring(qMarkIx) -> 13:encodedUrl.substring(qMarkIx) -> 12:encodedUrl.substring(qMarkIx) -> 10:encodedUrl.substring(qMarkIx) -> 9:encodedUrl.substring(qMarkIx)
+  node=17 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 18:StringEscapeUtils -> 17:StringEscapeUtils
+  node=8 method='main' var='StringEscapeUtils'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:StringEscapeUtils -> 22:StringEscapeUtils -> 21:StringEscapeUtils -> 20:StringEscapeUtils -> 19:StringEscapeUtils -> 11:StringEscapeUtils -> 10:StringEscapeUtils -> 9:StringEscapeUtils -> 8:StringEscapeUtils
+  node=6 method='main' var='data'
+    Path: 1:data -> 26:data -> 25:data -> 24:data -> 23:data -> 22:data -> 21:data -> 20:data -> 19:data -> 11:data -> 10:data -> 9:data -> 8:data -> 7:data -> 5:data -> 6:data
+  node=4 method='main' var='qMarkIx'
+    Path: 1:url -> 26:url -> 25:unescapedURL -> 24:unescapedURL -> 23:unescapedURL -> 22:unescapedURL -> 21:encodedUrl -> 20:encodedUrl -> 19:qMarkIx -> 11:qMarkIx -> 10:qMarkIx -> 9:qMarkIx -> 8:qMarkIx -> 7:qMarkIx -> 5:qMarkIx -> 4:qMarkIx
+  node=8 method='main' var='p'
+    Path: 1:p -> 26:p -> 25:p -> 24:p -> 23:p -> 22:p -> 21:p -> 20:p -> 19:p -> 11:p -> 10:p -> 9:p -> 8:p
+
+Flows detected: 0

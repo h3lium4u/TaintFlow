@@ -1,0 +1,11 @@
+[package]
+name = "normalizer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+parser = { path = "../parser" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.4", features = ["v4"] }
+
