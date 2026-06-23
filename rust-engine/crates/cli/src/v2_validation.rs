@@ -657,6 +657,11 @@ fn run_v2_analysis_safe(
             _ => None,
         };
 
+        let mut cohort_paths = vec![filename.to_lowercase().replace('\\', "/")];
+        for (_, sib_filename) in &siblings_clone {
+            cohort_paths.push(sib_filename.to_lowercase().replace('\\', "/"));
+        }
+
         let mut flows_touching_target = Vec::new();
         for flow in &engine.flows {
             let mut touches = false;
@@ -672,8 +677,7 @@ fn run_v2_analysis_safe(
                     if let Some(step_node) = icfg.nodes.get(&f_step.node_id) {
                         if let Some(path) = engine.get_method_file_path(step_node.method_id) {
                             let path_norm = path.to_lowercase().replace('\\', "/");
-                            let target_norm = filename.to_lowercase().replace('\\', "/");
-                            if path_norm.ends_with(&target_norm) || target_norm.ends_with(&path_norm) {
+                            if cohort_paths.iter().any(|c_path| path_norm.ends_with(c_path) || c_path.ends_with(&path_norm)) {
                                 current_touches = true;
                                 break;
                             }
@@ -1010,7 +1014,14 @@ fn main() {
                 let mut package_root = repo_normalized.clone();
                 for root in &import_roots {
                     let root_lower = root.to_lowercase();
-                    if repo_normalized.contains(&root_lower) || root_lower.contains(&repo_normalized) {
+                    let is_match = root_lower == repo_normalized
+                        || repo_normalized.starts_with(&root_lower)
+                        || repo_normalized.ends_with(&root_lower)
+                        || root_lower.starts_with(&repo_normalized)
+                        || root_lower.ends_with(&repo_normalized)
+                        || repo_normalized.split('_').any(|part| part == root_lower)
+                        || root_lower.split('_').any(|part| part == repo_normalized);
+                    if is_match {
                         package_root = root.clone();
                         break;
                     }
