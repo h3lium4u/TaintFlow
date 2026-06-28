@@ -4,6 +4,31 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
 use symbols::call_graph::CallGraph;
 use symbols::global::GlobalSymbolTable;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::time::Instant;
+
+struct ReturnScanStats {
+    invocations: u64,
+    total_candidates: u64,
+    max_candidates: usize,
+    total_duration_ns: u64,
+}
+
+impl ReturnScanStats {
+    fn new() -> Self {
+        ReturnScanStats {
+            invocations: 0,
+            total_candidates: 0,
+            max_candidates: 0,
+            total_duration_ns: 0,
+        }
+    }
+}
+
+thread_local! {
+    static RETURN_SCAN_INSTRUMENTATION: RefCell<ReturnScanStats> = RefCell::new(ReturnScanStats::new());
+}
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TaintFact {
@@ -49,6 +74,10 @@ pub struct InterproceduralTaintEngine<'a> {
     pub callee_info_cache: std::cell::RefCell<std::collections::HashMap<(MethodId, String), Option<(String, String)>>>,
     pub method_insts_cache: std::cell::RefCell<std::collections::HashMap<ir::MethodId, Vec<ir::InstructionId>>>,
     pub target_file: Option<String>,
+    pub target_and_siblings: HashSet<String>,
+    pub related_types_cache: std::cell::RefCell<std::collections::HashMap<ir::TypeId, Rc<HashSet<ir::TypeId>>>>,
+    pub methods_by_type: HashMap<ir::TypeId, Vec<MethodId>>,
+    pub call_sites_by_callee: HashMap<MethodId, Vec<u32>>,
 }
 
 impl<'a> InterproceduralTaintEngine<'a> {
@@ -79,6 +108,25 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
         }
 
+        let mut methods_by_type = HashMap::new();
+        for (&m_id, method) in &program.methods {
+            if let Some(parent_type_id) = method.parent_type_id {
+                methods_by_type.entry(parent_type_id).or_insert_with(Vec::new).push(m_id);
+            }
+        }
+
+        let mut call_sites_by_callee = HashMap::new();
+        for edge in &icfg.edges {
+            if edge.kind == IcfgEdgeKind::Call {
+                if let Some(target_node) = icfg.nodes.get(&edge.to) {
+                    call_sites_by_callee
+                        .entry(target_node.method_id)
+                        .or_insert_with(Vec::new)
+                        .push(edge.from);
+                }
+            }
+        }
+
         Self {
             program,
             gst,
@@ -95,6 +143,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
             callee_info_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
             method_insts_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
             target_file: None,
+            target_and_siblings: HashSet::new(),
+            related_types_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+            methods_by_type,
+            call_sites_by_callee,
         }
     }
 
@@ -459,6 +511,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 is_entry = false;
             }
 
+            let is_in_analysis_scope = if self.target_and_siblings.is_empty() {
+                true
+            } else if let Some(m_path) = self.get_method_file_path(method_id) {
+                let norm_path = m_path.to_lowercase().replace('\\', "/");
+                self.target_and_siblings.contains(&norm_path)
+            } else {
+                true
+            };
+
+            if !is_in_analysis_scope {
+                is_entry = false;
+            }
+
             if is_entry {
                 if let Some(path) = self.get_method_file_path(method_id) {
                     let path_lower = path.to_lowercase();
@@ -603,19 +668,35 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let src_lower = src.to_lowercase();
                         let is_flask_attr = flask_attrs.iter().any(|attr| {
                             let al = attr.to_lowercase();
-                            if src_lower == al || src_lower.starts_with(&format!("{}", al)) {
+                            if src_lower == al || src_lower.starts_with(&format!("{}.", al)) {
                                 return true;
                             }
                             let suffix = &al[al.find('.').map(|i| i + 1).unwrap_or(0)..];
-                            if suffix == "get" || suffix == "post" {
+
+                            // Constrain suffix checking to explicit Python request-variable naming patterns.
+                            // This prevents global suffix matching from creating false positives by colliding
+                            // with library namespaces (e.g. os.path, pathlib.Path, sys.path) or unrelated
+                            // connection state attributes (e.g. sess.cookies).
+                            let prefixes_to_check = [
+                                format!("request.{}", suffix),
+                                format!("req.{}", suffix),
+                                format!("self.request.{}", suffix),
+                                format!("self.req.{}", suffix),
+                            ];
+
+                            let is_prefixed = prefixes_to_check.iter().any(|p| src_lower.contains(p.as_str()));
+
+                            let suffix_check = if suffix == "get" || suffix == "post" {
                                 if attr.contains("GET") || attr.contains("POST") {
                                     src.contains(".GET") || src.contains(".POST")
                                 } else {
                                     false
                                 }
                             } else {
-                                src_lower.contains(&format!(".{}", suffix))
-                            }
+                                true
+                            };
+
+                            is_prefixed && suffix_check
                         });
                         if is_flask_attr {
                             self.tainted_facts.insert(TaintFact {
@@ -1329,33 +1410,36 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if let Some(parent_type_id) = current_method.parent_type_id {
                                     // Find all related types in the hierarchy
                                     let related_types = self.get_related_types(parent_type_id);
-                                    // Find all methods belonging to these related types
-                                    for (&m_id, method) in &self.program.methods {
-                                        if let Some(m_type_id) = method.parent_type_id {
-                                            if related_types.contains(&m_type_id) && m_id != node.method_id {
-                                                // Seed the field at the entry node of this other method!
-                                                if let Some(&entry_node_id) = self.icfg.method_entry_node.get(&m_id) {
-                                                    let is_java = self.method_file_paths.get(&m_id)
-                                                        .map_or(false, |path| path.ends_with(".java"));
-                                                    let receiver_prefix = if is_java {
-                                                        "this.".to_string()
-                                                    } else {
-                                                        if let Some(first_param) = method.parameters.first() {
-                                                            format!("{}.", first_param)
-                                                        } else {
-                                                            "self.".to_string()
+                                    for &m_type_id in related_types.iter() {
+                                        if let Some(m_ids) = self.methods_by_type.get(&m_type_id) {
+                                            for &m_id in m_ids {
+                                                if related_types.contains(&m_type_id) && m_id != node.method_id {
+                                                    // Seed the field at the entry node of this other method!
+                                                    if let Some(&entry_node_id) = self.icfg.method_entry_node.get(&m_id) {
+                                                        if let Some(method) = self.program.methods.get(&m_id) {
+                                                            let is_java = self.method_file_paths.get(&m_id)
+                                                                .map_or(false, |path| path.ends_with(".java"));
+                                                            let receiver_prefix = if is_java {
+                                                                "this.".to_string()
+                                                            } else {
+                                                                if let Some(first_param) = method.parameters.first() {
+                                                                    format!("{}.", first_param)
+                                                                } else {
+                                                                    "self.".to_string()
+                                                                }
+                                                            };
+                                                            let target_var = format!("{}{}", receiver_prefix, field_name);
+                                                            let next_fact = TaintFact {
+                                                                node_id: entry_node_id,
+                                                                context: 0,
+                                                                var: target_var,
+                                                                sanitized_for: processed.sanitized_for.clone(),
+                                                                source_domain: processed.source_domain,
+                                                            };
+                                                            if !self.tainted_facts.contains(&next_fact) {
+                                                                local_queue.push_back((next_fact, Some(processed.clone())));
+                                                            }
                                                         }
-                                                    };
-                                                    let target_var = format!("{}{}", receiver_prefix, field_name);
-                                                    let next_fact = TaintFact {
-                                                        node_id: entry_node_id,
-                                                        context: 0,
-                                                        var: target_var,
-                                                        sanitized_for: processed.sanitized_for.clone(),
-                                                        source_domain: processed.source_domain,
-                                                    };
-                                                    if !self.tainted_facts.contains(&next_fact) {
-                                                        local_queue.push_back((next_fact, Some(processed.clone())));
                                                     }
                                                 }
                                             }
@@ -1370,7 +1454,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
         }
     }
 
-    fn get_related_types(&self, type_id: ir::TypeId) -> HashSet<ir::TypeId> {
+    fn get_related_types(&self, type_id: ir::TypeId) -> Rc<HashSet<ir::TypeId>> {
+        if let Some(cached) = self.related_types_cache.borrow().get(&type_id) {
+            return cached.clone();
+        }
+
         let mut related = HashSet::new();
         related.insert(type_id);
 
@@ -1411,7 +1499,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
             }
         }
-        related
+        let rc_related = Rc::new(related);
+        self.related_types_cache.borrow_mut().insert(type_id, rc_related.clone());
+        rc_related
     }
 
     pub fn run(&mut self) {
@@ -1467,6 +1557,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         IcfgEdgeKind::Call => {
                             let new_context = node.id;
                             self.parent_contexts.insert(new_context, fact.context);
+
+                            let mut is_sanitizer = false;
+                            if let Some(inst_id) = node.instruction_id {
+                                if let Some(inst) = self.program.instructions.get(&inst_id) {
+                                    if let InstructionKind::Call { callee, .. } = &inst.kind {
+                                        if self.is_sanitizer_call_site(node.method_id, callee) {
+                                            is_sanitizer = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if is_sanitizer {
+                                continue;
+                            }
 
                             let new_vars =
                                 self.bind_arguments_to_parameters(node, edge.to, &fact.var);
@@ -1525,28 +1630,38 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 // Find pre-call nodes: Call edges from some node → entry of
                                 // the callee method, where the caller's instruction == return_node's
                                 // instruction (they share the same InstructionId in the ICFG).
-                                let call_site_ids: Vec<u32> = self
-                                    .icfg
-                                    .edges
-                                    .iter()
-                                    .filter(|e| {
-                                        e.kind == IcfgEdgeKind::Call
-                                            && self
-                                                .icfg
-                                                .nodes
-                                                .get(&e.to)
-                                                .map(|n| n.method_id == callee_method_id)
-                                                .unwrap_or(false)
-                                    })
-                                    .filter_map(|call_edge| {
-                                        let pre_call = self.icfg.nodes.get(&call_edge.from)?;
-                                        if pre_call.instruction_id == return_inst_id {
-                                            Some(call_edge.from)
-                                        } else {
-                                            None
-                                        }
-                                    })
-                                    .collect();
+                                let start_time = Instant::now();
+                                let call_site_ids: Vec<u32> = if let Some(candidates) = self.call_sites_by_callee.get(&callee_method_id) {
+                                    let candidates_len = candidates.len();
+                                    let res: Vec<u32> = candidates
+                                        .iter()
+                                        .filter_map(|&from_id| {
+                                            let pre_call = self.icfg.nodes.get(&from_id)?;
+                                            if pre_call.instruction_id == return_inst_id {
+                                                Some(from_id)
+                                            } else {
+                                                None
+                                            }
+                                        })
+                                        .collect();
+                                    let elapsed = start_time.elapsed().as_nanos() as u64;
+                                    RETURN_SCAN_INSTRUMENTATION.with(|stats| {
+                                        let mut s = stats.borrow_mut();
+                                        s.invocations += 1;
+                                        s.total_candidates += candidates_len as u64;
+                                        s.max_candidates = s.max_candidates.max(candidates_len);
+                                        s.total_duration_ns += elapsed;
+                                    });
+                                    res
+                                } else {
+                                    let elapsed = start_time.elapsed().as_nanos() as u64;
+                                    RETURN_SCAN_INSTRUMENTATION.with(|stats| {
+                                        let mut s = stats.borrow_mut();
+                                        s.invocations += 1;
+                                        s.total_duration_ns += elapsed;
+                                    });
+                                    Vec::new()
+                                };
 
                                 for call_site_id in call_site_ids {
                                     let parent_ctx =
@@ -1588,6 +1703,18 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
         }
         println!("[ENGINE] finished after {} iterations", iterations);
+        RETURN_SCAN_INSTRUMENTATION.with(|stats| {
+            let s = stats.borrow();
+            let avg = if s.invocations > 0 { s.total_candidates as f64 / s.invocations as f64 } else { 0.0 };
+            println!("=================================");
+            println!("RETURN SCAN HOTSPOT ANALYSIS");
+            println!("---------------------------------");
+            println!("Invocations: {}", s.invocations);
+            println!("Average candidates: {:.4}", avg);
+            println!("Maximum candidates: {}", s.max_candidates);
+            println!("Total duration: {} ms", s.total_duration_ns / 1_000_000);
+            println!("=================================");
+        });
     }
 
     fn check_sink_flow_domain(&mut self, fact: &TaintFact, target_cwe: crate::CWE, node_id: u32, sink_var: &str) -> bool {
@@ -2406,25 +2533,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         }
 
                         if !handled_as_collection {
-                            let is_sanitizer_call = if let Some((class_fqn, method_name)) =
-                                self.resolve_callee_info(node.method_id, callee)
-                            {
-                                let m_lower = method_name.to_lowercase();
-                                if m_lower == "isvalidhref" {
-                                    class_fqn.to_lowercase().contains("xssfilter")
-                                } else if let Some(stub) = self.stubs.lookup(&class_fqn, &method_name) {
-                                    stub.kind == crate::stubs::StubKind::Sanitizer
-                                } else {
-                                    expression_contains_sanitizer(callee)
-                                }
-                            } else {
-                                let c_lower = callee.to_lowercase();
-                                if c_lower.contains("isvalidhref") {
-                                    c_lower.contains("xssfilter")
-                                } else {
-                                    expression_contains_sanitizer(callee)
-                                }
-                            };
+                            let is_sanitizer_call = self.is_sanitizer_call_site(node.method_id, callee);
 
                             if is_sanitizer_call {
                                 let mut is_sanitized = false;
@@ -3861,6 +3970,26 @@ impl<'a> InterproceduralTaintEngine<'a> {
         }
         matches_pattern(callee)
     }
+
+    fn is_sanitizer_call_site(&self, caller_method_id: MethodId, callee: &str) -> bool {
+        if let Some((class_fqn, method_name)) = self.resolve_callee_info(caller_method_id, callee) {
+            let m_lower = method_name.to_lowercase();
+            if m_lower == "isvalidhref" {
+                class_fqn.to_lowercase().contains("xssfilter")
+            } else if let Some(stub) = self.stubs.lookup(&class_fqn, &method_name) {
+                stub.kind == crate::stubs::StubKind::Sanitizer
+            } else {
+                expression_contains_sanitizer(callee)
+            }
+        } else {
+            let c_lower = callee.to_lowercase();
+            if c_lower.contains("isvalidhref") {
+                c_lower.contains("xssfilter")
+            } else {
+                expression_contains_sanitizer(callee)
+            }
+        }
+    }
 }
 
 
@@ -4061,6 +4190,25 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
                 && (line.contains("base") || line.contains("root") || line.contains("safe")
                     || line.contains("allowed") || line.contains("upload_dir") || line.contains("dir") || line.contains("path"));
 
+            // ── RC112 (revised): Regex filter guard ──────────────────────────
+            // Only fires when re.match/re.fullmatch result is consumed via .group(),
+            // meaning the tainted variable is OVERWRITTEN with the matched (sanitized)
+            // substring. This is semantically different from using re.match as a
+            // boolean guard (if re.match(...):"), which does NOT sanitize the original var.
+            //
+            // Does NOT fire on:
+            //   - Numeric format checks: re.match(r"^\s*[0-9]+", retry_after)
+            //   - URL route guards:      re.fullmatch(r"gateway/.../invoc", path)
+            //   - Version string parses: re.match(r"^(\d+)\.(\d+)", ver)
+            //   - Boolean guards:        if re.match(pat, var):
+            //
+            // Evidence: Paddle fix (Sample 51) uses:
+            //   module_name = re.match("^[a-zA-Z0-9_/\\-]+$", module_name).group()
+            // The .group() call is the definitive indicator that the regex is a filter.
+            let py_regex_filter_assign = (line.contains("re.match(") || line.contains("re.fullmatch("))
+                && has_word(&line, part)
+                && line.contains(".group()");
+
             // ── RC78 Task 3: Java path guards ────────────────────────────────
             // Only fully-qualified method names to avoid ambiguity.
             // NOTE: 'normalize' intentionally excluded — too broad (matches SQL/string normalizers).
@@ -4091,6 +4239,7 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
                 || contains_is_none || contains_whitelist || contains_guard
                 || contains_realpath || contains_abspath || contains_normpath || contains_normalize || contains_canonical
                 || py_ospath_guard || py_pathlib_guard || py_startswith_basedir
+                || py_regex_filter_assign
                 || java_canonical || java_startswith_base
                 || sanitizer_fn_guard
             {

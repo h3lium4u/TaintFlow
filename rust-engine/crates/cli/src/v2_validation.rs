@@ -1,8 +1,43 @@
 use serde::Deserialize;
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::panic;
 use std::path::Path;
+use rayon::prelude::*;
+
+thread_local! {
+    static THREAD_LOG: RefCell<Option<Vec<String>>> = RefCell::new(None);
+}
+
+macro_rules! println {
+    () => {
+        THREAD_LOG.with(|log| {
+            let mut borrow = log.borrow_mut();
+            if let Some(ref mut lines) = *borrow {
+                lines.push("".to_string());
+            } else {
+                use std::io::Write;
+                let mut stdout = std::io::stdout();
+                let _ = writeln!(stdout);
+            }
+        });
+    };
+    ($($arg:tt)*) => {
+        THREAD_LOG.with(|log| {
+            let mut borrow = log.borrow_mut();
+            if let Some(ref mut lines) = *borrow {
+                lines.push(format!($($arg)*));
+            } else {
+                use std::io::Write;
+                let mut stdout = std::io::stdout();
+                let _ = write!(stdout, $($arg)*);
+                let _ = writeln!(stdout);
+            }
+        });
+    };
+}
+
 
 #[derive(Deserialize)]
 struct HoldoutEntry {
@@ -536,6 +571,7 @@ fn run_v2_analysis_safe(
     base_dir: &Path,
     entry_filter: Option<&str>,
     target_path: Option<String>,
+    cohort_paths: Option<&[String]>,
 ) -> (bool, bool, Vec<taint::interproc::SuppressedFlowDiagnostic>) {
     let code_clone = code.to_string();
     let lang_clone = language.to_string();
@@ -622,12 +658,210 @@ fn run_v2_analysis_safe(
         let t3 = std::time::Instant::now();
         gst.resolve_inheritance_hierarchy();
         let cg = symbols::call_graph::CallGraph::build(&program, &gst);
+
+        // Minimal diagnostic-only enhancement to the cohort/sibling resolution pipeline
+        if std::env::var("VALIDATION_DIAGNOSTICS").map(|val| val == "1" || val.to_lowercase() == "true").unwrap_or(false) {
+            let mut diag_cohort_paths = vec![filename.to_lowercase().replace('\\', "/")];
+            for (_, sib_filename) in &siblings_clone {
+                diag_cohort_paths.push(sib_filename.to_lowercase().replace('\\', "/"));
+            }
+
+            // Identify all module IDs that belong to the compiled cohort
+            let cohort_module_ids: std::collections::HashSet<ir::ModuleId> = program.modules.iter()
+                .filter(|(_, m)| {
+                    let path = m.file_path.to_lowercase().replace('\\', "/");
+                    diag_cohort_paths.iter().any(|c| path.ends_with(c) || c.ends_with(&path))
+                })
+                .map(|(&m_id, _)| m_id)
+                .collect();
+
+            let cohort_module_names: std::collections::HashSet<String> = program.modules.iter()
+                .filter(|(&m_id, _)| cohort_module_ids.contains(&m_id))
+                .map(|(_, m)| m.name.clone())
+                .collect();
+
+            let mut cohort_type_fqns = std::collections::HashSet::new();
+            let mut cohort_method_fqns = std::collections::HashSet::new();
+
+            for (&tid, type_info) in &gst.program_index.types {
+                if cohort_module_ids.contains(&type_info.module_id) {
+                    cohort_type_fqns.insert(type_info.fqn.clone());
+                }
+            }
+            for (&mid, method_info) in &gst.program_index.methods {
+                if cohort_module_ids.contains(&method_info.module_id) {
+                    cohort_method_fqns.insert(method_info.fqn.clone());
+                }
+            }
+
+            // 1. Which imports could not be resolved inside the cohort
+            for &m_id in &cohort_module_ids {
+                if let Some(m_info) = gst.program_index.modules.get(&m_id) {
+                    if let Some(module_imports) = gst.import_index.imports_by_module.get(&m_id) {
+                        for (short_name, import_fqn) in module_imports {
+                            let is_resolved_in_cohort = cohort_module_names.contains(import_fqn)
+                                || cohort_type_fqns.contains(import_fqn)
+                                || cohort_method_fqns.contains(import_fqn)
+                                || {
+                                    let parts: Vec<&str> = import_fqn.split('.').collect();
+                                    (1..parts.len()).any(|i| {
+                                        let prefix = parts[..i].join(".");
+                                        cohort_module_names.contains(&prefix)
+                                    })
+                                };
+
+                            if !is_resolved_in_cohort {
+                                println!(
+                                    "[COHORT_DIAGNOSTIC] Unresolved Import: Module '{}' (file: '{}') imported '{}' (as '{}') which is missing from the compiled cohort.",
+                                    m_info.name, m_info.file_path, import_fqn, short_name
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Which referenced classes/functions are missing from the compiled cohort
+            let mut missing_classes_functions = std::collections::HashSet::new();
+            for (&mid, node) in &cg.nodes {
+                if let Some(method_info) = gst.program_index.methods.get(&mid) {
+                    if cohort_module_ids.contains(&method_info.module_id) {
+                        // Check if any edge goes to a callee not in the cohort
+                        if let Some(edges) = cg.caller_to_edges.get(&mid) {
+                            for edge in edges {
+                                if let Some(callee_info) = gst.program_index.methods.get(&edge.callee) {
+                                    if !cohort_module_ids.contains(&callee_info.module_id) {
+                                        missing_classes_functions.insert(callee_info.fqn.clone());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for missing in &missing_classes_functions {
+                println!(
+                    "[COHORT_DIAGNOSTIC] Missing Class/Function definition: '{}' is referenced but its implementation is missing from the compiled cohort.",
+                    missing
+                );
+            }
+
+            // 3. Which call edges were skipped because target definitions were unavailable
+            // Helper to recursively collect instruction IDs
+            struct InstCollector<'a> {
+                program: &'a ir::Program,
+                visited: &'a mut std::collections::HashSet<ir::InstructionId>,
+                out: &'a mut Vec<ir::InstructionId>,
+            }
+            
+            impl<'a> InstCollector<'a> {
+                fn collect(&mut self, ids: &[ir::InstructionId]) {
+                    for &id in ids {
+                        if !self.visited.insert(id) {
+                            continue;
+                        }
+                        self.out.push(id);
+                        if let Some(inst) = self.program.instructions.get(&id) {
+                            match &inst.kind {
+                                ir::InstructionKind::Branch { then_block, else_block, .. } => {
+                                    self.collect(then_block);
+                                    if let Some(eb) = else_block {
+                                        self.collect(eb);
+                                    }
+                                }
+                                ir::InstructionKind::Loop { body, .. } => {
+                                    self.collect(body);
+                                }
+                                ir::InstructionKind::Try { body, catches, finally, .. } => {
+                                    self.collect(body);
+                                    self.collect(catches);
+                                    if let Some(fb) = finally {
+                                        self.collect(fb);
+                                    }
+                                }
+                                ir::InstructionKind::Catch { body, .. } => {
+                                    self.collect(body);
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (&caller_id, method_info) in &gst.program_index.methods {
+                if cohort_module_ids.contains(&method_info.module_id) {
+                    if let Some(method) = program.methods.get(&caller_id) {
+                        let mut all_insts = Vec::new();
+                        let mut visited = std::collections::HashSet::new();
+                        {
+                            let mut collector = InstCollector {
+                                program: &program,
+                                visited: &mut visited,
+                                out: &mut all_insts,
+                            };
+                            collector.collect(&method.body);
+                        }
+
+                        for &inst_id in &all_insts {
+                            if let Some(inst) = program.instructions.get(&inst_id) {
+                                if let ir::InstructionKind::Call { callee, .. } = &inst.kind {
+                                    // Find edges associated with this call site
+                                    let edges: Vec<&symbols::CallEdge> = cg.edges.iter()
+                                        .filter(|e| e.caller == caller_id && e.instruction_id == Some(inst_id))
+                                        .collect();
+
+                                    let caller_fqn = &method_info.fqn;
+                                    let caller_file = gst.program_index.modules.get(&method_info.module_id)
+                                        .map(|m| m.file_path.as_str())
+                                        .unwrap_or("unknown");
+
+                                    if edges.is_empty() {
+                                        println!(
+                                            "[COHORT_DIAGNOSTIC] Skipped Call Edge: Call to '{}' in method '{}' (file: '{}') was skipped (unresolved, definition completely unavailable).",
+                                            callee, caller_fqn, caller_file
+                                        );
+                                    } else {
+                                        let mut resolved_to_cohort = false;
+                                        for edge in &edges {
+                                            if let Some(callee_info) = gst.program_index.methods.get(&edge.callee) {
+                                                if cohort_module_ids.contains(&callee_info.module_id) {
+                                                    resolved_to_cohort = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if !resolved_to_cohort {
+                                            let stub_targets: Vec<String> = edges.iter()
+                                                .filter_map(|e| gst.program_index.methods.get(&e.callee).map(|m| m.fqn.clone()))
+                                                .collect();
+                                            println!(
+                                                "[COHORT_DIAGNOSTIC] Skipped Cohort Call Edge: Call to '{}' in method '{}' (file: '{}') resolved to external/stub definition(s) {:?} (target definition unavailable in cohort).",
+                                                callee, caller_fqn, caller_file, stub_targets
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
         let t_cg_icfg = t3.elapsed();
 
         let t4 = std::time::Instant::now();
         let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
         engine.target_file = Some(filename.clone());
+        if let Some(paths) = cohort_paths {
+            let mut set = std::collections::HashSet::new();
+            for p in paths {
+                set.insert(p.to_lowercase().replace('\\', "/"));
+            }
+            engine.target_and_siblings = set;
+        }
         engine.seed_sources(filter_clone.as_deref());
         engine.run();
         let t_engine = t4.elapsed();
@@ -760,6 +994,9 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
 
         let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
         engine.target_file = Some(filename.to_string());
+        let mut set = std::collections::HashSet::new();
+        set.insert(filename.to_lowercase().replace('\\', "/"));
+        engine.target_and_siblings = set;
         engine.seed_sources(entry_filter);
         engine.run();
 
@@ -809,6 +1046,201 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
 }
 
 
+
+fn repo_name_to_local_folder(repo: &str) -> &str {
+    // Map known repository slugs to local folder names under D:\RepositoryCache.
+    // The folder name is the last component of the slug by default, but explicit
+    // overrides can be added here when the on-disk name differs.
+    let repo_clean = repo.trim_end_matches(".git");
+    let parts: Vec<&str> = repo_clean.split('/').collect();
+    if parts.is_empty() {
+        return repo_clean;
+    }
+    parts[parts.len() - 1]
+}
+
+fn get_modified_files_from_git(repo_path: &Path, commit: &str) -> Option<Vec<String>> {
+    let output = std::process::Command::new("git")
+        .args(&["diff-tree", "--no-commit-id", "--name-only", "-r", commit])
+        .current_dir(repo_path)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let files = stdout
+        .lines()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    Some(files)
+}
+
+fn match_cohort_code_to_path(
+    repo: &str,
+    commit: &str,
+    code: &str,
+    modified_files: &[String],
+) -> Option<String> {
+    for file in modified_files {
+        if let Some(content) = fetch_file_from_github(repo, commit, file) {
+            if content.trim() == code.trim() {
+                return Some(file.clone());
+            }
+        }
+    }
+    let parent_commit = format!("{}~1", commit);
+    for file in modified_files {
+        if let Some(content) = fetch_file_from_github(repo, &parent_commit, file) {
+            if content.trim() == code.trim() {
+                return Some(file.clone());
+            }
+        }
+    }
+    None
+}
+
+static CACHE_MUTEX: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn fetch_file_from_github(repo: &str, commit: &str, filepath: &str) -> Option<String> {
+    let repo_clean = repo.trim_end_matches(".git");
+    let parts: Vec<&str> = repo_clean.split('/').collect();
+    if parts.len() < 2 {
+        return None;
+    }
+    let repo_name = parts[parts.len() - 1];
+    let owner = parts[parts.len() - 2];
+
+    // ── Step 1: Local repository lookup ─────────────────────────────────────
+    // Prefer D:\RepositoryCache\<RepoFolder>\<filepath> so validation runs
+    // entirely offline when the repository is already present on disk.
+    let local_folder = repo_name_to_local_folder(repo);
+    let local_root = Path::new("D:/RepositoryCache").join(local_folder);
+    if local_root.exists() {
+        let local_candidate = local_root.join(filepath);
+        if local_candidate.exists() {
+            if let Ok(content) = std::fs::read_to_string(&local_candidate) {
+                return Some(content);
+            }
+        }
+        // Fallback for src/ layout:
+        if filepath.ends_with(".py") {
+            let src_candidate = local_root.join("src").join(filepath);
+            if src_candidate.exists() {
+                if let Ok(content) = std::fs::read_to_string(&src_candidate) {
+                    return Some(content);
+                }
+            }
+        }
+    }
+
+    // ── Step 2: Disk cache (previously downloaded via GitHub) ───────────────
+    let cache_dir = Path::new("d:/V2 Backup/scratch/repository_cache")
+        .join(owner)
+        .join(repo_name)
+        .join(commit);
+    let cache_file = cache_dir.join(filepath);
+    if cache_file.exists() {
+        if let Ok(code) = std::fs::read_to_string(&cache_file) {
+            return Some(code);
+        }
+    }
+
+    // Try prepending "src/" for repositories using the src/ layout
+    let src_filepath = format!("src/{}", filepath);
+    let src_cache_file = cache_dir.join(&src_filepath);
+    if filepath.ends_with(".py") {
+        if src_cache_file.exists() {
+            if let Ok(code) = std::fs::read_to_string(&src_cache_file) {
+                return Some(code);
+            }
+        }
+    }
+
+    // ── Step 3: GitHub fallback (network) ───────────────────────────────────
+    let mut url = format!(
+        "https://raw.githubusercontent.com/{}/{}/{}/{}",
+        owner, repo_name, commit, filepath
+    );
+
+    if let Some(parent) = cache_file.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    if filepath.ends_with(".py") {
+        if let Some(parent) = src_cache_file.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+    }
+
+    // Lock CACHE_MUTEX to serialize downloads and cache file writes.
+    let _guard = CACHE_MUTEX.lock().unwrap();
+
+    // Double check if the file was written by another thread while waiting.
+    if cache_file.exists() {
+        if let Ok(code) = std::fs::read_to_string(&cache_file) {
+            return Some(code);
+        }
+    }
+    if filepath.ends_with(".py") {
+        if src_cache_file.exists() {
+            if let Ok(code) = std::fs::read_to_string(&src_cache_file) {
+                return Some(code);
+            }
+        }
+    }
+
+    let output = std::process::Command::new("curl.exe")
+        .args(&["-s", "-f", "-L", &url])
+        .output();
+
+    if let Ok(out) = output {
+        if out.status.success() {
+            if let Ok(content) = String::from_utf8(out.stdout) {
+                let _ = std::fs::write(&cache_file, &content);
+                return Some(content);
+            }
+        }
+    }
+
+    // Fallback: try fetching with "src/" prefix
+    if filepath.ends_with(".py") {
+        url = format!(
+            "https://raw.githubusercontent.com/{}/{}/{}/{}",
+            owner, repo_name, commit, src_filepath
+        );
+        let output_src = std::process::Command::new("curl.exe")
+            .args(&["-s", "-f", "-L", &url])
+            .output();
+
+        if let Ok(out) = output_src {
+            if out.status.success() {
+                if let Ok(content) = String::from_utf8(out.stdout) {
+                    let _ = std::fs::write(&src_cache_file, &content);
+                    return Some(content);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn resolve_module_to_filepaths(from_part: &str, symbol: &str) -> Vec<String> {
+    let mut paths = Vec::new();
+    let s = from_part.replace('.', "/");
+    paths.push(format!("{}.py", s));
+    paths.push(format!("{}/__init__.py", s));
+    paths.push(format!("{}/{}.py", s, symbol.to_lowercase()));
+    let parts: Vec<&str> = from_part.split('.').collect();
+    if parts.len() > 1 {
+        let parent_s = parts[..parts.len() - 1].join("/");
+        paths.push(format!("{}.py", parent_s));
+        paths.push(format!("{}/__init__.py", parent_s));
+        let last = parts[parts.len() - 1].to_lowercase();
+        paths.push(format!("{}/{}.py", parent_s, last));
+    }
+    paths
+}
 
 fn main() {
     let base_dir = Path::new("d:/V2 Backup");
@@ -945,33 +1377,174 @@ fn main() {
     let mut all_suppressed = Vec::new();
 
     let mut run_dataset = |name: &str, samples: &[Sample]| -> (Metrics, SplitMetrics, Vec<taint::interproc::SuppressedFlowDiagnostic>) {
-        println!("Scanning {} ({} samples)...", name, samples.len());
-        let mut m = Metrics::default();
-        let mut split = SplitMetrics::default();
-        let mut count = 0;
-        let mut suppressed_acc = Vec::new();
+        let sample_ids_env = std::env::var("SAMPLE_IDS").ok();
+        let repo_filter_env = std::env::var("REPO_FILTER").ok();
+
+        let sample_ids_filter: Option<std::collections::HashSet<usize>> = sample_ids_env.as_ref().map(|s| {
+            s.split(',')
+                .map(|token| token.trim())
+                .filter_map(|token| token.parse::<usize>().ok())
+                .collect()
+        });
+
+        let repo_filter: Option<String> = repo_filter_env.as_ref().map(|s| s.trim().to_string());
+
+        let mut active_samples = Vec::new();
+        let mut raw_index = 0;
+        let mut original_idx = 0;
+        let has_targeted_filter = sample_ids_filter.is_some() || repo_filter.is_some();
+
+        let stage0_loaded = samples.len();
+        let mut stage1_after_skips = 0;
+        let mut stage2_after_repo = 0;
+        let mut stage3_after_sample_ids = 0;
+        let mut stage4_final = 0;
+
+        if name == "GitHub" {
+            println!("--- FILTERING DIAGNOSTICS START ---");
+            println!("Parsed SAMPLE_IDS:");
+            if let Some(ref ids) = sample_ids_filter {
+                println!("  Integer set: {:?}", ids);
+                println!("  Total count: {}", ids.len());
+            } else {
+                println!("  Integer set: None");
+                println!("  Total count: 0");
+            }
+            println!("Parsed REPO_FILTER:");
+            println!("  Original env value: {:?}", repo_filter_env);
+            println!("  Normalized value: {:?}", repo_filter);
+        }
+
         for sample in samples {
-            if std::env::var("SKIP_PGADMIN").is_ok() && sample.repo.contains("pgadmin") {
-                continue;
-            }
-            if std::env::var("SKIP_DATACHAIN").is_ok() && sample.repo.contains("datachain") {
-                continue;
-            }
-            if std::env::var("SKIP_RAY").is_ok() && sample.repo.contains("ray") {
-                continue;
-            }
-            if std::env::var("ONLY_PADDLE").is_ok() && !sample.repo.to_lowercase().contains("paddle") {
-                continue;
-            }
-            if let Ok(only_repo) = std::env::var("ONLY_REPO") {
-                if !sample.repo.to_lowercase().contains(&only_repo.to_lowercase()) {
-                    continue;
+            let o_idx = original_idx;
+            original_idx += 1;
+
+            let skipped_by_standard = (std::env::var("SKIP_PGADMIN").is_ok() && sample.repo.contains("pgadmin"))
+                || (std::env::var("SKIP_DATACHAIN").is_ok() && sample.repo.contains("datachain"))
+                || (std::env::var("SKIP_RAY").is_ok() && sample.repo.contains("ray"))
+                || (std::env::var("ONLY_PADDLE").is_ok() && !sample.repo.to_lowercase().contains("paddle"))
+                || (if let Ok(only_repo) = std::env::var("ONLY_REPO") {
+                    !sample.repo.to_lowercase().contains(&only_repo.to_lowercase())
+                } else {
+                    false
+                });
+
+            if skipped_by_standard {
+                if name == "GitHub" && sample.repo.contains("GitPython") {
+                    println!("[GITPYTHON WARNING] Sample original_idx={} skipped by standard skips. Repo: {}", o_idx, sample.repo);
                 }
+                continue;
             }
-            count += 1;
-            if count % 100 == 0 {
-                println!("  Progress: {}/{}", count, samples.len());
+
+            stage1_after_skips += 1;
+            let idx = raw_index;
+            raw_index += 1;
+
+            let matches_repo = if let Some(ref filter) = repo_filter {
+                let sample_repo_clean = sample.repo
+                    .strip_prefix("https://github.com/")
+                    .or_else(|| sample.repo.strip_prefix("http://github.com/"))
+                    .unwrap_or(&sample.repo);
+                let is_match = sample_repo_clean == filter || sample.repo == *filter;
+                if name == "GitHub" && sample.repo.contains("GitPython") {
+                    println!("[DEBUG_REPO] Repository in dataset: '{}'", sample.repo);
+                    println!("[DEBUG_REPO] Filter string: '{}'", filter);
+                    println!("[DEBUG_REPO] Comparison result (sample_repo_clean == filter || sample.repo == *filter): {} (clean repo: '{}')", is_match, sample_repo_clean);
+                }
+                is_match
+            } else {
+                true
+            };
+
+            let matches_sample_ids = if let Some(ref ids) = sample_ids_filter {
+                let is_match = ids.contains(&idx);
+                if name == "GitHub" && sample.repo.contains("GitPython") && !is_match {
+                    println!("[DEBUG_SAMPLE_IDS] Expected IDs: {:?}", ids);
+                    println!("[DEBUG_SAMPLE_IDS] Actual active index: {}", idx);
+                    println!("[DEBUG_SAMPLE_IDS] Reason for rejection: Active index {} is not present in expected set {:?}", idx, ids);
+                }
+                is_match
+            } else {
+                true
+            };
+
+            if matches_repo {
+                stage2_after_repo += 1;
             }
+            if matches_sample_ids {
+                stage3_after_sample_ids += 1;
+            }
+
+            let keep = matches_repo && matches_sample_ids;
+            if keep {
+                stage4_final += 1;
+                active_samples.push((idx, sample));
+            }
+
+            if name == "GitHub" && sample.repo.contains("GitPython") {
+                println!(
+                    "[GITPYTHON FOCUS] Original index: {}, Active index: {}, Sample ID: {}, Repository: '{}', REPO_FILTER match: {}, SAMPLE_IDS match: {}, Final decision: {}",
+                    o_idx, idx, idx, sample.repo, matches_repo, matches_sample_ids, if keep { "KEEP" } else { "DISCARD" }
+                );
+            }
+        }
+
+        if name == "GitHub" {
+            println!("--- FILTERING DIAGNOSTICS END ---");
+            println!("Stage 0: Loaded dataset: {}", stage0_loaded);
+            println!("Stage 1: After standard skips: {}", stage1_after_skips);
+            println!("Stage 2: After REPO_FILTER: {}", stage2_after_repo);
+            println!("Stage 3: After SAMPLE_IDS: {}", stage3_after_sample_ids);
+            println!("Stage 4: Final selected: {}", stage4_final);
+        }
+
+        if name == "GitHub" {
+            use std::io::Write;
+            let mut stdout = std::io::stdout();
+            if has_targeted_filter {
+                let _ = writeln!(stdout, "GitHub samples loaded:\n{}", samples.len());
+                let _ = writeln!(stdout, "\nSamples selected:\n{}", active_samples.len());
+                let _ = writeln!(stdout, "\nRepository filter:\n{}", repo_filter.as_deref().unwrap_or("None"));
+                
+                let sample_filter_str = if let Some(ref ids) = sample_ids_filter {
+                    let mut sorted_ids: Vec<usize> = ids.iter().cloned().collect();
+                    sorted_ids.sort();
+                    sorted_ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
+                } else {
+                    "None".to_string()
+                };
+                let _ = writeln!(stdout, "\nSample filter:\n{}", sample_filter_str);
+                let _ = writeln!(stdout);
+            } else {
+                let _ = writeln!(stdout, "Repository filter:\nNone");
+                let _ = writeln!(stdout, "\nSample filter:\nNone");
+                let _ = writeln!(stdout);
+            }
+        } else {
+            println!("Scanning {} ({} samples)...", name, samples.len());
+        }
+
+        struct WorkerResult {
+            count: usize,
+            pred: bool,
+            has_any_flow: bool,
+            suppressed: Vec<taint::interproc::SuppressedFlowDiagnostic>,
+            logs: Vec<String>,
+        }
+
+        // Pair each active sample with its original index, then sort by complexity (code length) descending.
+        let mut tasks: Vec<(usize, (usize, &Sample))> = active_samples
+            .iter()
+            .cloned()
+            .enumerate()
+            .collect();
+        tasks.sort_by_key(|&(_, (_, sample))| std::cmp::Reverse(sample.code.len()));
+
+        let mut sorted_results: Vec<(usize, WorkerResult)> = tasks.par_iter().map(|&(original_pos, (count, sample))| {
+            THREAD_LOG.with(|log| {
+                *log.borrow_mut() = Some(Vec::new());
+            });
+
             let filter = if sample.is_juliet {
                 if sample.vulnerable {
                     Some("bad")
@@ -984,6 +1557,7 @@ fn main() {
 
             let mut siblings = Vec::new();
             let mut target_path = None;
+            let mut cohort_paths = None;
 
             if name == "GitHub" {
                 let mut cohort_codes = vec![sample.code.clone()];
@@ -1028,18 +1602,38 @@ fn main() {
                 }
 
                 let mut resolved_paths: std::collections::HashMap<usize, String> = std::collections::HashMap::new();
-                for (i, code) in cohort_codes.iter().enumerate() {
-                    for (j, other_code) in cohort_codes.iter().enumerate() {
-                        if i == j { continue; }
-                        for (from_part, symbol) in extract_imported_symbols(other_code) {
-                            if !from_part.starts_with('.') && from_part.starts_with(&package_root) {
-                                if code_defines_symbol(code, &symbol) {
-                                    resolved_paths.insert(i, format!("{}.py", from_part.replace('.', "/")));
-                                    break;
-                                }
+
+                let mut git_resolved = false;
+                let local_folder = repo_name_to_local_folder(&sample.repo);
+                let local_root = Path::new("D:/RepositoryCache").join(local_folder);
+                if local_root.exists() {
+                    if let Some(modified_files) = get_modified_files_from_git(&local_root, &sample.commit) {
+                        for (i, code) in cohort_codes.iter().enumerate() {
+                            if let Some(path) = match_cohort_code_to_path(&sample.repo, &sample.commit, code, &modified_files) {
+                                resolved_paths.insert(i, path);
                             }
                         }
-                        if resolved_paths.contains_key(&i) { break; }
+                        if resolved_paths.len() == cohort_codes.len() {
+                            git_resolved = true;
+                        }
+                    }
+                }
+
+                if !git_resolved {
+                    resolved_paths.clear();
+                    for (i, code) in cohort_codes.iter().enumerate() {
+                        for (j, other_code) in cohort_codes.iter().enumerate() {
+                            if i == j { continue; }
+                            for (from_part, symbol) in extract_imported_symbols(other_code) {
+                                if !from_part.starts_with('.') && from_part.starts_with(&package_root) {
+                                    if code_defines_symbol(code, &symbol) {
+                                        resolved_paths.insert(i, format!("{}.py", from_part.replace('.', "/")));
+                                        break;
+                                    }
+                                }
+                            }
+                            if resolved_paths.contains_key(&i) { break; }
+                        }
                     }
                 }
 
@@ -1140,6 +1734,62 @@ fn main() {
                     siblings.push((code, path));
                 }
 
+                let mut paths = vec![target_path.clone().unwrap_or_else(|| {
+                    get_target_filename(&sample.repo, &sample.commit, &sample.code)
+                })];
+                for (_, path) in &siblings {
+                    paths.push(path.clone());
+                }
+                cohort_paths = Some(paths);
+
+                // Dynamically fetch and include internal dependency files from GitHub
+                if !sample.repo.is_empty() && sample.repo != "unknown" && !sample.commit.is_empty() {
+                    let mut pending_files = vec![(sample.code.clone(), target_path.clone().unwrap_or_default())];
+                    for (code, path) in &siblings {
+                        pending_files.push((code.clone(), path.clone()));
+                    }
+
+                    let mut analyzed_paths = std::collections::HashSet::new();
+                    for (_, path) in &pending_files {
+                        analyzed_paths.insert(path.clone());
+                    }
+
+                    let mut idx = 0;
+                    while idx < pending_files.len() {
+                        let (code, _) = pending_files[idx].clone();
+                        idx += 1;
+
+                        for (from_part, symbol) in extract_imported_symbols(&code) {
+                            if !from_part.starts_with('.') && from_part.starts_with(&package_root) {
+                                let possible_paths = resolve_module_to_filepaths(&from_part, &symbol);
+                                let mut already_resolved = false;
+                                for p in &possible_paths {
+                                    if analyzed_paths.contains(p) {
+                                        already_resolved = true;
+                                        break;
+                                    }
+                                }
+                                if already_resolved {
+                                    continue;
+                                }
+
+                                for p in possible_paths {
+                                    if analyzed_paths.contains(&p) {
+                                        break;
+                                    }
+                                    if let Some(content) = fetch_file_from_github(&sample.repo, &sample.commit, &p) {
+                                        println!("[COHORT_BUILDER] Dynamically fetched internal dependency: {}", p);
+                                        analyzed_paths.insert(p.clone());
+                                        pending_files.push((content.clone(), p.clone()));
+                                        siblings.push((content, p));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 println!(
                     "[RC108A_DIAGNOSTIC] Repo: {}, Target Path: {:?}, Package Root: {}, Resolved Siblings: {}",
                     sample.repo, target_path, package_root, siblings.len()
@@ -1161,87 +1811,16 @@ fn main() {
                 base_dir,
                 filter,
                 target_path,
+                cohort_paths.as_deref(),
             );
-            if pred {
-                split.flow_found_correct_cwe += 1;
-            } else if has_any_flow {
-                split.flow_found_wrong_cwe += 1;
-            } else {
-                split.no_flow_found += 1;
-            }
-            if name == "GitHub" {
-                println!("[DIAGNOSTIC] GitHub Sample {}: cwe={} vulnerable={} pred={}", count - 1, sample.cwe, sample.vulnerable, pred);
-            }
-            suppressed_acc.extend(suppressed);
-            if sample.vulnerable {
-                if pred {
-                    m.tp += 1;
-                } else {
-                    m.fn_count += 1;
-                    all_fns.push(serde_json::json!({
-                        "dataset": name.to_string(),
-                        "language": sample.language.to_string(),
-                        "code": sample.code.to_string(),
-                        "cwe": sample.cwe.to_string(),
-                    }));
-                    if name == "GitHub" {
-                        let is_import_fn = true;
-                        if is_import_fn {
-                            println!("[FN_DIAGNOSTIC] Repo: {}, CWE: {}, Commit: {}", sample.repo, sample.cwe, sample.commit);
-                            let mut program = ir::Program::new();
-                            let mut gst = symbols::global::GlobalSymbolTable::new();
-                            let filename = get_target_filename(&sample.repo, &sample.commit, &sample.code);
-                            program.source_files.insert(filename.clone(), sample.code.clone());
-                            for (sib_code, sib_filename) in &siblings {
-                                program.source_files.insert(sib_filename.clone(), sib_code.clone());
-                            }
-                            if gst.load_file(&mut program, &sample.code, &filename, &sample.language).is_ok() {
-                                for (sib_code, sib_filename) in &siblings {
-                                    let _ = gst.load_file(&mut program, sib_code, sib_filename, &sample.language);
-                                }
-                                if !sample.repo.is_empty() && sample.repo != "unknown" {
-                                    load_mock_helpers(&mut program, &mut gst, &sample.repo, &sample.commit, &sample.language, base_dir);
-                                }
-                                gst.resolve_inheritance_hierarchy();
-                                let cg = symbols::call_graph::CallGraph::build(&program, &gst);
-                                let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
-                                let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
-                                engine.target_file = Some(filename.clone());
-                                engine.seed_sources(None);
-                                engine.run();
-                                println!("  [FN_DIAGNOSTIC] ICFG nodes: {}, edges: {}", icfg.nodes.len(), icfg.edges.len());
-                                println!("  [FN_DIAGNOSTIC] Program Methods:");
-                                for (mid, method) in &program.methods {
-                                    if let Some(path) = engine.get_method_file_path(*mid) {
-                                        if path.contains("test_ocsp") || path.contains("cache.py") {
-                                            println!("    Method: {} in {}", method.name, path);
-                                        }
-                                    }
-                                }
-                                println!("  [FN_DIAGNOSTIC] Flows detected: {}", engine.flows.len());
-                                for flow in &engine.flows {
-                                    println!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var);
-                                }
-                                for fact in &engine.tainted_facts {
-                                    if fact.var.contains("path") || fact.var.contains("dest") || fact.var.contains("cmd") || fact.var.contains("args") || fact.var.contains("url") {
-                                        println!("    Tainted: node={}, var={}", fact.node_id, fact.var);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                if pred {
-                    m.fp += 1;
-                    all_fps.push(serde_json::json!({
-                        "dataset": name.to_string(),
-                        "language": sample.language.to_string(),
-                        "code": sample.code.to_string(),
-                        "cwe": sample.cwe.to_string(),
-                    }));
-                    if name == "GitHub" {
-                        println!("[FP_DIAGNOSTIC] Repo: {}, CWE: {}, Commit: {}", sample.repo, sample.cwe, sample.commit);
+
+            let is_fn = sample.vulnerable && !pred;
+            let is_fp = !sample.vulnerable && pred;
+
+            if is_fn && name == "GitHub" {
+                THREAD_LOG.with(|log| {
+                    if let Some(ref mut lines) = *log.borrow_mut() {
+                        lines.push(format!("[FN_DIAGNOSTIC] Repo: {}, CWE: {}, Commit: {}", sample.repo, sample.cwe, sample.commit));
                         let mut program = ir::Program::new();
                         let mut gst = symbols::global::GlobalSymbolTable::new();
                         let filename = get_target_filename(&sample.repo, &sample.commit, &sample.code);
@@ -1261,11 +1840,73 @@ fn main() {
                             let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
                             let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
                             engine.target_file = Some(filename.clone());
+                            if let Some(ref paths) = cohort_paths {
+                                let mut set = std::collections::HashSet::new();
+                                for p in paths {
+                                    set.insert(p.to_lowercase().replace('\\', "/"));
+                                }
+                                engine.target_and_siblings = set;
+                            }
                             engine.seed_sources(None);
                             engine.run();
-                            println!("  [FP_DIAGNOSTIC] Flows detected: {}", engine.flows.len());
+                            lines.push(format!("  [FN_DIAGNOSTIC] ICFG nodes: {}, edges: {}", icfg.nodes.len(), icfg.edges.len()));
+                            lines.push(format!("  [FN_DIAGNOSTIC] Program Methods:"));
+                            for (mid, method) in &program.methods {
+                                if let Some(path) = engine.get_method_file_path(*mid) {
+                                    if path.contains("test_ocsp") || path.contains("cache.py") {
+                                        lines.push(format!("    Method: {} in {}", method.name, path));
+                                    }
+                                }
+                            }
+                            lines.push(format!("  [FN_DIAGNOSTIC] Flows detected: {}", engine.flows.len()));
                             for flow in &engine.flows {
-                                println!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var);
+                                lines.push(format!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var));
+                            }
+                            for fact in &engine.tainted_facts {
+                                if fact.var.contains("path") || fact.var.contains("dest") || fact.var.contains("cmd") || fact.var.contains("args") || fact.var.contains("url") {
+                                    lines.push(format!("    Tainted: node={}, var={}", fact.node_id, fact.var));
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if is_fp && name == "GitHub" {
+                THREAD_LOG.with(|log| {
+                    if let Some(ref mut lines) = *log.borrow_mut() {
+                        lines.push(format!("[FP_DIAGNOSTIC] Repo: {}, CWE: {}, Commit: {}", sample.repo, sample.cwe, sample.commit));
+                        let mut program = ir::Program::new();
+                        let mut gst = symbols::global::GlobalSymbolTable::new();
+                        let filename = get_target_filename(&sample.repo, &sample.commit, &sample.code);
+                        program.source_files.insert(filename.clone(), sample.code.clone());
+                        for (sib_code, sib_filename) in &siblings {
+                            program.source_files.insert(sib_filename.clone(), sib_code.clone());
+                        }
+                        if gst.load_file(&mut program, &sample.code, &filename, &sample.language).is_ok() {
+                            for (sib_code, sib_filename) in &siblings {
+                                let _ = gst.load_file(&mut program, sib_code, sib_filename, &sample.language);
+                            }
+                            if !sample.repo.is_empty() && sample.repo != "unknown" {
+                                load_mock_helpers(&mut program, &mut gst, &sample.repo, &sample.commit, &sample.language, base_dir);
+                            }
+                            gst.resolve_inheritance_hierarchy();
+                            let cg = symbols::call_graph::CallGraph::build(&program, &gst);
+                            let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
+                            let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
+                            engine.target_file = Some(filename.clone());
+                            if let Some(ref paths) = cohort_paths {
+                                let mut set = std::collections::HashSet::new();
+                                for p in paths {
+                                    set.insert(p.to_lowercase().replace('\\', "/"));
+                                }
+                                engine.target_and_siblings = set;
+                            }
+                            engine.seed_sources(None);
+                            engine.run();
+                            lines.push(format!("  [FP_DIAGNOSTIC] Flows detected: {}", engine.flows.len()));
+                            for flow in &engine.flows {
+                                lines.push(format!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var));
                                 let matching_facts = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
                                 let mut best_path = Vec::new();
                                 for fact in matching_facts {
@@ -1285,18 +1926,97 @@ fn main() {
                                         let step_node = icfg.nodes.get(&step.node_id).unwrap();
                                         let step_method = program.methods.get(&step_node.method_id).unwrap();
                                         let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
-                                        println!("      [{}] node={} method='{}' var='{}' inst={:?}", 
-                                            step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind));
+                                        lines.push(format!("      [{}] node={} method='{}' var='{}' inst={:?}", 
+                                            step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)));
                                     }
                                 }
                             }
                         }
                     }
+                });
+            }
+
+            let logs = THREAD_LOG.with(|log| {
+                log.borrow_mut().take()
+            }).unwrap_or_default();
+
+            let res = WorkerResult {
+                count,
+                pred,
+                has_any_flow,
+                suppressed,
+                logs,
+            };
+            (original_pos, res)
+        }).collect();
+
+        // Restore original deterministic ordering of the results
+        sorted_results.sort_by_key(|&(original_pos, _)| original_pos);
+        let worker_results: Vec<WorkerResult> = sorted_results
+            .into_iter()
+            .map(|(_, res)| res)
+            .collect();
+
+        let mut suppressed_acc = Vec::new();
+        let mut m = Metrics::default();
+        let mut split = SplitMetrics::default();
+
+        for (i, res) in worker_results.into_iter().enumerate() {
+            for line in res.logs {
+                use std::io::Write;
+                let mut stdout = std::io::stdout();
+                let _ = write!(stdout, "{}", line);
+                let _ = writeln!(stdout);
+            }
+
+            let sample = active_samples[i].1;
+            if (i + 1) % 100 == 0 || i == active_samples.len() - 1 {
+                use std::io::Write;
+                let _ = writeln!(std::io::stdout(), "  Progress: {}/{}", i + 1, active_samples.len());
+            }
+
+            if res.pred {
+                split.flow_found_correct_cwe += 1;
+            } else if res.has_any_flow {
+                split.flow_found_wrong_cwe += 1;
+            } else {
+                split.no_flow_found += 1;
+            }
+
+            if name == "GitHub" {
+                use std::io::Write;
+                let _ = writeln!(std::io::stdout(), "[DIAGNOSTIC] GitHub Sample {}: cwe={} vulnerable={} pred={}", res.count, sample.cwe, sample.vulnerable, res.pred);
+            }
+
+            suppressed_acc.extend(res.suppressed);
+
+            if sample.vulnerable {
+                if res.pred {
+                    m.tp += 1;
+                } else {
+                    m.fn_count += 1;
+                    all_fns.push(serde_json::json!({
+                        "dataset": name.to_string(),
+                        "language": sample.language.to_string(),
+                        "code": sample.code.to_string(),
+                        "cwe": sample.cwe.to_string(),
+                    }));
+                }
+            } else {
+                if res.pred {
+                    m.fp += 1;
+                    all_fps.push(serde_json::json!({
+                        "dataset": name.to_string(),
+                        "language": sample.language.to_string(),
+                        "code": sample.code.to_string(),
+                        "cwe": sample.cwe.to_string(),
+                    }));
                 } else {
                     m.tn += 1;
                 }
             }
         }
+
         (m, split, suppressed_acc)
     };
 

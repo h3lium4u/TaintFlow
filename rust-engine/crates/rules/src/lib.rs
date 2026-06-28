@@ -464,9 +464,13 @@ fn is_path_traversal_guarded(file_path: &str, var_name: &str, target_line: usize
 
                 let contains_guard = line.contains("guard") && line.contains(part);
 
+                let contains_clean_path = line.contains("clean_path(") && line.contains(part);
+
+                let contains_dotdot = line.contains("..") && (line.contains(" in ") || line.contains("not in") || line.contains("contains")) && line.contains(part);
 
 
-                if contains_exists || contains_isfile || contains_isdir || contains_endswith || contains_is_none || contains_whitelist || contains_guard {
+
+                if contains_exists || contains_isfile || contains_isdir || contains_endswith || contains_is_none || contains_whitelist || contains_guard || contains_clean_path || contains_dotdot {
 
                     return true;
 
@@ -1712,7 +1716,7 @@ fn is_path_traversal_guarded(file_path: &str, var_name: &str, target_line: usize
             || c.ends_with(".commandoutput")
 
             || c == "commandoutput"
-
+            || (file_path.ends_with(".py") && (c == "eval" || c == "builtins.eval"))
         {
 
             Some(CWE::CWE78)

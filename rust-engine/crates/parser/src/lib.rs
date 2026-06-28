@@ -51,12 +51,20 @@ impl UnifiedParser {
 
         parser.set_language(lang).map_err(|e| e.to_string())?;
 
+        let preprocessed_code;
+        let code_to_parse = if language.to_lowercase() == "python" {
+            preprocessed_code = preprocess_python(code);
+            &preprocessed_code
+        } else {
+            code
+        };
+
         let tree = parser
-            .parse(code, None)
+            .parse(code_to_parse, None)
             .ok_or_else(|| "Failed to parse code".to_string())?;
 
         let root_node = tree.root_node();
-        Ok(Self::convert_node(root_node, code, language))
+        Ok(Self::convert_node(root_node, code_to_parse, language))
     }
 
     fn convert_node(node: tree_sitter::Node, code: &str, language: &str) -> AstNode {
@@ -143,4 +151,82 @@ impl UnifiedParser {
             raw,
         }
     }
+}
+
+fn preprocess_python(code: &str) -> String {
+    // Guard: only preprocess if the first non-empty line has indent >= 8.
+    let first_nonempty_indent = code
+        .lines()
+        .find(|l| !l.trim().is_empty())
+        .map(|l| l.len() - l.trim_start().len())
+        .unwrap_or(0);
+    if first_nonempty_indent < 8 {
+        return code.to_string();
+    }
+
+    let mut cleaned_lines = Vec::new();
+    let mut in_top_level = true;
+    let mut in_class_header = false;
+    let mut open_parens = 0;
+    let mut inserted_pass = false;
+
+    for line in code.split('\n') {
+        let stripped = line.trim();
+        if stripped.is_empty() {
+            cleaned_lines.push(line.to_string());
+            continue;
+        }
+
+        if in_top_level {
+            if stripped.starts_with("class ") || stripped.starts_with("def ") {
+                in_top_level = false;
+            }
+        }
+
+        let mut line_to_add = if in_top_level {
+            line.trim_start().to_string()
+        } else {
+            line.to_string()
+        };
+
+        let is_class = stripped.starts_with("class ");
+        let is_def = stripped.starts_with("def ");
+
+        if is_class {
+            in_class_header = true;
+            inserted_pass = false;
+        } else if is_def {
+            in_class_header = false;
+        }
+
+        if in_class_header && !is_class {
+            let mut line_parens = 0i32;
+            for c in stripped.chars() {
+                if c == '(' || c == '[' || c == '{' {
+                    line_parens += 1;
+                } else if c == ')' || c == ']' || c == '}' {
+                    line_parens -= 1;
+                }
+            }
+
+            let indent = line.len() - line.trim_start().len();
+            let is_comment = stripped.starts_with('#');
+            let is_docstring = stripped.starts_with("\"\"\"") || stripped.starts_with("'''");
+
+            if (line_parens < 0 && open_parens == 0) || (indent >= 12 && !is_comment && !is_docstring) {
+                if !inserted_pass {
+                    line_to_add = "    pass".to_string();
+                    inserted_pass = true;
+                } else {
+                    line_to_add = format!("# stripped: {}", stripped);
+                }
+            } else {
+                open_parens = std::cmp::max(0, open_parens + line_parens);
+            }
+        }
+
+        cleaned_lines.push(line_to_add);
+    }
+
+    cleaned_lines.join("\n")
 }
