@@ -2599,7 +2599,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let method_name = callee.split('.').last().unwrap_or(callee);
                         let method_lower = method_name.to_lowercase();
 
-                        if method_lower == "setsecure" || method_lower == "sethttponly" {
+                        if method_lower == "setsecure" {
                             let is_true = args.first().map_or(false, |a| a.trim().to_lowercase() == "true");
                             if is_true {
                                 if let Some(receiver) = get_receiver_name(callee) {
@@ -4285,6 +4285,12 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
                 if let Some(eq_idx) = trimmed.find('=') {
                     let lhs = trimmed[..eq_idx].trim();
                     let rhs = trimmed[eq_idx + 1..].trim();
+
+                    // Reject RHS containing (, ., ::, new (Candidate C)
+                    if rhs.contains('(') || rhs.contains('.') || rhs.contains("::") || rhs.contains("new ") {
+                        continue;
+                    }
+
                     let mut rhs_has_part = false;
                     for p in &parts {
                         if rhs.to_lowercase().contains(p) {

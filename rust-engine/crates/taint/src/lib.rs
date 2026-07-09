@@ -181,6 +181,7 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
         || c.contains("preparestatement") || c.contains("createnativequery")
         || c.contains("rawsql") || c.contains("raw_sql")
         || (c == "raw") || (c == "extra")
+        || (c == "query") || c.contains("queryfor")
     {
         return Some(CWE::CWE89);
     }
@@ -294,7 +295,8 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     }
 
     // HTTP response splitting (CWE-113)
-    if c.contains("setheader") || c.contains("addheader") || c.contains("addcookie")
+    // Note: addCookie is CWE-614 (insecure cookie), not CWE-113 (header injection).
+    if c.contains("setheader") || c.contains("addheader")
         || c.contains("sendredirect") || c.contains("setcontenttype")
     {
         return Some(CWE::CWE113);
@@ -303,6 +305,11 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     // Trust boundary (CWE-501)
     if c.contains("setattribute") || c.contains("putvalue") || c.contains("setinitparameter") {
         return Some(CWE::CWE501);
+    }
+
+    // Insecure cookie (CWE-614)
+    if c.contains("addcookie") {
+        return Some(CWE::CWE614);
     }
 
     None

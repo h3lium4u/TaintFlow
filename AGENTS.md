@@ -4,208 +4,288 @@ This file acts as the persistent project instruction manual for all future Taint
 
 ---
 
-## Validation Execution Policy
+# Validation Execution Policy
 
 The user performs all validations manually.
 
-**Never execute the following commands or tasks:**
-- `cargo run`
-- `cargo test`
-- `cargo check`
-- Benchmark suites
-- Validation harnesses
-- Repository scans
-- Any long-running background execution jobs
+## Automatic Compilation Policy
 
-**Instead, the agent must:**
-- Generate exact PowerShell commands for the user.
-- Recommend target validation scope.
-- Wait for user-provided logs/reports.
-- Analyze existing artifacts only.
+Compilation is permitted because it is a fast static verification step and does not execute the validation harness.
 
-When validation is required, the agent must only provide the instructions and commands for manual execution.
+The agent **MAY** execute:
+
+* `cargo build`
+* `cargo build --release`
+* `cargo check` (when only compile verification is required)
+
+Compilation may be used to:
+
+* Detect compiler errors
+* Detect borrow checker issues
+* Detect type mismatches
+* Detect missing imports
+* Detect lifetime errors
+* Verify that a patch compiles before requesting validation
+
+Compilation **must never** be used as a substitute for validation.
 
 ---
 
-## Validation Scope Policy
+## Manual Validation Policy
+
+The agent **MUST NEVER** execute:
+
+* `cargo run`
+* Validation harnesses
+* Benchmark suites
+* Repository scans
+* Long-running background validation jobs
+* Any command that executes the validation datasets
+
+Instead, the agent must:
+
+* Generate exact PowerShell commands for the user.
+* Recommend the smallest validation scope.
+* Wait for user-provided logs/reports.
+* Analyze existing artifacts only.
+
+Whenever validation is required, the agent must provide only the required PowerShell commands and wait for the user's results.
+
+---
+
+# Validation Scope Policy
 
 Always prefer the smallest validation scope capable of answering the question to optimize cycle time and compute resources.
 
-### Priority Level
-1. **Repository-Specific Validation**: Scan only the target repository under analysis.
-2. **GitHub-Only Validation**: Scan only the GitHub holdout dataset.
-3. **Vul4J-Only Validation**: Scan only the Vul4J dataset.
-4. **OWASP-Only Validation**: Scan only the OWASP Benchmark datasets.
-5. **Juliet-Only Validation**: Scan only the Juliet test suites.
-6. **Full Validation**: Scan all datasets.
+## Priority Level
 
-### When to Use Full Validation
-Only request full validation when:
-- Creating a Release Candidate (RC)
-- Establishing a new metrics baseline
-- Merging multiple architectural changes
-- Modifying global taint propagation logic
-- Modifying core source/sink/sanitizer infrastructure
+1. Repository-Specific Validation
+2. GitHub-Only Validation
+3. Vul4J-Only Validation
+4. OWASP-Only Validation
+5. Juliet-Only Validation
+6. Full Validation
+
+## When to Use Full Validation
+
+Use full validation **only** when:
+
+* Creating a Release Candidate (RC)
+* Establishing a new metrics baseline
+* Merging multiple architectural changes
+* Modifying global taint propagation logic
+* Modifying core source/sink/sanitizer infrastructure
 
 ---
 
-## Validation Performance Policy
+# Validation Performance Policy
 
-All performance optimizations must preserve semantic correctness. Under no circumstances should precision, recall, or MCC metrics be degraded for speed.
+All performance optimizations must preserve semantic correctness.
+
+Never sacrifice:
+
+* TP
+* FP
+* TN
+* FN
+* Precision
+* Recall
+* F1
+* MCC
 
 ### Allowed Optimizations
-- Rayon sample-level parallelism
-- Lock-free map/reduce aggregation
-- Dataset-level parallelism
-- Validation harness execution/runner optimizations
+
+* Rayon sample-level parallelism
+* Lock-free aggregation
+* Dataset-level parallelism
+* Validation harness optimizations
+* Safe caching
 
 ### Disallowed Optimizations
-- Propagation depth or step caps
-- Reduced iteration limits
-- `stop_on_first_match` shortcuts
-- Timeout reductions
-- Heuristic pruning of search space
-- Any optimization that alters detection behavior or suppresses flows
+
+* Propagation caps
+* Reduced iteration limits
+* `stop_on_first_match`
+* Timeout reductions
+* Search-space pruning
+* Any optimization that changes detection behavior
 
 ---
 
-## Development Workflow
+# Development Workflow
 
-Every sprint/change must follow this loop:
-1. **Review**: Analyze the requested change or error log.
-2. **Estimate**: Predict the impact on metrics.
-3. **Recommend Scope**: Propose the smallest validation scope.
-4. **Provide Commands**: Give the user the exact manual validation command.
-5. **User Run**: The user runs the validation manually and provides the log.
-6. **Analyze**: Inspect the returned log/report.
-7. **Iterate**: Recommend the next corrective or finalizing action.
+Every engineering iteration must follow this sequence:
 
-*Never run validation automatically.*
+1. Review the requested change.
+2. Estimate expected metric impact.
+3. Implement the change.
+4. **Compile automatically** to verify correctness.
+5. Recommend the smallest validation scope.
+6. Provide the exact PowerShell validation command.
+7. Wait for the user to execute validation.
+8. Analyze the returned validation log.
+9. Decide:
 
----
-
-## Release Candidate Workflow
-
-- **Development Phase**: Use targeted validation only.
-- **Release Phase**:
-  1. Recommend a full manual validation run.
-  2. Compare the output metrics against the latest approved baseline.
-  3. Produce a detailed release report.
+   * ACCEPT
+   * ROLLBACK
+   * ITERATE
 
 ---
 
-## Reporting Requirements
+# Release Candidate Workflow
 
-For every sprint/feature proposal, the agent must provide:
-- Expected True Positive (TP) impact
-- Expected False Positive (FP) impact
-- Expected False Negative (FN) impact
-- Expected MCC impact
-- Recommended validation scope
-- Manual PowerShell commands to execute
+Development Phase:
+
+* Use targeted validation only.
+
+Release Phase:
+
+1. Recommend one manual full validation.
+2. Compare against the certified baseline.
+3. Produce the release report.
 
 ---
 
-## TaintFlow Priorities
+# Reporting Requirements
 
-All design and bugfix decisions must prioritize these goals in order:
-1. Precision improvements
-2. MCC improvements
-3. OWASP XSS False Positive reduction
-4. GitHub False Positive reduction
+Every engineering proposal must include:
+
+* Expected TP impact
+* Expected FP impact
+* Expected FN impact
+* Expected MCC impact
+* Recommended validation scope
+* Required manual PowerShell commands
+
+---
+
+# TaintFlow Priorities
+
+Engineering priorities are:
+
+1. Precision
+2. MCC
+3. OWASP XSS FP reduction
+4. GitHub FP reduction
 5. Recall preservation
 
-*Avoid sacrificing MCC for small, localized recall gains.*
+Never trade significant MCC for a small localized recall gain.
 
 ---
 
-## Agent Behavior
+# Agent Behavior
 
-- **Never** wait for validation completion.
-- **Never** execute validation.
-- **Never** execute cargo commands.
-- **Always** provide exact commands for manual execution.
-- **Always** analyze logs and reports provided by the user.
+The agent **MAY**:
+
+* Compile the project.
+* Perform static code inspection.
+* Analyze source code.
+* Analyze compiler output.
+* Analyze validation logs.
+
+The agent **MUST NEVER**:
+
+* Execute validation.
+* Execute benchmark suites.
+* Execute dataset scans.
+* Execute `cargo run`.
+* Wait for validation to finish.
+
+The user always performs validation manually.
 
 ---
 
-## Validation Acceleration Policy
+# Validation Acceleration Policy
 
-**Goal**: Reduce validation runtime while preserving identical metrics.
+Goal:
 
-Any optimization must preserve:
-- True Positive (TP)
-- False Positive (FP)
-- True Negative (TN)
-- False Negative (FN)
-- Precision
-- Recall
-- F1 Score
-- MCC
+Reduce validation runtime while preserving identical detection metrics.
 
-### Preferred Optimizations
+Always preserve:
+
+* TP
+* FP
+* TN
+* FN
+* Precision
+* Recall
+* F1
+* MCC
+
+Preferred optimizations:
+
 1. Rayon sample-level parallelism
-2. Lock-free map/reduce aggregation
+2. Lock-free aggregation
 3. Dataset-level parallelism
-4. Safe caching of reusable validation artifacts
+4. Safe caching
 
-### Disallowed Optimizations
-- Propagation caps
-- Reduced fixpoint iterations
-- `stop_on_first_match`
-- Timeout reductions
-- Heuristic pruning
-- Any change that alters detection semantics
+Never use:
 
-### Action when validation runtime becomes a bottleneck:
-1. Audit the validation harness first.
-2. Prefer performance improvements before reducing validation coverage.
-3. Explain why metrics remain identical.
+* Propagation caps
+* Reduced fixpoint iterations
+* Timeout reductions
+* Heuristic pruning
+* Any semantic shortcut
 
 ---
 
-## Validation Log Policy
+# Validation Log Policy
 
 Validation is always executed manually by the user.
 
 When validation is required:
-- Provide exact PowerShell commands.
-- Save output using `Tee-Object`.
-- Use descriptive log names.
 
-### Examples:
-- `RC104_PHASE1_VALIDATION.log`
-- `RC104B_OWASP_VALIDATION.log`
-- `RC105_GITHUB_VALIDATION.log`
+* Provide exact PowerShell commands.
+* Save output using `Tee-Object`.
+* Use descriptive log names.
 
-Never execute validation automatically. Assume the user will provide log files, reports, and metrics summaries for analysis.
+Examples:
 
----
+* `RC104_PHASE1_VALIDATION.log`
+* `RC104B_OWASP_VALIDATION.log`
+* `RC105_GITHUB_VALIDATION.log`
 
-## Optimization Rule
-
-Always choose the smallest validation scope capable of answering the question.
-
-### Preferred Order
-1. Repository-specific validation
-2. GitHub-only validation
-3. OWASP-only validation
-4. Vul4J-only validation
-5. Juliet-only validation
-
-### Use Full Validation only for:
-- Release candidates
-- Baseline creation
-- Major architectural changes
-- Global source/sink/sanitizer modifications
+Never execute validation automatically.
 
 ---
 
-## Standard Validation Commands
+# Optimization Rule
 
-### GitHub Holdout Validation (Fast Iteration)
+Always choose the smallest validation scope capable of answering the engineering question.
 
-Use this command template when a change affects only GitHub metrics or GitHub-specific regressions:
+Preferred order:
+
+1. Repository-specific
+2. GitHub
+3. OWASP
+4. Vul4J
+5. Juliet
+
+Use Full Validation only for:
+
+* Release candidates
+* Baseline creation
+* Major architectural changes
+* Global source/sink/sanitizer changes
+
+---
+
+# Standard Compilation Command
+
+The agent may execute this automatically after every implementation:
+
+```powershell
+Set-Location "d:\V2 Backup\rust-engine"
+
+cargo build --release --bin v2-validation *>&1 |
+Tee-Object COMPILE.log
+```
+
+---
+
+# Standard Validation Commands
+
+## GitHub Holdout Validation (Fast Iteration)
 
 ```powershell
 Set-Location "d:\V2 Backup\rust-engine"
@@ -218,3 +298,5 @@ $env:SKIP_RAY="1"
 cargo run --release --bin v2-validation *>&1 |
 Tee-Object RCXXXX_GITHUB_VALIDATION.log
 ```
+
+The agent must never execute this command. It must only provide it for the user to run manually.
