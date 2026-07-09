@@ -4385,10 +4385,7 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
             let contains_isfile     = line.contains("isfile(")     && has_word(&line, part);
             let contains_isdir      = line.contains("isdir(")      && has_word(&line, part);
             let contains_endswith   = line.contains(".endswith(")  && has_word(&line, part);
-            let contains_is_none    = (line.contains("is none") || line.contains("is not none")
-                || line.contains("!= none") || line.contains("== none")
-                || line.contains("!= null") || line.contains("== null"))
-                && has_word(&line, part);
+            let contains_is_none    = false;
             let contains_whitelist  = (line.contains(" in ") || line.contains("not in"))
                 && has_word(&line, part)
                 && (line.contains("whitelist") || line.contains("allowed")
