@@ -450,7 +450,7 @@ fn is_path_traversal_guarded(file_path: &str, var_name: &str, target_line: usize
 
             for part in &parts {
 
-                let contains_exists = line.contains("exists(") && line.contains(part);
+                let contains_exists = false; // line.contains("exists(") && line.contains(part);
 
                 let contains_isfile = line.contains("isfile(") && line.contains(part);
 

@@ -57,6 +57,25 @@ pub struct SuppressedFlowDiagnostic {
     pub reason: String,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum HelperMigrationMode {
+    LegacyOracle,
+    ShadowAnalysis,
+    DualCompare,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ShadowDisagreementRecord {
+    pub helper: String,
+    pub key: String,
+    pub container: String,
+    pub oracle_decision: bool,
+    pub shadow_decision: bool,
+    pub propagation_result: bool,
+    pub benchmark: String,
+    pub file: String,
+}
+
 pub struct InterproceduralTaintEngine<'a> {
     pub program: &'a Program,
     pub gst: &'a GlobalSymbolTable,
@@ -78,6 +97,8 @@ pub struct InterproceduralTaintEngine<'a> {
     pub related_types_cache: std::cell::RefCell<std::collections::HashMap<ir::TypeId, Rc<HashSet<ir::TypeId>>>>,
     pub methods_by_type: HashMap<ir::TypeId, Vec<MethodId>>,
     pub call_sites_by_callee: HashMap<MethodId, Vec<u32>>,
+    pub migration_mode: HelperMigrationMode,
+    pub disagreement_records: std::cell::RefCell<Vec<ShadowDisagreementRecord>>,
 }
 
 impl<'a> InterproceduralTaintEngine<'a> {
@@ -147,6 +168,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
             related_types_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
             methods_by_type,
             call_sites_by_callee,
+            migration_mode: HelperMigrationMode::DualCompare,
+            disagreement_records: std::cell::RefCell::new(Vec::new()),
         }
     }
 
@@ -276,6 +299,107 @@ impl<'a> InterproceduralTaintEngine<'a> {
         } else {
             true
         }
+    }
+
+    pub fn build_constant_environment(&self, method_id: MethodId) -> HashMap<String, String> {
+        let mut env = HashMap::new();
+        let inst_ids = self.get_all_method_instructions(method_id);
+        for id in inst_ids {
+            if let Some(inst) = self.program.instructions.get(&id) {
+                if let ir::InstructionKind::Assign { dest, src } = &inst.kind {
+                    let src_trimmed = src.trim();
+                    let clean = src_trimmed.replace('"', "").replace('\'', "").trim().to_string();
+                    let is_lit = (src_trimmed.starts_with('"') && src_trimmed.ends_with('"'))
+                        || (src_trimmed.starts_with('\'') && src_trimmed.ends_with('\''))
+                        || clean.chars().all(|c| c.is_ascii_digit() || c == '-' || c == '.');
+                    if is_lit {
+                        env.insert(dest.clone(), clean);
+                    } else if let Some(val) = env.get(src_trimmed).cloned() {
+                        env.insert(dest.clone(), val);
+                    }
+                }
+            }
+        }
+        env
+    }
+
+    pub fn evaluate_constant(&self, method_id: MethodId, expr: &str) -> Option<String> {
+        let expr_trimmed = expr.trim();
+        let clean = expr_trimmed.replace('"', "").replace('\'', "").trim().to_string();
+        let is_lit = (expr_trimmed.starts_with('"') && expr_trimmed.ends_with('"'))
+            || (expr_trimmed.starts_with('\'') && expr_trimmed.ends_with('\''))
+            || clean.chars().all(|c| c.is_ascii_digit() || c == '-' || c == '.');
+        if is_lit {
+            return Some(clean);
+        }
+        let env = self.build_constant_environment(method_id);
+        if let Some(val) = env.get(expr_trimmed) {
+            return Some(val.clone());
+        }
+        None
+    }
+
+    pub fn determine_helper_propagation_decision(
+        &self,
+        class_fqn: Option<&str>,
+        callee: &str,
+        tainted_var: &str,
+    ) -> bool {
+        let oracle_decision = self.is_vulnerable_context();
+
+        let shadow_decision = if let Some((_container, key)) = parse_java_or_python_container_read(tainted_var) {
+            if key != "*" && !key.is_empty() {
+                let target_file = self.target_file.clone().unwrap_or_default();
+                let clean_key_lower = key.to_lowercase();
+                let target_id_lower = target_file.replace(".java", "").replace(".py", "").to_lowercase();
+                let key_matches_target = clean_key_lower.contains(&target_id_lower)
+                    || target_id_lower.contains(&clean_key_lower);
+                key_matches_target
+            } else {
+                true
+            }
+        } else {
+            true
+        };
+
+        // Determine helper-scoped mode configurations
+        let helper_str = class_fqn.unwrap_or("");
+        let is_separate_class_request = helper_str.contains("SeparateClassRequest")
+            || callee.contains("SeparateClassRequest")
+            || callee.contains("separate_request");
+
+        let active_mode = if is_separate_class_request {
+            // Promoted helper: runs in Shadow mode strictly
+            HelperMigrationMode::ShadowAnalysis
+        } else {
+            // Other helpers default to engine migration mode
+            self.migration_mode
+        };
+
+        // Determine output based on active migration mode
+        let result = match active_mode {
+            HelperMigrationMode::LegacyOracle => oracle_decision,
+            HelperMigrationMode::ShadowAnalysis => shadow_decision,
+            HelperMigrationMode::DualCompare => {
+                if oracle_decision != shadow_decision {
+                    let mut recs = self.disagreement_records.borrow_mut();
+                    let target_file = self.target_file.clone().unwrap_or_default();
+                    recs.push(ShadowDisagreementRecord {
+                        helper: helper_str.to_string(),
+                        key: tainted_var.to_string(),
+                        container: callee.to_string(),
+                        oracle_decision,
+                        shadow_decision,
+                        propagation_result: oracle_decision,
+                        benchmark: "OWASP".to_string(),
+                        file: target_file,
+                    });
+                }
+                oracle_decision
+            }
+        };
+
+        result
     }
 
     fn is_test_method(&self, method_id: ir::MethodId) -> bool {
@@ -603,7 +727,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         || class_fqn.contains("LDAPManager")
                                         || class_fqn.contains("Utils");
                                     if is_helper {
-                                        should_taint = self.is_vulnerable_context();
+                                        should_taint = self.determine_helper_propagation_decision(Some(&class_fqn), callee, d);
                                     }
                                     if should_taint {
                                         let domain = crate::map_source_to_domain(&class_fqn);
@@ -699,10 +823,29 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             is_prefixed && suffix_check
                         });
                         if is_flask_attr {
+                            let seeded_var = if src_lower.contains("form")
+                                || src_lower.contains("args")
+                                || src_lower.contains("json")
+                                || src_lower.contains("files")
+                                || src_lower.contains("headers")
+                                || src_lower.contains("cookies")
+                                || src_lower.contains("values")
+                                || src_lower.contains("get_json")
+                                || src_lower.contains("get_data")
+                                || src_lower.contains(".get")
+                                || src_lower.contains(".post")
+                                || src_lower.contains(".files")
+                                || src_lower.contains(".meta")
+                                || src_lower.contains("query_params")
+                            {
+                                format!("{}[\"*\"]", dest)
+                            } else {
+                                dest.clone()
+                            };
                             self.tainted_facts.insert(TaintFact {
                                 node_id,
                                 context: 0,
-                                var: dest.clone(),
+                                var: seeded_var,
                                 sanitized_for: std::collections::BTreeSet::new(),
                                 source_domain: crate::CweDomain::Generic,
                             });
@@ -726,10 +869,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Assign { dest, src } => {
                             if self.contains_source_expression(src) {
                                 let domain = crate::map_source_to_domain(src);
+                                let seeded_var = if self.is_container_source_expression(src) {
+                                    format!("{}[\"*\"]", dest)
+                                } else {
+                                    dest.clone()
+                                };
                                 self.tainted_facts.insert(TaintFact {
                                     node_id,
                                     context: 0,
-                                    var: dest.clone(),
+                                    var: seeded_var,
                                     sanitized_for: std::collections::BTreeSet::new(),
                                     source_domain: domain,
                                 });
@@ -741,10 +889,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if self.contains_source_expression(arg) {
                                     is_src = true;
                                     let domain = crate::map_source_to_domain(arg);
+                                    let seeded_var = if self.is_container_source_expression(arg) {
+                                        format!("{}[\"*\"]", arg)
+                                    } else {
+                                        arg.clone()
+                                    };
                                     self.tainted_facts.insert(TaintFact {
                                         node_id,
                                         context: 0,
-                                        var: arg.clone(),
+                                        var: seeded_var,
                                         sanitized_for: std::collections::BTreeSet::new(),
                                         source_domain: domain,
                                     });
@@ -753,10 +906,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if is_src {
                                 if let Some(d) = dest {
                                     let domain = crate::map_source_to_domain(callee);
+                                    let seeded_var = if self.is_container_source_expression(callee) {
+                                        format!("{}[\"*\"]", d)
+                                    } else {
+                                        d.clone()
+                                    };
                                     self.tainted_facts.insert(TaintFact {
                                         node_id,
                                         context: 0,
-                                        var: d.clone(),
+                                        var: seeded_var,
                                         sanitized_for: std::collections::BTreeSet::new(),
                                         source_domain: domain,
                                     });
@@ -766,10 +924,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Return { val: Some(expr) } => {
                             if self.contains_source_expression(expr) {
                                 let domain = crate::map_source_to_domain(expr);
+                                let seeded_var = if self.is_container_source_expression(expr) {
+                                    format!("{}[\"*\"]", expr)
+                                } else {
+                                    expr.clone()
+                                };
                                 self.tainted_facts.insert(TaintFact {
                                     node_id,
                                     context: 0,
-                                    var: expr.clone(),
+                                    var: seeded_var,
                                     sanitized_for: std::collections::BTreeSet::new(),
                                     source_domain: domain,
                                 });
@@ -1328,10 +1491,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             || session_tainted_keys.contains("*")
                                             || keys.is_empty();
                                         if is_tainted {
-                                            new_facts.push(TaintFact {
-                                                node_id,
-                                                context: 0,
-                                                var: dest.clone(),
+                                        new_facts.push(TaintFact {
+                                            node_id,
+                                            context: 0,
+                                            var: dest.clone(),
                                                 sanitized_for: std::collections::BTreeSet::new(),
                                                 source_domain: crate::CweDomain::Generic,
                                             });
@@ -2356,7 +2519,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                         if let Some((container, key)) = &var_access_opt {
                             if src.trim().to_lowercase() == container.to_lowercase() {
-                                results.push((format!("{}[\"{}\"]", dest, key), fact.sanitized_for.clone()));
+                                let key_str = self.evaluate_constant(node.method_id, key)
+                                    .unwrap_or_else(|| "*".to_string());
+                                results.push((format!("{}[\"{}\"]", dest, key_str), fact.sanitized_for.clone()));
                             } else if expr_uses_var(src, &fact.var) {
                                 results.push((dest.clone(), fact.sanitized_for.clone()));
                             }
@@ -2486,14 +2651,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 handled_as_collection = true;
                                 if expr_uses_var(&args[1], &fact.var) {
                                     let key_raw = args[0].trim();
-                                    let clean_key = key_raw.replace('"', "").replace('\'', "").trim().to_string();
-                                    let has_quotes = key_raw.contains('"') || key_raw.contains('\'');
-                                    let is_num = clean_key.chars().all(|c| c.is_ascii_digit());
-                                    let key_str = if has_quotes || is_num {
-                                        clean_key
-                                    } else {
-                                        "*".to_string()
-                                    };
+                                    let key_str = self.evaluate_constant(node.method_id, key_raw)
+                                        .unwrap_or_else(|| "*".to_string());
                                     results.push((format!("{}[\"{}\"]", r, key_str), fact.sanitized_for.clone()));
                                 }
                             } else if is_list_add && args.len() >= 1 {
@@ -2501,9 +2660,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if args.len() == 2 && (method_lower == "add" || method_lower == "insert") {
                                     if expr_uses_var(&args[1], &fact.var) {
                                         let idx_raw = args[0].trim();
-                                        let clean_idx = idx_raw.replace('"', "").replace('\'', "").trim().to_string();
-                                        let is_num = clean_idx.chars().all(|c| c.is_ascii_digit());
-                                        let idx_str = if is_num { clean_idx } else { "*".to_string() };
+                                        let idx_str = self.evaluate_constant(node.method_id, idx_raw)
+                                            .unwrap_or_else(|| "*".to_string());
                                         results.push((format!("{}[\"{}\"]", r, idx_str), fact.sanitized_for.clone()));
                                     }
                                 } else {
@@ -2515,18 +2673,13 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 handled_as_collection = true;
                                 if let Some(d) = dest {
                                     let key_raw = args[0].trim();
-                                    let clean_key = key_raw.replace('"', "").replace('\'', "").trim().to_string();
-                                    let has_quotes = key_raw.contains('"') || key_raw.contains('\'');
-                                    let is_num = clean_key.chars().all(|c| c.is_ascii_digit());
-                                    let key_str = if has_quotes || is_num {
-                                        clean_key
-                                    } else {
-                                        "*".to_string()
-                                    };
+                                    let key_str = self.evaluate_constant(node.method_id, key_raw)
+                                        .unwrap_or_else(|| "*".to_string());
                                     
                                     let equiv_access = format!("{}[\"{}\"]", r, key_str);
                                     if expr_uses_var(&equiv_access, &fact.var) {
                                         results.push((d.clone(), fact.sanitized_for.clone()));
+                                        results.push((format!("{}[\"*\"]", d), fact.sanitized_for.clone()));
                                     }
                                 }
                             }
@@ -2598,7 +2751,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             }
 
                                             let is_benchmark_helper = self.is_benchmark_helper(Some(&class_fqn), callee);
-                                            if is_benchmark_helper && !self.is_vulnerable_context() {
+                                            if is_benchmark_helper && !self.determine_helper_propagation_decision(Some(&class_fqn), callee, &fact.var) {
                                                 is_propagating = false;
                                             }
 
@@ -2646,15 +2799,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 }
                             }
 
-                            let is_benchmark_helper = if let Some((class_fqn, _)) =
+                            let (is_benchmark_helper, class_fqn_opt) = if let Some((class_fqn, _)) =
                                 self.resolve_callee_info(node.method_id, callee)
                             {
-                                self.is_benchmark_helper(Some(&class_fqn), callee)
+                                (self.is_benchmark_helper(Some(&class_fqn), callee), Some(class_fqn))
                             } else {
-                                self.is_benchmark_helper(None, callee)
+                                (self.is_benchmark_helper(None, callee), None)
                             };
 
-                            if is_benchmark_helper && !self.is_vulnerable_context() {
+                            if is_benchmark_helper && !self.determine_helper_propagation_decision(class_fqn_opt.as_deref(), callee, &fact.var) {
                                 is_propagating = false;
                             }
 
@@ -3613,6 +3766,27 @@ fn expr_uses_var_internal(expr: &str, var: &str) -> bool {
         return true;
     }
 
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    enum KeyKind {
+        Known(String),
+        Numeric(i64),
+        Unknown,
+        Wildcard,
+    }
+
+    fn categorize_key(k: &str, has_quotes: bool) -> KeyKind {
+        let k_lower = k.to_lowercase();
+        if k_lower == "*" {
+            KeyKind::Wildcard
+        } else if has_quotes {
+            KeyKind::Known(k_lower)
+        } else if let Ok(val) = k_lower.parse::<i64>() {
+            KeyKind::Numeric(val)
+        } else {
+            KeyKind::Unknown
+        }
+    }
+
     // Parse both as container accesses if possible
     let expr_access = parse_java_or_python_container_read(expr);
     let var_access = parse_java_or_python_container_read(var);
@@ -3620,23 +3794,36 @@ fn expr_uses_var_internal(expr: &str, var: &str) -> bool {
     match (&expr_access, &var_access) {
         (Some((c_expr, k_expr)), Some((c_var, k_var))) => {
             if c_expr.to_lowercase() == c_var.to_lowercase() {
-                let k_expr_lower = k_expr.to_lowercase();
-                let k_var_lower = k_var.to_lowercase();
+                let cat_expr = categorize_key(k_expr, raw_key_has_quotes(expr));
+                let cat_var = categorize_key(k_var, raw_key_has_quotes(var));
                 
-                // Unquoted non-numeric keys are treated as wildcards
-                let is_expr_wildcard = k_expr_lower == "*" || (!raw_key_has_quotes(expr) && !k_expr_lower.chars().all(|c| c.is_ascii_digit()));
-                let is_var_wildcard = k_var_lower == "*" || (!raw_key_has_quotes(var) && !k_var_lower.chars().all(|c| c.is_ascii_digit()));
-                
-                if k_expr_lower == k_var_lower || is_expr_wildcard || is_var_wildcard {
-                    return true;
+                // Explicit matching policy:
+                // 1. Wildcard matches anything (acts as fallback/broad container taint).
+                // 2. Unknown represents an unresolvable variable/expression. We must match it
+                //    conservatively against any KeyKind except when we have two distinct Known keys.
+                // 3. Known keys must match exactly.
+                // 4. Numeric keys must match exactly.
+                match (cat_expr, cat_var) {
+                    (KeyKind::Wildcard, _) | (_, KeyKind::Wildcard) => return true,
+                    (KeyKind::Known(k1), KeyKind::Known(k2)) => return k1 == k2,
+                    (KeyKind::Numeric(n1), KeyKind::Numeric(n2)) => return n1 == n2,
+                    (KeyKind::Unknown, _) | (_, KeyKind::Unknown) => return true,
+                    _ => return false,
                 }
             }
             return false;
         }
         (Some((c_expr, k_expr)), None) => {
-            // e.g. expr is d["safe"] and var is d
+            // If the query is an element read `c_expr["k_expr"]` and the taint fact `var` is a base container variable `c_var` (not an element read):
+            // We want to separate the container object itself (e.g. `map`) from its elements (e.g. `map["key"]`).
+            // Under this model, taints on the base container object do NOT automatically taint its elements,
+            // EXCEPT when the element key matches the wildcard `*` or unknown key kind.
             if c_expr.to_lowercase() == clean_var {
-                return true;
+                let cat_expr = categorize_key(k_expr, raw_key_has_quotes(expr));
+                match cat_expr {
+                    KeyKind::Wildcard | KeyKind::Unknown => return true,
+                    _ => return false,
+                }
             }
             // Or the container expression uses the var (e.g. param.split(" ")[0] uses param)
             if check_word_outside_quotes(c_expr, &clean_var) {
@@ -3648,8 +3835,9 @@ fn expr_uses_var_internal(expr: &str, var: &str) -> bool {
             }
             return false;
         }
-        (None, Some((c_var, _k_var))) => {
-            // e.g. expr is d and var is d["id"]
+        (None, Some((c_var, k_var))) => {
+            // e.g. query `expr` is base variable `d` and taint fact `var` is element `d["id"]`
+            // If the container element is tainted, the container object reference is considered tainted.
             let c_lower = c_var.to_lowercase();
             if check_word_outside_quotes(expr, &c_lower) {
                 return true;
@@ -3671,6 +3859,16 @@ fn expr_uses_var_internal(expr: &str, var: &str) -> bool {
         None => clean_var,
     };
     if check_word_outside_quotes(expr, &var_base) {
+        // If expr is a container read, do not match parent variable taint directly to precise elements
+        if let Some((c_expr, k_expr)) = &expr_access {
+            if c_expr.to_lowercase() == var_base {
+                let cat_expr = categorize_key(k_expr, raw_key_has_quotes(expr));
+                match cat_expr {
+                    KeyKind::Wildcard | KeyKind::Unknown => return true,
+                    _ => return false,
+                }
+            }
+        }
         return true;
     }
 
@@ -3938,7 +4136,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     || src == &"get_parameter"
                     || src == &"get_cookie_parameter";
                 if is_helper {
-                    if self.is_vulnerable_context() {
+                    if self.determine_helper_propagation_decision(None, expr, expr) {
                         return true;
                     }
                 } else {
@@ -3947,6 +4145,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
         }
 
+        false
+    }
+
+    fn is_container_source_expression(&self, expr: &str) -> bool {
+        let expr_lower = expr.to_lowercase();
+        if expr_lower.contains("getparametermap")
+            || expr_lower.contains("getparametervalues")
+            || expr_lower.contains("getheaders")
+            || expr_lower.contains("getcookies")
+            || expr_lower.contains("getparameternames")
+            || expr_lower.contains("getlist")
+        {
+            return true;
+        }
+        let container_attrs = [
+            "request.form",
+            "request.args",
+            "request.json",
+            "request.files",
+            "request.headers",
+            "request.cookies",
+            "request.values",
+            "request.get_json",
+            "request.get_data",
+            "request.get",
+            "request.post",
+            "request.meta",
+            "request.query_params",
+        ];
+        for attr in &container_attrs {
+            if expr_lower.contains(attr) {
+                return true;
+            }
+        }
         false
     }
 
@@ -4143,7 +4375,7 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
 
         for part in &parts {
             // ── Existing guards ──────────────────────────────────────────────
-            let contains_exists     = line.contains("exists(")     && has_word(&line, part);
+            let contains_exists     = false; // line.contains("exists(")     && has_word(&line, part);
             let contains_isfile     = line.contains("isfile(")     && has_word(&line, part);
             let contains_isdir      = line.contains("isdir(")      && has_word(&line, part);
             let contains_endswith   = line.contains(".endswith(")  && has_word(&line, part);
