@@ -86,3 +86,48 @@ fn test_interproc_map_method_get_repro() {
 
     assert!(!engine.flows.is_empty(), "Should have found taint flow through map.get inside helper method");
 }
+
+#[test]
+fn test_interproc_arraylist_precision() {
+    let code = r#"
+    public class Test {
+        public void bad(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) throws Exception {
+            String param = request.getParameter("BenchmarkTest00094");
+            String bar = "alsosafe";
+            if (param != null) {
+                java.util.List<String> valuesList = new java.util.ArrayList<String>();
+                valuesList.add("safe");
+                valuesList.add(param);
+                valuesList.add("moresafe");
+
+                valuesList.remove(0); // remove the 1st safe value -> shifts param to 0, moresafe to 1
+
+                bar = valuesList.get(1); // get index 1 ("moresafe", which is clean)
+            }
+
+            // Sink
+            java.io.PrintWriter writer = response.getWriter();
+            writer.println(bar); // Should be CLEAN!
+        }
+    }
+    "#;
+
+    let mut program = Program::new();
+    let mut gst = GlobalSymbolTable::new();
+    gst.load_file(&mut program, code, "Test.java", "java").unwrap();
+    gst.resolve_inheritance_hierarchy();
+
+    println!("=== INSTRUCTIONS ===");
+    for (id, inst) in &program.instructions {
+        println!("  inst {}: {:?}", id.0, inst.kind);
+    }
+
+    let cg = CallGraph::build(&program, &gst);
+    let icfg = InterproceduralCFG::build(&program, &cg);
+
+    let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
+    engine.seed_sources(None);
+    engine.run();
+
+    assert!(engine.flows.is_empty(), "Should have no flows because bar was retrieved from a safe index");
+}

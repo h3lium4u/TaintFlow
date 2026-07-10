@@ -3161,7 +3161,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         // RC97 fix: same guard — if var is also in args, it is not killed by
                         // its presence in the dest (return-value tuple unpacking).
                         let is_in_args = args.iter().any(|a| expr_uses_var(a, &fact.var));
-                        let is_overwritten = dest
+                        let mut is_overwritten = dest
                             .as_ref()
                             .map_or(false, |d| expr_uses_var(d, &fact.var))
                             && !is_in_args;
@@ -3181,6 +3181,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             || method_lower == "extend"
                             || method_lower == "push"
                             || method_lower == "insert";
+                        let is_list_remove = method_lower == "remove";
                         let is_map_get = method_lower == "get"
                             || method_lower == "getitem"
                             || method_lower == "getordefault"
@@ -3209,8 +3210,94 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     }
                                 } else {
                                     if expr_uses_var(&args[0], &fact.var) {
-                                        results.push((format!("{}[\"{}\"]", r, "*"), fact.sanitized_for.clone()));
+                                        let mut has_loop = false;
+                                        let all_insts = self.get_all_method_instructions(node.method_id);
+                                        for inst_id in &all_insts {
+                                            if let Some(inst) = self.program.instructions.get(inst_id) {
+                                                if matches!(inst.kind, InstructionKind::Loop { .. }) {
+                                                    has_loop = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        let mut is_local_arraylist = false;
+                                        let mut add_count = 0;
+                                        let mut failed = false;
+
+                                        if !has_loop {
+                                            for inst_id in &all_insts {
+                                                if Some(*inst_id) == node.instruction_id {
+                                                    break;
+                                                }
+                                                if let Some(inst) = self.program.instructions.get(inst_id) {
+                                                    match &inst.kind {
+                                                        InstructionKind::Call { dest: Some(d), callee: c, .. } => {
+                                                            if d == r && c.to_lowercase().contains("arraylist") {
+                                                                is_local_arraylist = true;
+                                                            }
+                                                        }
+                                                        InstructionKind::Call { dest: _, callee: c, args: a } => {
+                                                            if let Some(rec) = get_receiver_name_safe(c) {
+                                                                if &rec == r {
+                                                                    let method_name = c.split('.').last().unwrap_or(c);
+                                                                    let method_lower = method_name.to_lowercase();
+                                                                    if method_lower == "add" && a.len() == 1 {
+                                                                        add_count += 1;
+                                                                    } else if method_lower == "remove" {
+                                                                        failed = true;
+                                                                    } else if method_lower != "get" {
+                                                                        failed = true;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        InstructionKind::Assign { dest, src } => {
+                                                            if dest.contains(r) || src.contains(r) {
+                                                                failed = true;
+                                                            }
+                                                        }
+                                                        _ => {}
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if is_local_arraylist && !failed && !has_loop {
+                                            results.push((format!("{}[\"{}\"]", r, add_count), fact.sanitized_for.clone()));
+                                        } else {
+                                            results.push((format!("{}[\"{}\"]", r, "*"), fact.sanitized_for.clone()));
+                                        }
                                     }
+                                }
+                            } else if is_list_remove && args.len() == 1 && node.kind == cfg::icfg::IcfgNodeKind::Call && self.is_receiver_local_arraylist(node.method_id, node.instruction_id, r) {
+                                handled_as_collection = true;
+                                is_overwritten = true;
+                                let idx_raw = args[0].trim();
+                                let idx_str = self.evaluate_constant(node.method_id, idx_raw)
+                                    .unwrap_or_else(|| "*".to_string());
+                                
+                                let clean_var = fact.var.trim();
+                                if let Some((receiver, key)) = parse_java_or_python_container_read(clean_var) {
+                                    if receiver.to_lowercase() == r.to_lowercase() {
+                                        if let Ok(k) = idx_str.parse::<i64>() {
+                                            if let Ok(n) = key.parse::<i64>() {
+                                                if n > k {
+                                                    results.push((format!("{}[\"{}\"]", r, n - 1), fact.sanitized_for.clone()));
+                                                } else if n < k {
+                                                    results.push((format!("{}[\"{}\"]", r, n), fact.sanitized_for.clone()));
+                                                }
+                                            } else if key == "*" {
+                                                results.push((format!("{}[\"*\"]", r), fact.sanitized_for.clone()));
+                                            }
+                                        } else {
+                                            results.push((format!("{}[\"*\"]", r), fact.sanitized_for.clone()));
+                                        }
+                                    } else {
+                                        results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                    }
+                                } else if clean_var.to_lowercase() == r.to_lowercase() {
+                                    results.push((fact.var.clone(), fact.sanitized_for.clone()));
                                 }
                             } else if is_map_get && args.len() >= 1 {
                                 handled_as_collection = true;
@@ -3222,10 +3309,20 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     let equiv_access = format!("{}[\"{}\"]", r, key_str);
                                     if expr_uses_var(&equiv_access, &fact.var) {
                                         results.push((d.clone(), fact.sanitized_for.clone()));
-                                        results.push((format!("{}[\"*\"]", d), fact.sanitized_for.clone()));
+                                        let is_arraylist = self.is_receiver_local_arraylist(node.method_id, node.instruction_id, r);
+                                        if !is_arraylist || key_str == "*" {
+                                            results.push((format!("{}[\"*\"]", d), fact.sanitized_for.clone()));
+                                        }
                                     }
                                 }
                             }
+                        }
+
+                        if handled_as_collection {
+                            if !is_overwritten {
+                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                            }
+                            return results;
                         }
 
                         if !handled_as_collection {
@@ -3407,6 +3504,58 @@ impl<'a> InterproceduralTaintEngine<'a> {
         }
 
         vec![(fact.var.clone(), fact.sanitized_for.clone())]
+    }
+
+    fn is_receiver_local_arraylist(&self, method_id: ir::MethodId, instruction_id: Option<ir::InstructionId>, r: &str) -> bool {
+        let Some(inst_id) = instruction_id else { return false; };
+        let mut has_loop = false;
+        let all_insts = self.get_all_method_instructions(method_id);
+        for id in &all_insts {
+            if let Some(inst) = self.program.instructions.get(id) {
+                if matches!(inst.kind, InstructionKind::Loop { .. }) {
+                    has_loop = true;
+                    break;
+                }
+            }
+        }
+        if has_loop {
+            return false;
+        }
+
+        let mut is_local_arraylist = false;
+        let mut failed = false;
+        for id in &all_insts {
+            if *id == inst_id {
+                break;
+            }
+            if let Some(inst) = self.program.instructions.get(id) {
+                match &inst.kind {
+                    InstructionKind::Call { dest: Some(d), callee: c, .. } => {
+                        if d == r && c.to_lowercase().contains("arraylist") {
+                            is_local_arraylist = true;
+                        }
+                    }
+                    InstructionKind::Call { dest: _, callee: c, args: a } => {
+                        if let Some(rec) = get_receiver_name_safe(c) {
+                            if &rec == r {
+                                let method_name = c.split('.').last().unwrap_or(c);
+                                let method_lower = method_name.to_lowercase();
+                                if method_lower != "get" && method_lower != "add" && method_lower != "remove" {
+                                    failed = true;
+                                }
+                            }
+                        }
+                    }
+                    InstructionKind::Assign { dest, src } => {
+                        if dest.contains(r) || src.contains(r) {
+                            failed = true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        is_local_arraylist && !failed
     }
 
     fn bind_arguments_to_parameters(
