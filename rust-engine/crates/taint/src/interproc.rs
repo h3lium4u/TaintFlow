@@ -2538,6 +2538,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     }
                     InstructionKind::Call { callee, args, .. } => {
                         let mut is_sink = false;
+                        let mut allowed_sink_indices = None;
                         let mut target_cwe = crate::CWE::CWE79;
                         let mut method_name_opt = None;
                         let file_path = self.get_method_file_path(node.method_id);
@@ -2552,6 +2553,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if let Some(stub) = stub_lookup {
                                 if stub.kind == crate::stubs::StubKind::Sink {
                                     is_sink = true;
+                                    allowed_sink_indices = stub.propagates_from.clone();
                                     target_cwe = crate::map_sink_to_cwe_heuristic(&method_name, file_path)
                                         .or_else(|| crate::map_sink_to_cwe_heuristic(callee, file_path))
                                         .or_else(|| crate::map_sink_to_cwe_heuristic(&class_fqn, file_path))
@@ -2895,6 +2897,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             }
 
                             for (arg_idx, arg) in args.iter().enumerate() {
+                                if let Some(ref indices) = allowed_sink_indices {
+                                    if !indices.contains(&arg_idx) {
+                                        continue;
+                                    }
+                                }
                                 // if callee.contains("Popen") {
                                 //     println!("  arg={}, expr_uses_var={}, contains_san={}", arg, expr_uses_var(arg, &fact.var), expression_contains_sanitizer(arg));
                                 // }

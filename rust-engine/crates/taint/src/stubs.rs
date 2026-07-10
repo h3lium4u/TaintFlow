@@ -54,7 +54,7 @@ impl StubRegistry {
             let stub = JULIET_81_STUB.get_or_init(|| MethodStub {
                 name: "action".to_string(),
                 kind: StubKind::Sink,
-                propagates_from: None,
+                propagates_from: Some(vec![0]),
             });
             return Some(stub);
         }
