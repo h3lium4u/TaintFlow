@@ -3856,6 +3856,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
             return Some("pathlib.Path".to_string());
         }
 
+        if class_lower.contains("base64") {
+            if method_lower == "getdecoder" || method_lower == "geturldecoder" || method_lower == "getmimedecoder" {
+                return Some("java.util.Base64$Decoder".to_string());
+            }
+            if method_lower == "getencoder" || method_lower == "geturlencoder" || method_lower == "getmimeencoder" {
+                return Some("java.util.Base64$Encoder".to_string());
+            }
+        }
+
         if class_lower.contains("connection") && method_lower == "preparestatement" {
             return Some("java.sql.PreparedStatement".to_string());
         }

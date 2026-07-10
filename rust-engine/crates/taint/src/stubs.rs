@@ -1757,6 +1757,84 @@ impl StubRegistry {
             ],
         });
 
+        // base64 module
+        self.register(LibraryStub {
+            class_fqn: "base64".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "b64encode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "b64decode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "urlsafe_b64encode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "urlsafe_b64decode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+
+        // org.apache.commons.codec.binary.Base64
+        self.register(LibraryStub {
+            class_fqn: "org.apache.commons.codec.binary.Base64".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "decodeBase64".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "encodeBase64".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "encodeBase64String".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+
+        // java.util.Base64$Decoder
+        self.register(LibraryStub {
+            class_fqn: "java.util.Base64$Decoder".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "decode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+
+        // java.util.Base64$Encoder
+        self.register(LibraryStub {
+            class_fqn: "java.util.Base64$Encoder".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "encode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+                MethodStub {
+                    name: "encodeToString".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+
         // sqlalchemy
         self.register(LibraryStub {
             class_fqn: "sqlalchemy.orm.Session".to_string(),
