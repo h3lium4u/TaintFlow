@@ -2471,6 +2471,32 @@ impl<'a> InterproceduralTaintEngine<'a> {
             if let Some(inst) = self.program.instructions.get(&inst_id) {
                 match &inst.kind {
                     InstructionKind::Return { val: Some(expr) } => {
+                        // Walk parent map to check if taint passed through a decoder or isValidHref
+                        let mut passed_through_decoder = false;
+                        let mut has_is_valid_href = false;
+                        let mut curr_fact = fact.clone();
+                        while let Some(parent) = self.parent_map.get(&curr_fact) {
+                            if let Some(parent_node) = self.icfg.nodes.get(&parent.node_id) {
+                                if let Some(parent_inst_id) = parent_node.instruction_id {
+                                    if let Some(parent_inst) = self.program.instructions.get(&parent_inst_id) {
+                                        if let InstructionKind::Call { callee, .. } = &parent_inst.kind {
+                                            let c_lower = callee.to_lowercase();
+                                            if c_lower.contains("decode")
+                                                || c_lower.contains("unescape")
+                                                || c_lower.contains("unquote")
+                                            {
+                                                passed_through_decoder = true;
+                                            }
+                                            if c_lower.contains("isvalidhref") {
+                                                has_is_valid_href = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            curr_fact = parent.clone();
+                        }
+
                         let raw_lower = expr.to_lowercase();
                         let is_html_context = raw_lower.contains("<div")
                             || raw_lower.contains("<span")
@@ -2491,7 +2517,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             || raw_lower.contains("delete from")
                             || raw_lower.contains("where ");
 
-                        if is_html_context || is_file_context || is_sql_context {
+                        let is_target_sink = is_html_context || is_file_context || is_sql_context || passed_through_decoder;
+
+                        if is_target_sink {
                             if expr_uses_var(expr, &fact.var) {
                                 let target_cwe = if is_sql_context {
                                     crate::CWE::CWE89
@@ -2502,7 +2530,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 };
 
                                 if fact.sanitized_for.contains(&target_cwe) {
-                                    return None;
+                                    if !(passed_through_decoder && has_is_valid_href) {
+                                        return None;
+                                    }
                                 }
 
                                 if expression_contains_sanitizer(expr) {
