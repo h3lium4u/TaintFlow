@@ -881,6 +881,7 @@ fn run_v2_analysis_safe(
             "CWE-90" => Some(taint::CWE::CWE90),
             "CWE-113" => Some(taint::CWE::CWE113),
             "CWE-327" => Some(taint::CWE::CWE327),
+            "CWE-328" => Some(taint::CWE::CWE328),
             "CWE-330" => Some(taint::CWE::CWE330),
             "CWE-338" => Some(taint::CWE::CWE338),
             "CWE-501" => Some(taint::CWE::CWE501),
