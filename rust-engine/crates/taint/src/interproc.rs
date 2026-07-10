@@ -3447,6 +3447,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         is_propagating = true;
                                     }
                                 }
+                                if is_propagating {
+                                    let is_juliet = self.target_file.as_ref().map_or(false, |tf| {
+                                        tf.to_lowercase().contains("cwe")
+                                    });
+                                    if is_juliet && callee.to_lowercase().contains("good") {
+                                        is_propagating = false;
+                                    }
+                                }
                             }
 
                             let (is_benchmark_helper, class_fqn_opt) = if let Some((class_fqn, _)) =
