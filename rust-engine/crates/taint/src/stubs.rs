@@ -1731,7 +1731,27 @@ impl StubRegistry {
                 },
                 MethodStub {
                     name: "read_text".to_string(),
-                    kind: StubKind::Source,
+                    kind: StubKind::Sink,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "read_bytes".to_string(),
+                    kind: StubKind::Sink,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "write_text".to_string(),
+                    kind: StubKind::Sink,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "write_bytes".to_string(),
+                    kind: StubKind::Sink,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "exists".to_string(),
+                    kind: StubKind::Sink,
                     propagates_from: None,
                 },
             ],

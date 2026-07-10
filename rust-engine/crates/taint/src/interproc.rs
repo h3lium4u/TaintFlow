@@ -3852,6 +3852,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
         let class_lower = class_fqn.to_lowercase();
         let method_lower = method_name.to_lowercase();
 
+        if class_lower.contains("path") && method_lower == "resolve" {
+            return Some("pathlib.Path".to_string());
+        }
+
         if class_lower.contains("connection") && method_lower == "preparestatement" {
             return Some("java.sql.PreparedStatement".to_string());
         }
@@ -4106,7 +4110,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             }
                                         }
                                     }
-                                    local_type = Some(clean_src.to_string());
+                                    let mut resolved = false;
+                                    if clean_src.contains(" / ") {
+                                        let parts: Vec<&str> = clean_src.split(" / ").collect();
+                                        if let Some(&left_var) = parts.first() {
+                                            if let Some((left_type, _)) = self.resolve_callee_info(method_id, &format!("{}.exists", left_var.trim())) {
+                                                if left_type.to_lowercase().contains("path") {
+                                                    local_type = Some(left_type);
+                                                    resolved = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if !resolved {
+                                        local_type = Some(clean_src.to_string());
+                                    }
                                 }
                             }
                             _ => {}
