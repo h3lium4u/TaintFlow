@@ -3462,11 +3462,20 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             }
 
                             if is_propagating {
-                                let propagated_san = if crate::is_desanitizer(callee) {
+                                let mut propagated_san = if crate::is_desanitizer(callee) {
                                     std::collections::BTreeSet::new()
                                 } else {
                                     fact.sanitized_for.clone()
                                 };
+                                // Inspect arguments for nested sanitizers
+                                for arg in args {
+                                    if expr_uses_var(arg, &fact.var) {
+                                        let nested = find_nested_sanitizers(arg);
+                                        for cwe in nested {
+                                            propagated_san.insert(cwe);
+                                        }
+                                    }
+                                }
                                 if let Some(d) = dest {
                                     results.push((d.clone(), propagated_san.clone()));
                                 }
@@ -5406,3 +5415,25 @@ pub fn is_deserialization_sink_check(callee: &str, resolved_class_fqn: Option<&s
 
     false
 }
+
+fn find_nested_sanitizers(expr: &str) -> Vec<crate::CWE> {
+    let mut result = Vec::new();
+    let mut current_word = String::new();
+    for c in expr.chars() {
+        if c.is_alphanumeric() || c == '_' || c == '.' {
+            current_word.push(c);
+        } else if c == '(' {
+            let callee = current_word.trim();
+            if !callee.is_empty() {
+                let sanitized = crate::get_sanitized_cwes_for_callee(callee);
+                for cwe in sanitized {
+                    result.push(cwe);
+                }
+            }
+            current_word.clear();
+        } else {
+            current_word.clear();
+        }
+    }
+    result
+}
