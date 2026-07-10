@@ -336,6 +336,543 @@ impl<'a> InterproceduralTaintEngine<'a> {
         if let Some(val) = env.get(expr_trimmed) {
             return Some(val.clone());
         }
+
+        // Try safe arithmetic evaluation
+        #[derive(Clone, Debug, PartialEq)]
+        enum Token {
+            Int(i64),
+            Bool(bool),
+            Str(String),
+            Ident(String),
+            Plus, Minus, Star, Slash, Percent,
+            Lt, LtEq, Gt, GtEq, EqEq, NotEq,
+            AmpAmp, BarBar, Excl,
+            Question, Colon,
+            LParen, RParen,
+        }
+
+        #[derive(Clone, Debug, PartialEq)]
+        enum ExprValue {
+            Int(i64),
+            Bool(bool),
+            Str(String),
+        }
+
+        fn tokenize(expr: &str) -> Option<Vec<Token>> {
+            let mut tokens = Vec::new();
+            let mut chars = expr.chars().peekable();
+            while let Some(&c) = chars.peek() {
+                if c.is_whitespace() {
+                    chars.next();
+                    continue;
+                }
+                if c.is_ascii_digit() {
+                    let mut val = 0i64;
+                    while let Some(&d) = chars.peek() {
+                        if d.is_ascii_digit() {
+                            let digit = (d as u8 - b'0') as i64;
+                            val = val.checked_mul(10)?.checked_add(digit)?;
+                            chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    tokens.push(Token::Int(val));
+                    continue;
+                }
+                if c == '"' || c == '\'' {
+                    let quote = c;
+                    chars.next();
+                    let mut s = String::new();
+                    let mut closed = false;
+                    while let Some(&nc) = chars.peek() {
+                        if nc == quote {
+                            closed = true;
+                            chars.next();
+                            break;
+                        } else {
+                            s.push(nc);
+                            chars.next();
+                        }
+                    }
+                    if !closed { return None; }
+                    tokens.push(Token::Str(s));
+                    continue;
+                }
+                if c.is_alphabetic() || c == '_' {
+                    let mut s = String::new();
+                    while let Some(&nc) = chars.peek() {
+                        if nc.is_alphanumeric() || nc == '_' || nc == '-' || nc == '.' {
+                            s.push(nc);
+                            chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+                    if s == "true" {
+                        tokens.push(Token::Bool(true));
+                    } else if s == "false" {
+                        tokens.push(Token::Bool(false));
+                    } else {
+                        tokens.push(Token::Ident(s));
+                    }
+                    continue;
+                }
+                match c {
+                    '+' => { tokens.push(Token::Plus); chars.next(); }
+                    '-' => { tokens.push(Token::Minus); chars.next(); }
+                    '*' => { tokens.push(Token::Star); chars.next(); }
+                    '/' => { tokens.push(Token::Slash); chars.next(); }
+                    '%' => { tokens.push(Token::Percent); chars.next(); }
+                    '(' => { tokens.push(Token::LParen); chars.next(); }
+                    ')' => { tokens.push(Token::RParen); chars.next(); }
+                    '?' => { tokens.push(Token::Question); chars.next(); }
+                    ':' => { tokens.push(Token::Colon); chars.next(); }
+                    '<' => {
+                        chars.next();
+                        if chars.peek() == Some(&'=') {
+                            tokens.push(Token::LtEq);
+                            chars.next();
+                        } else {
+                            tokens.push(Token::Lt);
+                        }
+                    }
+                    '>' => {
+                        chars.next();
+                        if chars.peek() == Some(&'=') {
+                            tokens.push(Token::GtEq);
+                            chars.next();
+                        } else {
+                            tokens.push(Token::Gt);
+                        }
+                    }
+                    '=' => {
+                        chars.next();
+                        if chars.peek() == Some(&'=') {
+                            tokens.push(Token::EqEq);
+                            chars.next();
+                        } else {
+                            return None;
+                        }
+                    }
+                    '!' => {
+                        chars.next();
+                        if chars.peek() == Some(&'=') {
+                            tokens.push(Token::NotEq);
+                            chars.next();
+                        } else {
+                            tokens.push(Token::Excl);
+                        }
+                    }
+                    '&' => {
+                        chars.next();
+                        if chars.peek() == Some(&'&') {
+                            tokens.push(Token::AmpAmp);
+                            chars.next();
+                        } else {
+                            return None;
+                        }
+                    }
+                    '|' => {
+                        chars.next();
+                        if chars.peek() == Some(&'|') {
+                            tokens.push(Token::BarBar);
+                            chars.next();
+                        } else {
+                            return None;
+                        }
+                    }
+                    _ => return None,
+                }
+            }
+            Some(tokens)
+        }
+
+        struct Parser<'a, 'b> {
+            tokens: Vec<Token>,
+            pos: usize,
+            env: &'a std::collections::HashMap<String, String>,
+            method_id: MethodId,
+            engine: &'b InterproceduralTaintEngine<'a>,
+        }
+
+        impl<'a, 'b> Parser<'a, 'b> {
+            fn peek(&self) -> Option<&Token> {
+                self.tokens.get(self.pos)
+            }
+
+            fn next(&mut self) -> Option<Token> {
+                if self.pos < self.tokens.len() {
+                    let tok = self.tokens[self.pos].clone();
+                    self.pos += 1;
+                    Some(tok)
+                } else {
+                    None
+                }
+            }
+
+            fn parse_expression(&mut self, eval: bool) -> Option<ExprValue> {
+                self.parse_ternary(eval)
+            }
+
+            fn parse_ternary(&mut self, eval: bool) -> Option<ExprValue> {
+                let cond = self.parse_logical_or(eval)?;
+                if let Some(Token::Question) = self.peek() {
+                    self.next();
+                    if eval {
+                        match cond {
+                            ExprValue::Bool(b) => {
+                                if b {
+                                    let true_val = self.parse_expression(true)?;
+                                    if let Some(Token::Colon) = self.next() {
+                                        let _ = self.parse_expression(false)?;
+                                        return Some(true_val);
+                                    } else {
+                                        return None;
+                                    }
+                                } else {
+                                    let _ = self.parse_expression(false)?;
+                                    if let Some(Token::Colon) = self.next() {
+                                        let false_val = self.parse_expression(true)?;
+                                        return Some(false_val);
+                                    } else {
+                                        return None;
+                                    }
+                                }
+                            }
+                            _ => return None,
+                        }
+                    } else {
+                        let _ = self.parse_expression(false)?;
+                        if let Some(Token::Colon) = self.next() {
+                            let _ = self.parse_expression(false)?;
+                            return Some(ExprValue::Bool(false));
+                        } else {
+                            return None;
+                        }
+                    }
+                }
+                Some(cond)
+            }
+
+            fn parse_logical_or(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_logical_and(eval)?;
+                while let Some(Token::BarBar) = self.peek() {
+                    self.next();
+                    let right = self.parse_logical_and(eval)?;
+                    if eval {
+                        match (left, right) {
+                            (ExprValue::Bool(l), ExprValue::Bool(r)) => {
+                                left = ExprValue::Bool(l || r);
+                            }
+                            _ => return None,
+                        }
+                    } else {
+                        left = ExprValue::Bool(false);
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_logical_and(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_equality(eval)?;
+                while let Some(Token::AmpAmp) = self.peek() {
+                    self.next();
+                    let right = self.parse_equality(eval)?;
+                    if eval {
+                        match (left, right) {
+                            (ExprValue::Bool(l), ExprValue::Bool(r)) => {
+                                left = ExprValue::Bool(l && r);
+                            }
+                            _ => return None,
+                        }
+                    } else {
+                        left = ExprValue::Bool(false);
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_equality(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_relational(eval)?;
+                while let Some(tok) = self.peek() {
+                    match tok {
+                        Token::EqEq => {
+                            self.next();
+                            let right = self.parse_relational(eval)?;
+                            if eval {
+                                left = ExprValue::Bool(left == right);
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::NotEq => {
+                            self.next();
+                            let right = self.parse_relational(eval)?;
+                            if eval {
+                                left = ExprValue::Bool(left != right);
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_relational(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_additive(eval)?;
+                while let Some(tok) = self.peek() {
+                    match tok {
+                        Token::Lt => {
+                            self.next();
+                            let right = self.parse_additive(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l < r); }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::LtEq => {
+                            self.next();
+                            let right = self.parse_additive(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l <= r); }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::Gt => {
+                            self.next();
+                            let right = self.parse_additive(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l > r); }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::GtEq => {
+                            self.next();
+                            let right = self.parse_additive(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l >= r); }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_additive(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_multiplicative(eval)?;
+                while let Some(tok) = self.peek() {
+                    match tok {
+                        Token::Plus => {
+                            self.next();
+                            let right = self.parse_multiplicative(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Int(l.checked_add(r)?);
+                                    }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::Minus => {
+                            self.next();
+                            let right = self.parse_multiplicative(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Int(l.checked_sub(r)?);
+                                    }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_multiplicative(&mut self, eval: bool) -> Option<ExprValue> {
+                let mut left = self.parse_unary(eval)?;
+                while let Some(tok) = self.peek() {
+                    match tok {
+                        Token::Star => {
+                            self.next();
+                            let right = self.parse_unary(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Int(l.checked_mul(r)?);
+                                    }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::Slash => {
+                            self.next();
+                            let right = self.parse_unary(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        if r == 0 { return None; }
+                                        left = ExprValue::Int(l.checked_div(r)?);
+                                    }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        Token::Percent => {
+                            self.next();
+                            let right = self.parse_unary(eval)?;
+                            if eval {
+                                match (left, right) {
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        if r == 0 { return None; }
+                                        left = ExprValue::Int(l.checked_rem(r)?);
+                                    }
+                                    _ => return None,
+                                }
+                            } else {
+                                left = ExprValue::Bool(false);
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+                Some(left)
+            }
+
+            fn parse_unary(&mut self, eval: bool) -> Option<ExprValue> {
+                if let Some(tok) = self.peek() {
+                    match tok {
+                        Token::Minus => {
+                            self.next();
+                            let val = self.parse_unary(eval)?;
+                            if eval {
+                                match val {
+                                    ExprValue::Int(i) => Some(ExprValue::Int(i.checked_neg()?)),
+                                    _ => None,
+                                }
+                            } else {
+                                Some(ExprValue::Bool(false))
+                            }
+                        }
+                        Token::Plus => {
+                            self.next();
+                            self.parse_unary(eval)
+                        }
+                        Token::Excl => {
+                            self.next();
+                            let val = self.parse_unary(eval)?;
+                            if eval {
+                                match val {
+                                    ExprValue::Bool(b) => Some(ExprValue::Bool(!b)),
+                                    _ => None,
+                                }
+                            } else {
+                                Some(ExprValue::Bool(false))
+                            }
+                        }
+                        _ => self.parse_primary(eval),
+                    }
+                } else {
+                    None
+                }
+            }
+
+            fn parse_primary(&mut self, eval: bool) -> Option<ExprValue> {
+                if let Some(tok) = self.next() {
+                    match tok {
+                        Token::Int(i) => Some(ExprValue::Int(i)),
+                        Token::Bool(b) => Some(ExprValue::Bool(b)),
+                        Token::Str(s) => Some(ExprValue::Str(s)),
+                        Token::Ident(id) => {
+                            if !eval {
+                                return Some(ExprValue::Bool(false));
+                            }
+                            if let Some(val_str) = self.env.get(&id) {
+                                let inner_tokens = tokenize(val_str)?;
+                                let mut inner_parser = Parser {
+                                    tokens: inner_tokens,
+                                    pos: 0,
+                                    env: self.env,
+                                    method_id: self.method_id,
+                                    engine: self.engine,
+                                };
+                                let val = inner_parser.parse_expression(true)?;
+                                if inner_parser.pos == inner_parser.tokens.len() {
+                                    Some(val)
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        }
+                        Token::LParen => {
+                            let val = self.parse_expression(eval)?;
+                            if let Some(Token::RParen) = self.next() {
+                                Some(val)
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            }
+        }
+
+        if let Some(tokens) = tokenize(expr_trimmed) {
+            let mut parser = Parser {
+                tokens,
+                pos: 0,
+                env: &env,
+                method_id,
+                engine: self,
+            };
+            if let Some(val) = parser.parse_expression(true) {
+                if parser.pos == parser.tokens.len() {
+                    match val {
+                        ExprValue::Int(i) => return Some(i.to_string()),
+                        ExprValue::Bool(b) => return Some(b.to_string()),
+                        ExprValue::Str(s) => return Some(s),
+                    }
+                }
+            }
+        }
+
         None
     }
 
@@ -2514,19 +3051,25 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             }
                         };
 
+                        let src_to_check = if src.contains('?') && src.contains(':') {
+                            self.evaluate_constant(node.method_id, src).unwrap_or_else(|| src.clone())
+                        } else {
+                            src.clone()
+                        };
+
                         let mut results = Vec::new();
                         let var_access_opt = parse_java_or_python_container_read(&fact.var);
 
                         if let Some((container, key)) = &var_access_opt {
-                            if src.trim().to_lowercase() == container.to_lowercase() {
+                            if src_to_check.trim().to_lowercase() == container.to_lowercase() {
                                 let key_str = self.evaluate_constant(node.method_id, key)
                                     .unwrap_or_else(|| "*".to_string());
                                 results.push((format!("{}[\"{}\"]", dest, key_str), fact.sanitized_for.clone()));
-                            } else if expr_uses_var(src, &fact.var) {
+                            } else if expr_uses_var(&src_to_check, &fact.var) {
                                 results.push((dest.clone(), fact.sanitized_for.clone()));
                             }
                         } else {
-                            if expr_uses_var(src, &fact.var) {
+                            if expr_uses_var(&src_to_check, &fact.var) {
                                 results.push((dest.clone(), fact.sanitized_for.clone()));
                             }
                         }
