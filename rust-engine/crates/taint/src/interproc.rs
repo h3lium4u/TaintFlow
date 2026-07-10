@@ -3059,16 +3059,26 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                         let mut results = Vec::new();
                         let var_access_opt = parse_java_or_python_container_read(&fact.var);
+                        let mut propagated = false;
 
-                        if let Some((container, key)) = &var_access_opt {
-                            if src_to_check.trim().to_lowercase() == container.to_lowercase() {
-                                let key_str = self.evaluate_constant(node.method_id, key)
+                        if let Some((fact_container, fact_key)) = &var_access_opt {
+                            if let Some((src_container, src_key)) = parse_java_or_python_container_read(&src_to_check) {
+                                if src_container.to_lowercase() == fact_container.to_lowercase() {
+                                    if fact_key == "*" || src_key == "*" || src_key.to_lowercase() == fact_key.to_lowercase() {
+                                        results.push((dest.clone(), fact.sanitized_for.clone()));
+                                        propagated = true;
+                                    }
+                                }
+                            }
+                            if !propagated && src_to_check.trim().to_lowercase() == fact_container.to_lowercase() {
+                                let key_str = self.evaluate_constant(node.method_id, fact_key)
                                     .unwrap_or_else(|| "*".to_string());
                                 results.push((format!("{}[\"{}\"]", dest, key_str), fact.sanitized_for.clone()));
-                            } else if expr_uses_var(&src_to_check, &fact.var) {
-                                results.push((dest.clone(), fact.sanitized_for.clone()));
+                                propagated = true;
                             }
-                        } else {
+                        }
+
+                        if !propagated {
                             if expr_uses_var(&src_to_check, &fact.var) {
                                 results.push((dest.clone(), fact.sanitized_for.clone()));
                             }

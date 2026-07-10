@@ -131,3 +131,88 @@ fn test_interproc_arraylist_precision() {
 
     assert!(engine.flows.is_empty(), "Should have no flows because bar was retrieved from a safe index");
 }
+
+#[test]
+fn test_python_getlist_wildcard_propagation() {
+    let code = r#"
+def init(app):
+    @app.route('/benchmark')
+    def get_data():
+        values = request.form.getlist("id")
+        param = values[0]
+        import subprocess
+        subprocess.run(param)
+    "#;
+
+    let mut program = Program::new();
+    let mut gst = GlobalSymbolTable::new();
+    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.resolve_inheritance_hierarchy();
+
+    let cg = CallGraph::build(&program, &gst);
+    let icfg = InterproceduralCFG::build(&program, &cg);
+
+    let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
+    engine.seed_sources(None);
+    engine.run();
+
+    assert!(!engine.flows.is_empty(), "Taint should flow from values[0] through wildcard matching");
+}
+
+#[test]
+fn test_dict_quote_normalized_propagation() {
+    let code = r#"
+def init(app):
+    @app.route('/benchmark')
+    def get_data():
+        param = request.args.get("id")
+        my_map = {}
+        my_map['keyB'] = param
+        bar = my_map["keyB"]
+        import subprocess
+        subprocess.run(bar)
+    "#;
+
+    let mut program = Program::new();
+    let mut gst = GlobalSymbolTable::new();
+    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.resolve_inheritance_hierarchy();
+
+    let cg = CallGraph::build(&program, &gst);
+    let icfg = InterproceduralCFG::build(&program, &cg);
+
+    let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
+    engine.seed_sources(None);
+    engine.run();
+
+    assert!(!engine.flows.is_empty(), "Taint should flow through quote-normalized dict lookup");
+}
+
+#[test]
+fn test_different_key_isolation() {
+    let code = r#"
+def init(app):
+    @app.route('/benchmark')
+    def get_data():
+        param = request.args.get("id")
+        my_map = {}
+        my_map['keyA'] = param
+        bar = my_map["keyB"]
+        import subprocess
+        subprocess.run(bar)
+    "#;
+
+    let mut program = Program::new();
+    let mut gst = GlobalSymbolTable::new();
+    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.resolve_inheritance_hierarchy();
+
+    let cg = CallGraph::build(&program, &gst);
+    let icfg = InterproceduralCFG::build(&program, &cg);
+
+    let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
+    engine.seed_sources(None);
+    engine.run();
+
+    assert!(engine.flows.is_empty(), "Taint should not flow when reading a different key");
+}
