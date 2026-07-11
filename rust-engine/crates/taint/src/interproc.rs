@@ -2652,11 +2652,18 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 || callee_lower.contains("java.io.filewriter")
                                 || callee_lower.contains("java.io.filechannel")
                                 || callee_lower.contains("java.nio.file.files")
+                                || callee_lower.contains("java.nio.file.paths")
+                                || callee_lower.contains("java.nio.file.path")
+                                || callee_lower.contains("paths.get")
+                                || callee_lower.contains("path.of")
                                 || callee_lower.contains("files.")
                                 || callee_lower == "open"
                                 || callee_lower.contains(".open")
                                 || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
-                                    fqn.contains("java.io.file") || fqn.ends_with(".file") || fqn.contains("java.nio.file.files") || fqn.ends_with(".files")
+                                    fqn.contains("java.io.file") || fqn.ends_with(".file") 
+                                        || fqn.contains("java.nio.file.files") || fqn.ends_with(".files")
+                                        || fqn.contains("java.nio.file.paths") || fqn.ends_with(".paths")
+                                        || fqn.contains("java.nio.file.path") || fqn.ends_with(".path")
                                 })
                                 || (clean_method_lower == "<init>" && resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
                                     fqn.contains("java.io.file") || fqn.ends_with(".file")
@@ -3177,6 +3184,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     results.push((d.clone(), fact.sanitized_for.clone()));
                                 }
                                 if let Some(receiver) = get_receiver_name_safe(callee) {
+                                    println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='deser'", callee, receiver, fact.var, receiver, dest_node_id);
                                     results.push((receiver, fact.sanitized_for.clone()));
                                 }
                             }
@@ -3392,6 +3400,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         results.push((d.clone(), new_san.clone()));
                                     }
                                     if let Some(receiver) = get_receiver_name_safe(callee) {
+                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='sanitizer'", callee, receiver, fact.var, receiver, dest_node_id);
                                         results.push((receiver, new_san.clone()));
                                     }
                                     results.push((fact.var.clone(), new_san));
@@ -3452,6 +3461,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                     results.push((d.clone(), propagated_san.clone()));
                                                 }
                                                 if let Some(receiver) = get_receiver_name_safe(callee) {
+                                                    println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='stub'", callee, receiver, fact.var, receiver, dest_node_id);
                                                     results.push((receiver, propagated_san.clone()));
                                                 }
                                             }
@@ -3551,6 +3561,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             || callee_lower.contains("query") || callee_lower.contains("sql")
                                             || callee_lower.contains("conn"));
                                     if !is_jdbc_setter && !is_db_setter {
+                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='fallback'", callee, receiver, fact.var, receiver, dest_node_id);
                                         results.push((receiver, propagated_san.clone()));
                                     }
                                 }

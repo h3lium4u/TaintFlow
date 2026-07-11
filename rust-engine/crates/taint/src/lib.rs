@@ -281,6 +281,9 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
         || (c == "shutil" && !c.contains("move"))   // bare shutil receiver taint
         || c.contains("os.path.join") || c.contains("os.makedirs") || c.contains("os.rename")
         || c.contains("os.remove") || c.contains("os.unlink")
+        || c == "exists" || c == "read_text" || c == "read_bytes"
+        || c == "write_text" || c == "write_bytes" || c == "is_file" || c == "is_dir"
+        || c.contains("os.path.exists")
     {
         return Some(CWE::CWE22);
     }

@@ -514,44 +514,96 @@ impl Program {
                 };
 
                 if let Some(rhs) = rhs_node {
-                    if rhs.kind == NodeKind::CallExpression {
-                        let callee = extract_callee_name(rhs);
-                        let mut args = Vec::new();
-                        if let Some(arg_list) = rhs.children.iter().find(|c| {
-                            let t = match &c.kind {
-                                NodeKind::Unknown(typ) => typ.as_str(),
-                                _ => "",
-                            };
-                            t == "argument_list" || t == "formal_parameters"
-                        }) {
-                            for arg in &arg_list.children {
-                                args.push(arg.raw.clone());
+                    let is_augmented = node.raw.contains("+=");
+                    
+                    if is_augmented {
+                        let temp_var = format!("_aug_tmp_{}", self.instructions.len());
+                        if rhs.kind == NodeKind::CallExpression {
+                            let callee = extract_callee_name(rhs);
+                            let mut args = Vec::new();
+                            if let Some(arg_list) = rhs.children.iter().find(|c| {
+                                let t = match &c.kind {
+                                    NodeKind::Unknown(typ) => typ.as_str(),
+                                    _ => "",
+                                };
+                                t == "argument_list" || t == "formal_parameters"
+                            }) {
+                                for arg in &arg_list.children {
+                                    args.push(arg.raw.clone());
+                                }
                             }
+                            let call_inst_id = self.alloc_instruction(
+                                InstructionKind::Call {
+                                    dest: Some(temp_var.clone()),
+                                    callee,
+                                    args,
+                                },
+                                file_line,
+                            );
+                            insts.push(call_inst_id);
+                        } else {
+                            let mut nested_calls = Vec::new();
+                            find_call_expressions(rhs, &mut nested_calls);
+                            for call_node in nested_calls {
+                                self.collect_statements(&call_node, insts);
+                            }
+                            let assign_inst_id = self.alloc_instruction(
+                                InstructionKind::Assign {
+                                    dest: temp_var.clone(),
+                                    src: rhs.raw.clone(),
+                                },
+                                file_line,
+                            );
+                            insts.push(assign_inst_id);
                         }
-                        let inst_id = self.alloc_instruction(
-                            InstructionKind::Call {
-                                dest: Some(lhs_raw),
-                                callee,
-                                args,
-                            },
-                            file_line,
-                        );
-                        insts.push(inst_id);
-                    } else {
-                        let mut nested_calls = Vec::new();
-                        find_call_expressions(rhs, &mut nested_calls);
-                        for call_node in nested_calls {
-                            self.collect_statements(&call_node, insts);
-                        }
-
-                        let inst_id = self.alloc_instruction(
+                        let concat_inst_id = self.alloc_instruction(
                             InstructionKind::Assign {
-                                dest: lhs_raw,
-                                src: rhs.raw.clone(),
+                                dest: lhs_raw.clone(),
+                                src: format!("{} + {}", lhs_raw, temp_var),
                             },
                             file_line,
                         );
-                        insts.push(inst_id);
+                        insts.push(concat_inst_id);
+                    } else {
+                        if rhs.kind == NodeKind::CallExpression {
+                            let callee = extract_callee_name(rhs);
+                            let mut args = Vec::new();
+                            if let Some(arg_list) = rhs.children.iter().find(|c| {
+                                let t = match &c.kind {
+                                    NodeKind::Unknown(typ) => typ.as_str(),
+                                    _ => "",
+                                };
+                                t == "argument_list" || t == "formal_parameters"
+                            }) {
+                                for arg in &arg_list.children {
+                                    args.push(arg.raw.clone());
+                                }
+                            }
+                            let inst_id = self.alloc_instruction(
+                                InstructionKind::Call {
+                                    dest: Some(lhs_raw),
+                                    callee,
+                                    args,
+                                },
+                                file_line,
+                            );
+                            insts.push(inst_id);
+                        } else {
+                            let mut nested_calls = Vec::new();
+                            find_call_expressions(rhs, &mut nested_calls);
+                            for call_node in nested_calls {
+                                self.collect_statements(&call_node, insts);
+                            }
+
+                            let inst_id = self.alloc_instruction(
+                                InstructionKind::Assign {
+                                    dest: lhs_raw,
+                                    src: rhs.raw.clone(),
+                                },
+                                file_line,
+                            );
+                            insts.push(inst_id);
+                        }
                     }
                 }
             }

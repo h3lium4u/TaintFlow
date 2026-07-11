@@ -1971,6 +1971,11 @@ impl StubRegistry {
                     kind: StubKind::Propagator,
                     propagates_from: Some(vec![0]),
                 },
+                MethodStub {
+                    name: "exists".to_string(),
+                    kind: StubKind::Sink,
+                    propagates_from: None,
+                },
             ],
         });
 

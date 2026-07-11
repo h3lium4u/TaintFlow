@@ -1873,7 +1873,7 @@ fn main() {
                 });
             }
 
-            if is_fp && name == "GitHub" {
+            if is_fp && (name == "GitHub" || sample.code.contains("BenchmarkTest00447") || sample.code.contains("BenchmarkTest00745")) {
                 THREAD_LOG.with(|log| {
                     if let Some(ref mut lines) = *log.borrow_mut() {
                         lines.push(format!("[FP_DIAGNOSTIC] Repo: {}, CWE: {}, Commit: {}", sample.repo, sample.cwe, sample.commit));
@@ -1906,6 +1906,14 @@ fn main() {
                             engine.seed_sources(None);
                             engine.run();
                             lines.push(format!("  [FP_DIAGNOSTIC] Flows detected: {}", engine.flows.len()));
+                            lines.push("  [FP_DIAGNOSTIC] All Tainted Facts:".to_string());
+                            for f in &engine.tainted_facts {
+                                if let Some(node_info) = icfg.nodes.get(&f.node_id) {
+                                    let method_info = program.methods.get(&node_info.method_id).unwrap();
+                                    let inst_info = node_info.instruction_id.and_then(|id| program.instructions.get(&id));
+                                    lines.push(format!("    node={} method='{}' var='{}' inst={:?}", f.node_id, method_info.name, f.var, inst_info.map(|i| &i.kind)));
+                                }
+                            }
                             for flow in &engine.flows {
                                 lines.push(format!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var));
                                 let matching_facts = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
