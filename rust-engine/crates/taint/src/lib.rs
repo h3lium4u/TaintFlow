@@ -1346,8 +1346,7 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
         result.push(CWE::CWE89);
     }
     // Path normalization
-    if c.contains("realpath") || c.contains("abspath") || c.contains("normpath")
-        || c.contains("canonicalize") || c.contains("resolve") || c.contains("normalize")
+    if c.contains("canonicalize") || c.contains("normalize")
         || c.contains("clean_path") || c.contains("clean_join") || c.contains("safe_join")
         || c.contains("check_path_traversal") || c.contains("verify_path")
         || c.contains("check_ref_name") || c.contains("ref_name_valid")
@@ -1355,7 +1354,7 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
         result.push(CWE::CWE22);
     }
     // General sanitizers
-    if c.contains("sanitize") || c.contains("validate") || c.contains("clean") {
+    if c.contains("sanitize") || c.contains("clean") {
         result.push(CWE::CWE79);
         result.push(CWE::CWE89);
         result.push(CWE::CWE22);

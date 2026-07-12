@@ -1325,7 +1325,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
             if let Some(inst_id) = node.instruction_id {
                 if let Some(inst) = self.program.instructions.get(&inst_id) {
+                    let mut matched_dest_and_src = None;
                     if let InstructionKind::Assign { dest, src } = &inst.kind {
+                        matched_dest_and_src = Some((dest, src));
+                    } else if let InstructionKind::Call { dest: Some(d), callee, .. } = &inst.kind {
+                        matched_dest_and_src = Some((d, callee));
+                    }
+
+                    if let Some((dest, src)) = matched_dest_and_src {
                         let src_lower = src.to_lowercase();
                         let is_flask_attr = flask_attrs.iter().any(|attr| {
                             let al = attr.to_lowercase();
@@ -5135,11 +5142,15 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
     println!("[DEBUG_GUARD] var_name='{}' target_line={} resolved_parts={:?}", var_name, target_line, parts);
 
     let check_start = if target_line > 50 { target_line - 50 } else { 1 };
-    let check_end = std::cmp::min(target_line + 15, total_lines);
-    let check_lines: Vec<&str> = content.lines()
-        .skip(check_start - 1)
-        .take(check_end - check_start + 1)
-        .collect();
+    let check_end = if target_line > 1 { target_line - 1 } else { 1 };
+    let check_lines: Vec<&str> = if check_end >= check_start {
+        content.lines()
+            .skip(check_start - 1)
+            .take(check_end - check_start + 1)
+            .collect()
+    } else {
+        Vec::new()
+    };
 
     let has_word = |line: &str, part: &str| -> bool {
         let mut start = 0;

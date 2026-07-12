@@ -3372,7 +3372,19 @@ impl StubRegistry {
             methods: vec![
                 MethodStub {
                     name: "quote".to_string(),
-                    kind: StubKind::Sanitizer,
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
+                },
+            ],
+        });
+
+        // Python RSA cryptography stubs
+        self.register(LibraryStub {
+            class_fqn: "rsa.randnum".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "read_random_int".to_string(),
+                    kind: StubKind::Propagator,
                     propagates_from: None,
                 },
             ],
