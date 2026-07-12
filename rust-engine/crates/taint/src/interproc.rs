@@ -3931,7 +3931,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
             return Some("pathlib.Path".to_string());
         }
 
+        if class_lower.contains("open") || class_lower.contains("file") {
+            if method_lower.starts_with("read") {
+                return Some("bytes".to_string());
+            }
+        }
+
         if class_lower.contains("base64") {
+            if method_lower.starts_with("b64decode") || method_lower.starts_with("urlsafe_b64decode") {
+                return Some("bytes".to_string());
+            }
             if method_lower == "getdecoder" || method_lower == "geturldecoder" || method_lower == "getmimedecoder" {
                 return Some("java.util.Base64$Decoder".to_string());
             }
@@ -4058,6 +4067,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
             }
             return Some((clean_class, method_name));
+        }
+
+        if receiver.contains('.') {
+            if let Some((callee_class, callee_method)) = self.resolve_callee_info(method_id, &receiver) {
+                if let Some(ret_type) = self.get_library_call_return_type(&callee_class, &callee_method) {
+                    return Some((ret_type, method_name));
+                }
+            }
         }
 
         let receiver_base = receiver.split('.').next().unwrap_or(&receiver).to_string();
@@ -4218,13 +4235,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                 if let Some(t_name) = local_type {
                     let mut clean_t = t_name.split('(').next().unwrap_or(&t_name).trim().to_string();
+                    let mut resolved_entire = false;
                     
                     if clean_t.contains('.') {
                         if let Some((callee_class, callee_method)) = self.resolve_callee_info(method_id, &clean_t) {
                             if let Some(ret_type) = self.get_library_call_return_type(&callee_class, &callee_method) {
                                 clean_t = ret_type;
+                                resolved_entire = true;
                             }
                         }
+                    }
+
+                    if resolved_entire {
+                        return Some((clean_t, method_name));
                     }
 
                     if let Some(type_id) = self.gst.resolve_type(module_id, &clean_t) {

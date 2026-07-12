@@ -229,7 +229,6 @@ impl StubRegistry {
         let generic_sanitizers = [
             "escape",
             "sanitize",
-            "encode",
             "escapehtml4",
             "escapejavascript",
             "escapexml11",
@@ -1780,6 +1779,18 @@ impl StubRegistry {
                     name: "urlsafe_b64decode".to_string(),
                     kind: StubKind::Propagator,
                     propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+
+        // bytes
+        self.register(LibraryStub {
+            class_fqn: "bytes".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "decode".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
                 },
             ],
         });

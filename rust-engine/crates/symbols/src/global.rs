@@ -1139,7 +1139,13 @@ impl GlobalSymbolTable {
                                         }
 
                                         let method_fqn = format!("{}.{}", type_fqn, method_name);
-                                        let return_fqn = format!("{}_Ret", method_fqn);
+                                        let return_fqn = if method_fqn.starts_with("base64.b64decode") || method_fqn.starts_with("base64.urlsafe_b64decode") {
+                                            "bytes".to_string()
+                                        } else if method_fqn.starts_with("global.open_Ret.read") || method_fqn.starts_with("builtins.open_Ret.read") {
+                                            "bytes".to_string()
+                                        } else {
+                                            format!("{}_Ret", method_fqn)
+                                        };
 
                                         // Synthesize return class type
                                         self.get_or_create_stub_type(program, &return_fqn, module_id);
@@ -1173,8 +1179,11 @@ impl GlobalSymbolTable {
                                         // Constructor returns the type itself
                                         inferred_ret_type = Some(fqn);
                                     } else {
-                                        // Function returns its synthesized return type
-                                        let func_ret_fqn = format!("{}_Ret", fqn);
+                                        let func_ret_fqn = if fqn.starts_with("base64.b64decode") || fqn.starts_with("base64.urlsafe_b64decode") {
+                                            "bytes".to_string()
+                                        } else {
+                                            format!("{}_Ret", fqn)
+                                        };
                                         self.get_or_create_stub_type(program, &func_ret_fqn, module_id);
                                         self.get_or_create_stub_method(
                                             program,
