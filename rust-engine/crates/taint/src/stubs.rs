@@ -41,12 +41,17 @@ impl StubRegistry {
     }
 
     pub fn lookup(&self, class_or_module: &str, method: &str) -> Option<&MethodStub> {
-        let class_clean = class_or_module.split('<').next().unwrap_or(class_or_module).trim();
+        let class_clean = class_or_module
+            .split('<')
+            .next()
+            .unwrap_or(class_or_module)
+            .trim();
         let class_lower = class_clean.to_lowercase();
         let method_lower = method.to_lowercase();
 
         // Juliet V2 dynamic stubbing for abstract dispatch (81 variant)
-        if class_lower.contains("cwe") && class_lower.contains("_81_")
+        if class_lower.contains("cwe")
+            && class_lower.contains("_81_")
             && (class_lower.ends_with("_bad") || class_lower.ends_with("_goodg2b"))
             && (method_lower == "action" || method_lower.ends_with(".action"))
         {
@@ -83,18 +88,14 @@ impl StubRegistry {
         {
             // OWASP Benchmark helper: wraps HttpServletRequest.getParameter()
             "org.owasp.benchmark.helpers.SeparateClassRequest"
-        } else if class_lower == "ldapmanager"
-            || class_lower.ends_with(".ldapmanager")
-        {
+        } else if class_lower == "databasehelper" || class_lower.ends_with(".databasehelper") {
+            "org.owasp.benchmark.helpers.DatabaseHelper"
+        } else if class_lower == "ldapmanager" || class_lower.ends_with(".ldapmanager") {
             // OWASP Benchmark LDAP helper wrapping DirContext.search()
             "org.owasp.benchmark.helpers.LDAPManager"
-        } else if class_lower == "thingfactory"
-            || class_lower.ends_with(".thingfactory")
-        {
+        } else if class_lower == "thingfactory" || class_lower.ends_with(".thingfactory") {
             "org.owasp.benchmark.helpers.ThingFactory"
-        } else if class_lower == "thinginterface"
-            || class_lower.ends_with(".thinginterface")
-        {
+        } else if class_lower == "thinginterface" || class_lower.ends_with(".thinginterface") {
             "org.owasp.benchmark.helpers.ThingInterface"
         } else {
             class_clean
@@ -138,21 +139,33 @@ impl StubRegistry {
         // when class name cannot be fully resolved (e.g. Iterator, Enumeration, Cookie).
         if clean_method_lower == "next" || clean_method_lower == "hasnext" {
             if let Some(lib_stub) = self.stubs.get("java.util.Iterator") {
-                if let Some(m_stub) = lib_stub.methods.iter().find(|m| m.name.to_lowercase() == clean_method_lower) {
+                if let Some(m_stub) = lib_stub
+                    .methods
+                    .iter()
+                    .find(|m| m.name.to_lowercase() == clean_method_lower)
+                {
                     return Some(m_stub);
                 }
             }
         }
         if clean_method_lower == "nextelement" || clean_method_lower == "hasmoreelements" {
             if let Some(lib_stub) = self.stubs.get("java.util.Enumeration") {
-                if let Some(m_stub) = lib_stub.methods.iter().find(|m| m.name.to_lowercase() == clean_method_lower) {
+                if let Some(m_stub) = lib_stub
+                    .methods
+                    .iter()
+                    .find(|m| m.name.to_lowercase() == clean_method_lower)
+                {
                     return Some(m_stub);
                 }
             }
         }
         if clean_method_lower == "getvalue" || clean_method_lower == "getname" {
             if let Some(lib_stub) = self.stubs.get("javax.servlet.http.Cookie") {
-                if let Some(m_stub) = lib_stub.methods.iter().find(|m| m.name.to_lowercase() == clean_method_lower) {
+                if let Some(m_stub) = lib_stub
+                    .methods
+                    .iter()
+                    .find(|m| m.name.to_lowercase() == clean_method_lower)
+                {
                     return Some(m_stub);
                 }
             }
@@ -253,15 +266,15 @@ impl StubRegistry {
             "encodeforbase64",
             // RC76 SANITIZER_FAILURE patterns — high-confidence path & URL sanitizers
             // These are purpose-built sanitizer functions with no ambiguity
-            "deny_unsafe_hosts",        // pgAdmin: SSRF host deny-list
-            "safe_build_path",          // Label Studio: safe path construction
-            "clean_path",               // generic: path cleaning
-            "safe_join",                // werkzeug.security.safe_join
-            "secure_filename",          // werkzeug.utils.secure_filename
-            "is_safe_url",              // Flask/Django URL safety check
-            "is_safe_path",             // generic path safety check
-            "check_ref_name_valid",     // GitPython: reference name validation
-            "_check_ref_name_valid",    // GitPython: reference name validation
+            "deny_unsafe_hosts",     // pgAdmin: SSRF host deny-list
+            "safe_build_path",       // Label Studio: safe path construction
+            "clean_path",            // generic: path cleaning
+            "safe_join",             // werkzeug.security.safe_join
+            "secure_filename",       // werkzeug.utils.secure_filename
+            "is_safe_url",           // Flask/Django URL safety check
+            "is_safe_path",          // generic path safety check
+            "check_ref_name_valid",  // GitPython: reference name validation
+            "_check_ref_name_valid", // GitPython: reference name validation
         ];
         // Flask request attribute sources — these appear as Assign src patterns like "request.data"
         // They are resolved when the src side of an Assign contains one of these attribute paths.
@@ -299,7 +312,8 @@ impl StubRegistry {
                 || full_path.contains(&format!(".{}.", attr_lower))
                 || method_lower.starts_with(&format!("{}.", attr_lower))
                 || method_lower == attr_lower
-                || (class_clean.to_lowercase().contains("request") && method_lower == attr_lower.split('.').last().unwrap_or(""))
+                || (class_clean.to_lowercase().contains("request")
+                    && method_lower == attr_lower.split('.').last().unwrap_or(""))
             {
                 return Some(&SOURCE_STUB);
             }
@@ -327,7 +341,9 @@ impl StubRegistry {
         };
 
         if generic_sinks.contains(&clean_method_lower.as_str()) {
-            if clean_method_lower == "readobject" && (class_lower.contains("safe") || class_lower.contains("validat")) {
+            if clean_method_lower == "readobject"
+                && (class_lower.contains("safe") || class_lower.contains("validat"))
+            {
                 return None;
             }
             return Some(&SINK_STUB);
@@ -344,16 +360,8 @@ impl StubRegistry {
         // the call should propagate taint (arg → return value) even if the body is in
         // a separate file not loaded during single-file analysis.
         // NOTE: Keep this list narrow — overly broad matching causes OWASP FP bleed.
-        let service_layer_suffixes = [
-            "service",
-            "repository",
-            "dao",
-            "manager",
-        ];
-        let class_last = class_lower
-            .split('.')
-            .last()
-            .unwrap_or(&class_lower);
+        let service_layer_suffixes = ["service", "repository", "dao", "manager"];
+        let class_last = class_lower.split('.').last().unwrap_or(&class_lower);
         let is_service_layer = service_layer_suffixes
             .iter()
             .any(|suffix| class_last.ends_with(suffix) && class_last.len() > suffix.len());
@@ -1615,13 +1623,11 @@ impl StubRegistry {
         // zipfile
         self.register(LibraryStub {
             class_fqn: "zipfile".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "ZipFile".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "ZipFile".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "zipfile.ZipFile".to_string(),
@@ -1642,13 +1648,11 @@ impl StubRegistry {
         // tarfile
         self.register(LibraryStub {
             class_fqn: "tarfile".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "tarfile.TarFile".to_string(),
@@ -1686,37 +1690,31 @@ impl StubRegistry {
         // codecs
         self.register(LibraryStub {
             class_fqn: "codecs".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
 
         // io
         self.register(LibraryStub {
             class_fqn: "io".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
 
         // builtins
         self.register(LibraryStub {
             class_fqn: "builtins".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
 
         // pathlib.Path
@@ -1786,13 +1784,11 @@ impl StubRegistry {
         // bytes
         self.register(LibraryStub {
             class_fqn: "bytes".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "decode".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "decode".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: None,
+            }],
         });
 
         // org.apache.commons.codec.binary.Base64
@@ -1820,13 +1816,11 @@ impl StubRegistry {
         // java.util.Base64$Decoder
         self.register(LibraryStub {
             class_fqn: "java.util.Base64$Decoder".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "decode".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: Some(vec![0]),
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "decode".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: Some(vec![0]),
+            }],
         });
 
         // java.util.Base64$Encoder
@@ -2045,13 +2039,11 @@ impl StubRegistry {
         // paddle.distributed.fleet.utils.fs.HDFSClient
         self.register(LibraryStub {
             class_fqn: "paddle.distributed.fleet.utils.fs".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "HDFSClient".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "HDFSClient".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: None,
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "paddle.distributed.fleet.utils.fs.HDFSClient".to_string(),
@@ -2601,33 +2593,27 @@ impl StubRegistry {
         // ====================================================
         self.register(LibraryStub {
             class_fqn: "javax.naming.directory.DirContext".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "search".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "search".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "javax.naming.directory.InitialDirContext".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "search".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "search".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "javax.naming.ldap.LdapContext".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "search".to_string(),
-                    kind: StubKind::Sink,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "search".to_string(),
+                kind: StubKind::Sink,
+                propagates_from: None,
+            }],
         });
 
         // java.io.ObjectInputStream / java.beans.XMLDecoder / ObjectMapper / pickle / yaml (CWE-502)
@@ -2739,23 +2725,19 @@ impl StubRegistry {
         });
         self.register(LibraryStub {
             class_fqn: "shelve".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: Some(vec![0]),
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: Some(vec![0]),
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "dbm".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "open".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: Some(vec![0]),
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "open".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: Some(vec![0]),
+            }],
         });
         self.register(LibraryStub {
             class_fqn: "requests".to_string(),
@@ -2897,6 +2879,48 @@ impl StubRegistry {
         // cases. Without these stubs the taint flow stops at the
         // helper boundary, producing false negatives.
         // ====================================================
+
+        // org.owasp.benchmark.helpers.DatabaseHelper — wraps sql Connection/Statement factories
+        self.register(LibraryStub {
+            class_fqn: "org.owasp.benchmark.helpers.DatabaseHelper".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "getSqlConnection".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "getSqlStatement".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "getOSCommandString".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
+        self.register(LibraryStub {
+            class_fqn: "DatabaseHelper".to_string(),
+            methods: vec![
+                MethodStub {
+                    name: "getSqlConnection".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "getSqlStatement".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: None,
+                },
+                MethodStub {
+                    name: "getOSCommandString".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
+            ],
+        });
 
         // SeparateClassRequest — wraps HttpServletRequest.getParameter()
         // Pattern: scr.getTheValue("BenchmarkTestXXXXX")  →  tainted String
@@ -3369,25 +3393,21 @@ impl StubRegistry {
         // Python shlex module stubs
         self.register(LibraryStub {
             class_fqn: "shlex".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "quote".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "quote".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: None,
+            }],
         });
 
         // Python RSA cryptography stubs
         self.register(LibraryStub {
             class_fqn: "rsa.randnum".to_string(),
-            methods: vec![
-                MethodStub {
-                    name: "read_random_int".to_string(),
-                    kind: StubKind::Propagator,
-                    propagates_from: None,
-                },
-            ],
+            methods: vec![MethodStub {
+                name: "read_random_int".to_string(),
+                kind: StubKind::Propagator,
+                propagates_from: None,
+            }],
         });
 
         // RepoProvider hierarchy stubs for binderhub (CWE-78 command injection)

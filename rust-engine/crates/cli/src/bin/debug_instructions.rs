@@ -11,14 +11,15 @@ fn main() {
             break;
         }
     }
-    
+
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
     let filename = "Test.java".to_string();
     program.source_files.insert(filename.clone(), code.clone());
-    
-    gst.load_file(&mut program, &code, &filename, &"java".to_string()).unwrap();
-    
+
+    gst.load_file(&mut program, &code, &filename, &"java".to_string())
+        .unwrap();
+
     println!("=== Program Instructions ===");
     for (id, inst) in &program.instructions {
         println!("  InstructionId({:?}): {:?}", id.0, inst.kind);

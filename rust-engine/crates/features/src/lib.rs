@@ -9,8 +9,6 @@ pub struct FeatureVector(pub [f32; 55]);
 
 pub struct FeatureExtractor;
 
-
-
 fn get_longest_path(cfg: &ControlFlowGraph) -> f32 {
     let entry_node = cfg
         .nodes
@@ -86,8 +84,6 @@ fn get_longest_path(cfg: &ControlFlowGraph) -> f32 {
         result.unwrap_or(0) as f32
     }
 }
-
-
 
 /// Count distinct acyclic paths from entry to exit, capped at 50.
 /// Structurally independent from path length: a graph can have many short

@@ -23,7 +23,8 @@ fn main() {
     let filename = "Test_CWE_90.java".to_string();
     let language = "java".to_string();
 
-    gst.load_file(&mut program, &code, &filename, &language).unwrap();
+    gst.load_file(&mut program, &code, &filename, &language)
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -35,7 +36,11 @@ fn main() {
     let facts = v2_export_adapter::Exporter::export(&engine);
 
     // Run SsaBuilder on the doPost method manually
-    let method = program.methods.values().find(|m| m.name == "doPost").unwrap();
+    let method = program
+        .methods
+        .values()
+        .find(|m| m.name == "doPost")
+        .unwrap();
     let cfg = v2_refiner_domain::CfgBuilder::build(&program, method);
     let ssa_builder = v2_refiner_domain::SsaBuilder::new(&program, method, &cfg);
     let ssa = ssa_builder.build();

@@ -2,13 +2,13 @@
 #![allow(dead_code)]
 // This file provides the single-file (intraprocedural) taint engine and shared types.
 
-pub mod stubs;
 pub mod interproc;
+pub mod stubs;
 pub mod vulnerable_tests;
 
 use normalizer::{NormalizedKind, NormalizedNode};
-use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 
 pub use interproc::InterproceduralTaintEngine;
 
@@ -76,37 +76,64 @@ pub fn contains_source_expression(raw: &str, file_path: Option<&str>) -> bool {
         }
     }
     // Python / Flask sources
-    if r.contains("request.args") || r.contains("request.form") || r.contains("request.data")
-        || r.contains("request.json") || r.contains("request.values") || r.contains("request.files")
-        || r.contains("request.cookies") || r.contains("request.headers") || r.contains("request.get_json")
-        || r.contains("request.environ") || r.contains("request.query_string")
+    if r.contains("request.args")
+        || r.contains("request.form")
+        || r.contains("request.data")
+        || r.contains("request.json")
+        || r.contains("request.values")
+        || r.contains("request.files")
+        || r.contains("request.cookies")
+        || r.contains("request.headers")
+        || r.contains("request.get_json")
+        || r.contains("request.environ")
+        || r.contains("request.query_string")
     {
         return true;
     }
     // Django sources
-    if r.contains("request.get") || r.contains("request.post") || r.contains("request.put")
-        || r.contains("request.delete") || r.contains("request.patch")
+    if r.contains("request.get")
+        || r.contains("request.post")
+        || r.contains("request.put")
+        || r.contains("request.delete")
+        || r.contains("request.patch")
     {
         return true;
     }
     // FastAPI / DRF
-    if r.contains("query_params") || r.contains("path_params") || r.contains("body()")
-        || r.contains("request.data") || r.contains("validated_data")
+    if r.contains("query_params")
+        || r.contains("path_params")
+        || r.contains("body()")
+        || r.contains("request.data")
+        || r.contains("validated_data")
     {
         return true;
     }
     // Java Servlet sources
-    if r.contains("getparameter") || r.contains("getheader") || r.contains("getremoteaddr")
-        || r.contains("getcookies") || r.contains("getquetystring") || r.contains("getinputstream")
-        || r.contains("getrequestdispatcher") || r.contains("getpathinfo") || r.contains("getservletpath")
-        || r.contains("getcontextpath") || r.contains("getattribute") || r.contains("getsession")
+    if r.contains("getparameter")
+        || r.contains("getheader")
+        || r.contains("getremoteaddr")
+        || r.contains("getcookies")
+        || r.contains("getquetystring")
+        || r.contains("getinputstream")
+        || r.contains("getrequestdispatcher")
+        || r.contains("getpathinfo")
+        || r.contains("getservletpath")
+        || r.contains("getcontextpath")
+        || r.contains("getattribute")
+        || r.contains("getsession")
     {
         return true;
     }
     // sys.argv / os.environ / input()
-    if r.contains("sys.argv") || r.contains("os.environ") || r.contains("os.getenv")
-        || r == "input()" || r.starts_with("input(") || r.contains(".read(") || r.contains(".readline(")
-        || r.contains("stdin.read") || r.contains("sys.stdin")
+    if r.contains("sys.argv")
+        || r.contains("os.environ")
+        || r.contains("os.getenv")
+        || r == "input()"
+        || r.starts_with("input(")
+        || r.contains(".read(")
+        || r.contains(".readline(")
+        || r.contains("stdin.read")
+        || r.contains("sys.stdin")
     {
         return true;
     }
@@ -145,9 +172,13 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     let fp = file_path.unwrap_or("").to_lowercase();
 
     // Path-based disambiguation for Juliet
-    let is_juliet = fp.contains("juliet") || fp.contains("testcases") || fp.contains("cwe") || fp.contains("benchmark");
+    let is_juliet = fp.contains("juliet")
+        || fp.contains("testcases")
+        || fp.contains("cwe")
+        || fp.contains("benchmark");
     if is_juliet {
-        let is_generic_xss_sink = c.contains("println") || c.contains("print") || c.contains("write");
+        let is_generic_xss_sink =
+            c.contains("println") || c.contains("print") || c.contains("write");
         if !is_generic_xss_sink {
             if fp.contains("cwe89") || fp.contains("cwe_89") {
                 return Some(CWE::CWE89);
@@ -180,19 +211,30 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     }
 
     // SQL (CWE-89)
-    if c.contains("execute") || c.contains("executequery") || c.contains("executeupdate")
-        || c.contains("preparestatement") || c.contains("createnativequery")
-        || c.contains("rawsql") || c.contains("raw_sql")
-        || (c == "raw") || (c == "extra")
-        || (c == "query") || c.contains("queryfor")
+    if c.contains("execute")
+        || c.contains("executequery")
+        || c.contains("executeupdate")
+        || c.contains("preparestatement")
+        || c.contains("createnativequery")
+        || c.contains("rawsql")
+        || c.contains("raw_sql")
+        || (c == "raw")
+        || (c == "extra")
+        || (c == "query")
+        || c.contains("queryfor")
     {
         return Some(CWE::CWE89);
     }
 
     // Command injection (CWE-78)
-    if c.contains("popen") || c.contains("subprocess") || c.contains("os.system")
-        || c.contains("runtime.exec") || c.contains("processbuilder") || c.contains("batchprocess")
-        || c.contains("runtime") || (c.contains("exec") && !c.contains("execute"))
+    if c.contains("popen")
+        || c.contains("subprocess")
+        || c.contains("os.system")
+        || c.contains("runtime.exec")
+        || c.contains("processbuilder")
+        || c.contains("batchprocess")
+        || c.contains("runtime")
+        || (c.contains("exec") && !c.contains("execute"))
     {
         return Some(CWE::CWE78);
     }
@@ -200,11 +242,22 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     // SSRF (CWE-918)
     // url_join() is an SSRF-pattern function that assembles URLs passed to outbound HTTP calls.
     // session.get / client.get are HTTP dispatch methods for requests.Session / httpx.Client.
-    if c.contains("urlopen") || c.contains("requests.get") || c.contains("requests.post")
-        || c.contains("urllib") || c.contains("aiohttp.") || c.contains("httpx.")
-        || c.contains("openconnection") || c.contains("openstream")
-        || c == "url_join" || c.ends_with(".url_join")
-        || ((c == "get" || c == "post" || c == "put" || c == "delete" || c == "patch" || c == "head")
+    if c.contains("urlopen")
+        || c.contains("requests.get")
+        || c.contains("requests.post")
+        || c.contains("urllib")
+        || c.contains("aiohttp.")
+        || c.contains("httpx.")
+        || c.contains("openconnection")
+        || c.contains("openstream")
+        || c == "url_join"
+        || c.ends_with(".url_join")
+        || ((c == "get"
+            || c == "post"
+            || c == "put"
+            || c == "delete"
+            || c == "patch"
+            || c == "head")
             && fp.contains("provider"))
     {
         return Some(CWE::CWE918);
@@ -271,7 +324,6 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
         return Some(CWE::CWE502);
     }
 
-
     // Path traversal (CWE-22)
     // shutil operations (copy, move, copytree, rmtree) act on file system paths and are path-traversal sinks.
     // os.path.join / os.makedirs / os.rename also operate on user-controlled paths.
@@ -292,18 +344,25 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     }
 
     // XSS / HTML injection (CWE-79)
-    if c.contains("write") || c.contains("print") || c.contains("println")
-        || c.contains("render_template_string") || c.contains("response.write")
-        || c.contains("out.print") || c.contains("getwriter")
-        || c.contains("badsink") || c.contains("dangerous_sink")
+    if c.contains("write")
+        || c.contains("print")
+        || c.contains("println")
+        || c.contains("render_template_string")
+        || c.contains("response.write")
+        || c.contains("out.print")
+        || c.contains("getwriter")
+        || c.contains("badsink")
+        || c.contains("dangerous_sink")
     {
         return Some(CWE::CWE79);
     }
 
     // HTTP response splitting (CWE-113)
     // Note: addCookie is CWE-614 (insecure cookie), not CWE-113 (header injection).
-    if c.contains("setheader") || c.contains("addheader")
-        || c.contains("sendredirect") || c.contains("setcontenttype")
+    if c.contains("setheader")
+        || c.contains("addheader")
+        || c.contains("sendredirect")
+        || c.contains("setcontenttype")
     {
         return Some(CWE::CWE113);
     }
@@ -342,7 +401,9 @@ pub struct ChaTable {
 }
 
 impl ChaTable {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Parse raw Java source code to extract class/interface hierarchy.
     /// Uses line-by-line text scanning — no AST needed.
@@ -359,13 +420,17 @@ impl ChaTable {
         for (k, vs) in &other.implementors {
             let entry = self.implementors.entry(k.clone()).or_default();
             for v in vs {
-                if !entry.contains(v) { entry.push(v.clone()); }
+                if !entry.contains(v) {
+                    entry.push(v.clone());
+                }
             }
         }
         for (k, vs) in &other.parents {
             let entry = self.parents.entry(k.clone()).or_default();
             for v in vs {
-                if !entry.contains(v) { entry.push(v.clone()); }
+                if !entry.contains(v) {
+                    entry.push(v.clone());
+                }
             }
         }
         for (k, v) in &other.var_types {
@@ -374,7 +439,9 @@ impl ChaTable {
         for (k, vs) in &other.method_owners {
             let entry = self.method_owners.entry(k.clone()).or_default();
             for v in vs {
-                if !entry.contains(v) { entry.push(v.clone()); }
+                if !entry.contains(v) {
+                    entry.push(v.clone());
+                }
             }
         }
         for t in &other.abstract_types {
@@ -385,10 +452,15 @@ impl ChaTable {
     fn parse_class_declaration(&mut self, line: &str) {
         let is_interface = line.contains("interface ") && !line.contains("//");
         let is_class = line.contains("class ") && !line.contains("//");
-        if !is_interface && !is_class { return; }
+        if !is_interface && !is_class {
+            return;
+        }
 
-        let name = Self::extract_declared_name(line, if is_interface { "interface" } else { "class" });
-        if name.is_empty() { return; }
+        let name =
+            Self::extract_declared_name(line, if is_interface { "interface" } else { "class" });
+        if name.is_empty() {
+            return;
+        }
 
         if is_interface || line.contains("abstract ") {
             self.abstract_types.insert(name.clone());
@@ -398,7 +470,8 @@ impl ChaTable {
 
         if let Some(ext_idx) = line.find(" extends ") {
             let after = &line[ext_idx + 8..];
-            let end = after.find(|c: char| c == '{' || c == ' ' && after.contains(" implements "))
+            let end = after
+                .find(|c: char| c == '{' || c == ' ' && after.contains(" implements "))
                 .unwrap_or(after.len());
             let parent_part = &after[..end];
             for p in parent_part.split(',') {
@@ -406,7 +479,9 @@ impl ChaTable {
                 if !p.is_empty() && Self::is_valid_java_ident(p) {
                     all_parents.push(p.to_string());
                     let entry = self.implementors.entry(p.to_string()).or_default();
-                    if !entry.contains(&name) { entry.push(name.clone()); }
+                    if !entry.contains(&name) {
+                        entry.push(name.clone());
+                    }
                 }
             }
         }
@@ -421,7 +496,9 @@ impl ChaTable {
                     all_parents.push(iface.to_string());
                     self.abstract_types.insert(iface.to_string());
                     let entry = self.implementors.entry(iface.to_string()).or_default();
-                    if !entry.contains(&name) { entry.push(name.clone()); }
+                    if !entry.contains(&name) {
+                        entry.push(name.clone());
+                    }
                 }
             }
         }
@@ -439,9 +516,12 @@ impl ChaTable {
                 let after_new = &line[new_idx + 4..];
                 let concrete_type = after_new
                     .split(|c: char| c == '(' || c == '<' || c == ' ')
-                    .next().unwrap_or("").trim();
+                    .next()
+                    .unwrap_or("")
+                    .trim();
                 if Self::is_valid_java_ident(var_name) && Self::is_valid_java_ident(concrete_type) {
-                    self.var_types.insert(var_name.to_string(), concrete_type.to_string());
+                    self.var_types
+                        .insert(var_name.to_string(), concrete_type.to_string());
                 }
             }
         }
@@ -461,7 +541,10 @@ impl ChaTable {
 
     fn is_valid_java_ident(s: &str) -> bool {
         !s.is_empty()
-            && s.chars().next().map(|c| c.is_alphabetic() || c == '_').unwrap_or(false)
+            && s.chars()
+                .next()
+                .map(|c| c.is_alphabetic() || c == '_')
+                .unwrap_or(false)
             && s.chars().all(|c| c.is_alphanumeric() || c == '_')
     }
 
@@ -470,15 +553,21 @@ impl ChaTable {
 
         if let Some(concrete) = self.var_types.get(var_name) {
             let qualified = format!("{}.{}", concrete, method_name);
-            if !targets.contains(&qualified) { targets.push(qualified); }
-            if !targets.contains(&method_name.to_string()) { targets.push(method_name.to_string()); }
+            if !targets.contains(&qualified) {
+                targets.push(qualified);
+            }
+            if !targets.contains(&method_name.to_string()) {
+                targets.push(method_name.to_string());
+            }
             return targets;
         }
 
         for (_abstract_type, implementors) in &self.implementors {
             for concrete in implementors {
                 let qualified = format!("{}.{}", concrete, method_name);
-                if !targets.contains(&qualified) { targets.push(qualified); }
+                if !targets.contains(&qualified) {
+                    targets.push(qualified);
+                }
             }
         }
         if !targets.contains(&method_name.to_string()) {
@@ -492,10 +581,14 @@ impl ChaTable {
         let mut queue = vec![type_name.to_string()];
         let mut visited = std::collections::HashSet::new();
         while let Some(t) = queue.pop() {
-            if !visited.insert(t.clone()) { continue; }
+            if !visited.insert(t.clone()) {
+                continue;
+            }
             if let Some(impls) = self.implementors.get(&t) {
                 for i in impls {
-                    if !result.contains(i) { result.push(i.clone()); }
+                    if !result.contains(i) {
+                        result.push(i.clone());
+                    }
                     queue.push(i.clone());
                 }
             }
@@ -526,7 +619,11 @@ pub struct TaintEngine {
 }
 
 impl TaintEngine {
-    pub fn new(max_alias_depth: usize, max_container_nesting_depth: usize, max_paths_explored: usize) -> Self {
+    pub fn new(
+        max_alias_depth: usize,
+        max_container_nesting_depth: usize,
+        max_paths_explored: usize,
+    ) -> Self {
         Self {
             tainted_symbols: HashMap::new(),
             validated_paths_count: 0,
@@ -592,7 +689,11 @@ impl TaintEngine {
         self.is_symbol_tainted(name)
     }
 
-    pub fn evaluate_taint_state_recursive(&self, node: &NormalizedNode, depth: usize) -> Option<TaintState> {
+    pub fn evaluate_taint_state_recursive(
+        &self,
+        node: &NormalizedNode,
+        depth: usize,
+    ) -> Option<TaintState> {
         if depth > 20 {
             return None;
         }
@@ -636,28 +737,37 @@ impl TaintEngine {
                         }
                     }
                 }
-                if combined.tainted { Some(combined) } else { None }
+                if combined.tainted {
+                    Some(combined)
+                } else {
+                    None
+                }
             }
-            NormalizedKind::Call { callee, arguments, .. } => {
+            NormalizedKind::Call {
+                callee, arguments, ..
+            } => {
                 let c_lower = callee.to_lowercase();
                 let method = c_lower.split('.').last().unwrap_or("");
                 if (method == "get" || method == "getordefault" || method == "getitem")
-                    && !c_lower.contains("getparameter") && !c_lower.contains("getheader")
-                    && !c_lower.contains("getrequest") && !c_lower.contains("getwriter")
+                    && !c_lower.contains("getparameter")
+                    && !c_lower.contains("getheader")
+                    && !c_lower.contains("getrequest")
+                    && !c_lower.contains("getwriter")
                 {
                     if let Some(receiver) = callee.rsplit('.').nth(1) {
                         let receiver = receiver.trim();
                         if arguments.len() >= 1 {
                             let key_arg = &arguments[0];
-                            let key_raw = key_arg.raw.trim().trim_matches(|c| c == '"' || c == '\'');
-                            
+                            let key_raw =
+                                key_arg.raw.trim().trim_matches(|c| c == '"' || c == '\'');
+
                             let key_var = format!("{}[\"{}\"]", receiver, key_raw);
                             if let Some(state) = self.is_symbol_tainted(&key_var) {
                                 if state.tainted {
                                     return Some(state);
                                 }
                             }
-                            
+
                             if let Ok(idx) = key_raw.parse::<usize>() {
                                 let list_var = format!("{}[{}]", receiver, idx);
                                 if let Some(state) = self.is_symbol_tainted(&list_var) {
@@ -667,9 +777,10 @@ impl TaintEngine {
                                 }
                             }
                         }
-                        
+
                         let has_precise = self.tainted_symbols.keys().any(|k| {
-                            k.starts_with(&format!("{}[", receiver)) || k.starts_with(&format!("{}[\"", receiver))
+                            k.starts_with(&format!("{}[", receiver))
+                                || k.starts_with(&format!("{}[\"", receiver))
                         });
                         if !has_precise {
                             if let Some(state) = self.is_symbol_tainted(receiver) {
@@ -704,7 +815,8 @@ impl TaintEngine {
                         if pos > 0 {
                             let receiver = raw[..pos].trim();
                             let has_precise = self.tainted_symbols.keys().any(|k| {
-                                k.starts_with(&format!("{}[", receiver)) || k.starts_with(&format!("{}[\"", receiver))
+                                k.starts_with(&format!("{}[", receiver))
+                                    || k.starts_with(&format!("{}[\"", receiver))
                             });
                             if has_precise {
                                 return None;
@@ -726,21 +838,26 @@ impl TaintEngine {
             NormalizedKind::Assignment { rhs, .. } => {
                 self.evaluate_taint_state_recursive(rhs, depth + 1)
             }
-            NormalizedKind::Return(expr) => {
-                self.evaluate_taint_state_recursive(expr, depth + 1)
-            }
+            NormalizedKind::Return(expr) => self.evaluate_taint_state_recursive(expr, depth + 1),
             _ => None,
         }
     }
 
     fn is_sanitizer_call(callee: &str) -> bool {
         let c = callee.to_lowercase();
-        c.contains("escape") || c.contains("sanitize") || c.contains("encode")
-            || c.contains("htmlentities") || c.contains("strip_tags")
-            || c.contains("htmlspecialchars") || c.contains("validate")
-            || c.contains("preparedstatement") || c.contains("parameterized")
-            || c.contains("urlencode") || c.contains("base64")
-            || c.contains("check_ref_name") || c.contains("ref_name_valid")
+        c.contains("escape")
+            || c.contains("sanitize")
+            || c.contains("encode")
+            || c.contains("htmlentities")
+            || c.contains("strip_tags")
+            || c.contains("htmlspecialchars")
+            || c.contains("validate")
+            || c.contains("preparedstatement")
+            || c.contains("parameterized")
+            || c.contains("urlencode")
+            || c.contains("base64")
+            || c.contains("check_ref_name")
+            || c.contains("ref_name_valid")
     }
 
     pub fn propagate_node(&mut self, node: &NormalizedNode) {
@@ -755,15 +872,18 @@ impl TaintEngine {
                     NormalizedKind::Identifier(n) => n.clone(),
                     _ => lhs.raw.clone(),
                 };
-                
+
                 // Check if RHS is a taint source or is tainted
                 let fp = self.file_path.clone();
                 let is_source = contains_source_expression(&rhs.raw, fp.as_deref())
-                    || self.evaluate_taint_state_recursive(rhs, 0)
-                        .map(|s| s.tainted).unwrap_or(false);
+                    || self
+                        .evaluate_taint_state_recursive(rhs, 0)
+                        .map(|s| s.tainted)
+                        .unwrap_or(false);
 
                 if is_source {
-                    let mut inherited_state = self.evaluate_taint_state_recursive(rhs, 0)
+                    let mut inherited_state = self
+                        .evaluate_taint_state_recursive(rhs, 0)
                         .unwrap_or_else(|| TaintState {
                             tainted: true,
                             sanitized_for: HashSet::new(),
@@ -779,18 +899,18 @@ impl TaintEngine {
                         }
                     }
 
-                    self.tainted_symbols.insert(dest.clone(), inherited_state.clone());
+                    self.tainted_symbols
+                        .insert(dest.clone(), inherited_state.clone());
 
                     // If RHS is a Block representing a collection literal, propagate to elements!
                     if let NormalizedKind::Block(children) = &rhs.kind {
                         self.list_lengths.insert(dest.clone(), children.len());
                         for (idx, child) in children.iter().enumerate() {
-                            if let Some(child_state) = self.evaluate_taint_state_recursive(child, 0) {
+                            if let Some(child_state) = self.evaluate_taint_state_recursive(child, 0)
+                            {
                                 if child_state.tainted {
-                                    self.tainted_symbols.insert(
-                                        format!("{}[{}]", dest, idx),
-                                        child_state,
-                                    );
+                                    self.tainted_symbols
+                                        .insert(format!("{}[{}]", dest, idx), child_state);
                                 }
                             }
                         }
@@ -802,7 +922,8 @@ impl TaintEngine {
                         }
                     }
                     self.tainted_symbols.retain(|k, _| {
-                        !k.starts_with(&format!("{}[", dest)) && !k.starts_with(&format!("{}[\"", dest))
+                        !k.starts_with(&format!("{}[", dest))
+                            && !k.starts_with(&format!("{}[\"", dest))
                     });
 
                     // Check if RHS is a variable/identifier (e.g. arr2 = arr1)
@@ -810,7 +931,7 @@ impl TaintEngine {
                         if let Some(&len) = self.list_lengths.get(rhs_name) {
                             self.list_lengths.insert(dest.clone(), len);
                         }
-                        
+
                         let mut elements_to_add = Vec::new();
                         for (k, v) in &self.tainted_symbols {
                             if k.starts_with(&format!("{}[", rhs_name)) {
@@ -827,7 +948,9 @@ impl TaintEngine {
                     }
                 }
             }
-            NormalizedKind::Call { callee, arguments, .. } => {
+            NormalizedKind::Call {
+                callee, arguments, ..
+            } => {
                 // Check sanitizer
                 if Self::is_sanitizer_call(callee) {
                     // Mark all arguments as sanitized
@@ -844,22 +967,31 @@ impl TaintEngine {
                 // Collection mutation methods
                 let c_lower = callee.to_lowercase();
                 let method = c_lower.split('.').last().unwrap_or("");
-                
-                if method == "append" || method == "add" || method == "put" || method == "push" || method == "insert" {
+
+                if method == "append"
+                    || method == "add"
+                    || method == "put"
+                    || method == "push"
+                    || method == "insert"
+                {
                     if let Some(receiver) = callee.rsplit('.').nth(1) {
                         let receiver = receiver.trim();
                         if method == "put" && arguments.len() >= 2 {
                             let key_arg = &arguments[0];
                             let val_arg = &arguments[1];
-                            if let Some(val_state) = self.evaluate_taint_state_recursive(val_arg, 0) {
+                            if let Some(val_state) = self.evaluate_taint_state_recursive(val_arg, 0)
+                            {
                                 if val_state.tainted {
-                                    let key_raw = key_arg.raw.trim_matches(|c| c == '"' || c == '\'');
+                                    let key_raw =
+                                        key_arg.raw.trim_matches(|c| c == '"' || c == '\'');
                                     let key_var = format!("{}[\"{}\"]", receiver, key_raw);
                                     self.tainted_symbols.insert(key_var, val_state.clone());
                                     self.tainted_symbols.insert(receiver.to_string(), val_state);
                                 }
                             }
-                        } else if (method == "append" || method == "add" || method == "push") && arguments.len() >= 1 {
+                        } else if (method == "append" || method == "add" || method == "push")
+                            && arguments.len() >= 1
+                        {
                             let (val_state, key_var) = if method == "add" && arguments.len() == 2 {
                                 let idx_arg = &arguments[0];
                                 let val_arg = &arguments[1];
@@ -869,8 +1001,10 @@ impl TaintEngine {
                             } else {
                                 let val_arg = &arguments[0];
                                 let val_state = self.evaluate_taint_state_recursive(val_arg, 0);
-                                let current_len = self.list_lengths.get(receiver).cloned().unwrap_or(0);
-                                self.list_lengths.insert(receiver.to_string(), current_len + 1);
+                                let current_len =
+                                    self.list_lengths.get(receiver).cloned().unwrap_or(0);
+                                self.list_lengths
+                                    .insert(receiver.to_string(), current_len + 1);
                                 (val_state, format!("{}[{}]", receiver, current_len))
                             };
 
@@ -893,14 +1027,18 @@ impl TaintEngine {
                             };
 
                             let src_len = self.list_lengths.get(&arg_name).cloned().unwrap_or(0);
-                            let receiver_len = self.list_lengths.get(receiver).cloned().unwrap_or(0);
+                            let receiver_len =
+                                self.list_lengths.get(receiver).cloned().unwrap_or(0);
 
                             let mut elements_to_add = Vec::new();
                             for (k, v) in &self.tainted_symbols {
                                 if k.starts_with(&format!("{}[", arg_name)) {
                                     let idx_str = &k[arg_name.len() + 1..k.len() - 1];
                                     if let Ok(idx) = idx_str.parse::<usize>() {
-                                        elements_to_add.push((format!("{}[{}]", receiver, receiver_len + idx), v.clone()));
+                                        elements_to_add.push((
+                                            format!("{}[{}]", receiver, receiver_len + idx),
+                                            v.clone(),
+                                        ));
                                     }
                                 }
                             }
@@ -908,7 +1046,8 @@ impl TaintEngine {
                                 self.tainted_symbols.insert(new_k, new_v);
                             }
 
-                            self.list_lengths.insert(receiver.to_string(), receiver_len + src_len);
+                            self.list_lengths
+                                .insert(receiver.to_string(), receiver_len + src_len);
                             if let Some(src_state) = self.tainted_symbols.get(&arg_name).cloned() {
                                 self.tainted_symbols.insert(receiver.to_string(), src_state);
                             }
@@ -928,7 +1067,8 @@ impl TaintEngine {
                             for (k, v) in &self.tainted_symbols {
                                 if k.starts_with(&format!("{}[\"", arg_name)) {
                                     let suffix = &k[arg_name.len()..];
-                                    elements_to_add.push((format!("{}{}", receiver, suffix), v.clone()));
+                                    elements_to_add
+                                        .push((format!("{}{}", receiver, suffix), v.clone()));
                                 }
                             }
                             for (new_k, new_v) in elements_to_add {
@@ -946,9 +1086,10 @@ impl TaintEngine {
                         if arguments.len() >= 1 {
                             let arg = &arguments[0];
                             let arg_raw = arg.raw.trim().trim_matches(|c| c == '"' || c == '\'');
-                            
+
                             if let Ok(idx_to_remove) = arg_raw.parse::<usize>() {
-                                let current_len = self.list_lengths.get(receiver).cloned().unwrap_or(0);
+                                let current_len =
+                                    self.list_lengths.get(receiver).cloned().unwrap_or(0);
                                 let mut shifted_elements = Vec::new();
                                 let mut keys_to_remove = Vec::new();
                                 for (k, v) in &self.tainted_symbols {
@@ -957,7 +1098,10 @@ impl TaintEngine {
                                         let idx_str = &k[receiver.len() + 1..k.len() - 1];
                                         if let Ok(idx) = idx_str.parse::<usize>() {
                                             if idx > idx_to_remove {
-                                                shifted_elements.push((format!("{}[{}]", receiver, idx - 1), v.clone()));
+                                                shifted_elements.push((
+                                                    format!("{}[{}]", receiver, idx - 1),
+                                                    v.clone(),
+                                                ));
                                             }
                                         }
                                     }
@@ -969,7 +1113,8 @@ impl TaintEngine {
                                     self.tainted_symbols.insert(new_k, new_v);
                                 }
                                 if current_len > 0 {
-                                    self.list_lengths.insert(receiver.to_string(), current_len - 1);
+                                    self.list_lengths
+                                        .insert(receiver.to_string(), current_len - 1);
                                 }
                             } else {
                                 let key_var = format!("{}[\"{}\"]", receiver, arg_raw);
@@ -978,7 +1123,8 @@ impl TaintEngine {
 
                             // If no precise element is left tainted, remove the container itself from tainted_symbols
                             let has_precise = self.tainted_symbols.keys().any(|k| {
-                                k.starts_with(&format!("{}[", receiver)) || k.starts_with(&format!("{}[\"", receiver))
+                                k.starts_with(&format!("{}[", receiver))
+                                    || k.starts_with(&format!("{}[\"", receiver))
                             });
                             if !has_precise {
                                 self.tainted_symbols.remove(receiver);
@@ -989,7 +1135,8 @@ impl TaintEngine {
                     if let Some(receiver) = callee.rsplit('.').nth(1) {
                         let receiver = receiver.trim();
                         self.tainted_symbols.retain(|k, _| {
-                            !k.starts_with(&format!("{}[", receiver)) && !k.starts_with(&format!("{}[\"", receiver))
+                            !k.starts_with(&format!("{}[", receiver))
+                                && !k.starts_with(&format!("{}[\"", receiver))
                         });
                         self.tainted_symbols.remove(receiver);
                         self.list_lengths.insert(receiver.to_string(), 0);
@@ -998,23 +1145,75 @@ impl TaintEngine {
 
                 // Sink detection for single-file engine
                 let sink_kws = [
-                    "execute", "query", "preparestatement", "preparedstatement",
-                    "executequery", "executeupdate", "executebatch", "createquery",
-                    "createnativequery", "nativequery", "all", "first", "list",
-                    "uniqueresult", "singleresult", "getresultlist",
-                    "run", "popen", "system", "subprocess", "exec", "processbuilder", "runtime.exec",
-                    "open", "fileinputstream", "fileoutputstream", "filechannel",
-                    "new file", "paths.get", "path(",
-                    "readobject", "loads", "load", "unpack", "decode", "deserialize", "jsonpickle", "marshal.loads",
-                    "objectinputstream", "yaml.load", "pickle.loads",
-                    "urlopen", "get", "post", "openconnection", "openstream",
-                    "requests.get", "requests.post", "urllib",
-                    "setheader", "addheader", "addcookie", "sendredirect",
-                    "setcontenttype", "setcharacterencoding",
-                    "write", "print", "println", "getwriter", "out.print", "out.println",
-                    "printwriter", "render_template_string", "response.write",
-                    "setattribute", "putvalue", "setinitparameter",
-                    "search", "lookup",
+                    "execute",
+                    "query",
+                    "preparestatement",
+                    "preparedstatement",
+                    "executequery",
+                    "executeupdate",
+                    "executebatch",
+                    "createquery",
+                    "createnativequery",
+                    "nativequery",
+                    "all",
+                    "first",
+                    "list",
+                    "uniqueresult",
+                    "singleresult",
+                    "getresultlist",
+                    "run",
+                    "popen",
+                    "system",
+                    "subprocess",
+                    "exec",
+                    "processbuilder",
+                    "runtime.exec",
+                    "open",
+                    "fileinputstream",
+                    "fileoutputstream",
+                    "filechannel",
+                    "new file",
+                    "paths.get",
+                    "path(",
+                    "readobject",
+                    "loads",
+                    "load",
+                    "unpack",
+                    "decode",
+                    "deserialize",
+                    "jsonpickle",
+                    "marshal.loads",
+                    "objectinputstream",
+                    "yaml.load",
+                    "pickle.loads",
+                    "urlopen",
+                    "get",
+                    "post",
+                    "openconnection",
+                    "openstream",
+                    "requests.get",
+                    "requests.post",
+                    "urllib",
+                    "setheader",
+                    "addheader",
+                    "addcookie",
+                    "sendredirect",
+                    "setcontenttype",
+                    "setcharacterencoding",
+                    "write",
+                    "print",
+                    "println",
+                    "getwriter",
+                    "out.print",
+                    "out.println",
+                    "printwriter",
+                    "render_template_string",
+                    "response.write",
+                    "setattribute",
+                    "putvalue",
+                    "setinitparameter",
+                    "search",
+                    "lookup",
                 ];
 
                 if sink_kws.iter().any(|&s| c_lower.contains(s)) {
@@ -1042,7 +1241,9 @@ impl TaintEngine {
                     let any_ldap_arg_tainted = arguments.iter().any(|arg| {
                         if let Some(state) = self.evaluate_taint_state_recursive(arg, 0) {
                             state.tainted && !state.sanitized_for.contains(&CWE::CWE90)
-                        } else { false }
+                        } else {
+                            false
+                        }
                     });
                     if any_ldap_arg_tainted {
                         self.validated_paths_count += 1;
@@ -1051,8 +1252,10 @@ impl TaintEngine {
 
                 // Collection getter taint propagation
                 if (method == "get" || method == "getordefault" || method == "getitem")
-                    && !c_lower.contains("getparameter") && !c_lower.contains("getheader")
-                    && !c_lower.contains("getrequest") && !c_lower.contains("getwriter")
+                    && !c_lower.contains("getparameter")
+                    && !c_lower.contains("getheader")
+                    && !c_lower.contains("getrequest")
+                    && !c_lower.contains("getwriter")
                 {
                     let callee_taint = self.is_symbol_tainted(callee);
                     if let Some(state) = callee_taint {
@@ -1067,29 +1270,40 @@ impl TaintEngine {
                     self.propagate_node(child);
                 }
             }
-            NormalizedKind::If { condition, consequent, alternate } => {
+            NormalizedKind::If {
+                condition,
+                consequent,
+                alternate,
+            } => {
                 self.propagate_node(condition);
 
                 let cond_raw_lower = condition.raw.to_lowercase();
                 let tokens = get_word_tokens(&cond_raw_lower);
                 let has_san_token = tokens.iter().any(|tok| {
-                    tok.contains("matches") || tok.contains("startswith") || tok.contains("ends_with")
-                        || tok.contains("contains") || tok.contains("validate")
-                        || tok.contains("validator") || tok.contains("valid") || tok.contains("check")
+                    tok.contains("matches")
+                        || tok.contains("startswith")
+                        || tok.contains("ends_with")
+                        || tok.contains("contains")
+                        || tok.contains("validate")
+                        || tok.contains("validator")
+                        || tok.contains("valid")
+                        || tok.contains("check")
                         || tok == "in"
                 });
                 let is_san_cond = has_san_token || {
-                    let has_equality = cond_raw_lower.contains("==") || cond_raw_lower.contains("!=");
-                    let is_null_check = cond_raw_lower.contains("null") || cond_raw_lower.contains("none");
+                    let has_equality =
+                        cond_raw_lower.contains("==") || cond_raw_lower.contains("!=");
+                    let is_null_check =
+                        cond_raw_lower.contains("null") || cond_raw_lower.contains("none");
                     has_equality && !is_null_check
                 };
 
                 if is_san_cond {
-                    let is_negated = cond_raw_lower.starts_with("not ") 
-                        || cond_raw_lower.contains("not ") 
+                    let is_negated = cond_raw_lower.starts_with("not ")
+                        || cond_raw_lower.contains("not ")
                         || cond_raw_lower.contains("!")
                         || cond_raw_lower.contains("!=");
-                    
+
                     let cwes_to_sanitize = get_sanitized_cwes_for_condition(&cond_raw_lower);
 
                     if !is_negated {
@@ -1101,9 +1315,9 @@ impl TaintEngine {
                                 }
                             }
                         }
-                        
+
                         self.propagate_node(consequent);
-                        
+
                         // Restore states of pre-existing variables, preserving new assignments
                         for (k, old_state) in saved_symbols {
                             if let Some(new_state) = self.tainted_symbols.get(&k) {
@@ -1114,7 +1328,7 @@ impl TaintEngine {
                                 self.tainted_symbols.insert(k, old_state);
                             }
                         }
-                        
+
                         if let Some(alt) = alternate {
                             self.propagate_node(alt);
                         }
@@ -1122,7 +1336,7 @@ impl TaintEngine {
                         let saved_symbols = self.tainted_symbols.clone();
                         self.propagate_node(consequent);
                         let exits_early = node_exits_early(consequent);
-                        
+
                         let mut alt_symbols = saved_symbols.clone();
                         for (_, state) in alt_symbols.iter_mut() {
                             if state.tainted {
@@ -1131,11 +1345,11 @@ impl TaintEngine {
                                 }
                             }
                         }
-                        
+
                         if let Some(alt) = alternate {
                             self.tainted_symbols = alt_symbols;
                             self.propagate_node(alt);
-                            
+
                             // Restore after alternate branch
                             for (k, old_state) in saved_symbols {
                                 if let Some(new_state) = self.tainted_symbols.get(&k) {
@@ -1167,7 +1381,11 @@ impl TaintEngine {
             NormalizedKind::Return(expr) => {
                 self.propagate_node(expr);
             }
-            NormalizedKind::Try { body, catch_clauses, finally_clause } => {
+            NormalizedKind::Try {
+                body,
+                catch_clauses,
+                finally_clause,
+            } => {
                 self.propagate_node(body);
                 for catch in catch_clauses {
                     self.propagate_node(catch);
@@ -1204,21 +1422,29 @@ impl TaintEngine {
                         NormalizedKind::Identifier(n) => n.clone(),
                         _ => lhs.raw.clone(),
                     };
-                    self.tainted_symbols.insert(dest, TaintState {
-                        tainted: true,
-                        sanitized_for: HashSet::new(),
-                        source_line: Some(rhs.span.start_line),
-                        source_var: Some(rhs.raw.clone()),
-                    });
+                    self.tainted_symbols.insert(
+                        dest,
+                        TaintState {
+                            tainted: true,
+                            sanitized_for: HashSet::new(),
+                            source_line: Some(rhs.span.start_line),
+                            source_var: Some(rhs.raw.clone()),
+                        },
+                    );
                 }
                 self.seed_sources(rhs);
             }
-            NormalizedKind::Block(children) | NormalizedKind::FunctionDefinition { body: children, .. } => {
+            NormalizedKind::Block(children)
+            | NormalizedKind::FunctionDefinition { body: children, .. } => {
                 for child in children {
                     self.seed_sources(child);
                 }
             }
-            NormalizedKind::If { condition, consequent, alternate } => {
+            NormalizedKind::If {
+                condition,
+                consequent,
+                alternate,
+            } => {
                 self.seed_sources(condition);
                 self.seed_sources(consequent);
                 if let Some(alt) = alternate {
@@ -1231,14 +1457,24 @@ impl TaintEngine {
                 self.seed_sources(body);
             }
             NormalizedKind::Return(expr) => self.seed_sources(expr),
-            NormalizedKind::Try { body, catch_clauses, finally_clause } => {
+            NormalizedKind::Try {
+                body,
+                catch_clauses,
+                finally_clause,
+            } => {
                 self.seed_sources(body);
-                for c in catch_clauses { self.seed_sources(c); }
-                if let Some(f) = finally_clause { self.seed_sources(f); }
+                for c in catch_clauses {
+                    self.seed_sources(c);
+                }
+                if let Some(f) = finally_clause {
+                    self.seed_sources(f);
+                }
             }
             NormalizedKind::Catch { body, .. } => self.seed_sources(body),
             NormalizedKind::Call { arguments, .. } => {
-                for arg in arguments { self.seed_sources(arg); }
+                for arg in arguments {
+                    self.seed_sources(arg);
+                }
             }
             _ => {}
         }
@@ -1269,15 +1505,26 @@ pub fn map_source_to_domain(source: &str) -> CweDomain {
         return CweDomain::Generic;
     }
     // Return Generic for HTTP requests, parameters, headers, cookies, sessions, etc.
-    if s.contains("parameter") || s.contains("header") || s.contains("cookie")
-        || s.contains("request") || s.contains("environ") || s.contains("session")
-        || s.contains("args") || s.contains("form") || s.contains("values")
-        || s.contains("input") || s.contains("reader")
+    if s.contains("parameter")
+        || s.contains("header")
+        || s.contains("cookie")
+        || s.contains("request")
+        || s.contains("environ")
+        || s.contains("session")
+        || s.contains("args")
+        || s.contains("form")
+        || s.contains("values")
+        || s.contains("input")
+        || s.contains("reader")
     {
         return CweDomain::Generic;
     }
-    if s.contains("sql") || s.contains("query") || s.contains("select")
-        || s.contains("insert") || s.contains("update") || s.contains("delete")
+    if s.contains("sql")
+        || s.contains("query")
+        || s.contains("select")
+        || s.contains("insert")
+        || s.contains("update")
+        || s.contains("delete")
         || s.contains("execute")
     {
         return CweDomain::Sql;
@@ -1285,7 +1532,8 @@ pub fn map_source_to_domain(source: &str) -> CweDomain {
     if s.contains("html") || s.contains("template") || s.contains("render") {
         return CweDomain::Xss;
     }
-    if s.contains("cmd") || s.contains("command")
+    if s.contains("cmd")
+        || s.contains("command")
         || (s.contains("exec") && !s.contains("execute"))
         || s.contains("shell")
     {
@@ -1294,7 +1542,8 @@ pub fn map_source_to_domain(source: &str) -> CweDomain {
     if s.contains("path") || s.contains("file") || s.contains("dir") {
         return CweDomain::PathTraversal;
     }
-    if s.contains("pickle") || s.contains("yaml") || s.contains("serial") || s.contains("deserial") {
+    if s.contains("pickle") || s.contains("yaml") || s.contains("serial") || s.contains("deserial")
+    {
         return CweDomain::Deserialization;
     }
     if s.contains("ldap") || s.contains("dircontext") {
@@ -1316,17 +1565,25 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
     }
 
     // HTML escaping / encoding
-    if c.contains("escape") || c.contains("htmlentities") || c.contains("htmlspecialchars")
-        || c.contains("markupsafe") || c.contains("bleach")
-        || c.contains("forhtml") || c.contains("forxml") || c.contains("owasp.encoder")
-        || c.contains("encodeforhtml") || c.contains("encodeforxml")
+    if c.contains("escape")
+        || c.contains("htmlentities")
+        || c.contains("htmlspecialchars")
+        || c.contains("markupsafe")
+        || c.contains("bleach")
+        || c.contains("forhtml")
+        || c.contains("forxml")
+        || c.contains("owasp.encoder")
+        || c.contains("encodeforhtml")
+        || c.contains("encodeforxml")
     {
         result.push(CWE::CWE79);
         result.push(CWE::CWE113);
     }
     // JS/CSS escaping / encoding (neutralizes XSS)
-    if c.contains("forjavascript") || c.contains("forcss") 
-        || c.contains("encodeforjavascript") || c.contains("encodeforcss")
+    if c.contains("forjavascript")
+        || c.contains("forcss")
+        || c.contains("encodeforjavascript")
+        || c.contains("encodeforcss")
     {
         result.push(CWE::CWE79);
     }
@@ -1342,17 +1599,27 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
         result.push(CWE::CWE78);
     }
     // SQL parameterization
-    if c.contains("parameterize") || c.contains("prepared") || c.contains("escape_string")
-        || c.contains("escapesql") || c.contains("escape_sql") || c.contains("escapestring")
-        || c.contains("quote_ident") || c.contains("mogrify")
+    if c.contains("parameterize")
+        || c.contains("prepared")
+        || c.contains("escape_string")
+        || c.contains("escapesql")
+        || c.contains("escape_sql")
+        || c.contains("escapestring")
+        || c.contains("quote_ident")
+        || c.contains("mogrify")
     {
         result.push(CWE::CWE89);
     }
     // Path normalization
-    if c.contains("canonicalize") || c.contains("normalize")
-        || c.contains("clean_path") || c.contains("clean_join") || c.contains("safe_join")
-        || c.contains("check_path_traversal") || c.contains("verify_path")
-        || c.contains("check_ref_name") || c.contains("ref_name_valid")
+    if c.contains("canonicalize")
+        || c.contains("normalize")
+        || c.contains("clean_path")
+        || c.contains("clean_join")
+        || c.contains("safe_join")
+        || c.contains("check_path_traversal")
+        || c.contains("verify_path")
+        || c.contains("check_ref_name")
+        || c.contains("ref_name_valid")
     {
         result.push(CWE::CWE22);
     }
@@ -1363,23 +1630,29 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
         result.push(CWE::CWE22);
     }
     // SSRF sanitization / validation
-    if c.contains("deny_unsafe_hosts") || c.contains("url_is_local") || c.contains("is_local_ip")
-        || c.contains("safe_url") || c.contains("validate_url")
+    if c.contains("deny_unsafe_hosts")
+        || c.contains("url_is_local")
+        || c.contains("is_local_ip")
+        || c.contains("safe_url")
+        || c.contains("validate_url")
     {
         result.push(CWE::CWE918);
     }
     result
 }
 
-
 /// Returns true if a call to this function "un-sanitizes" (re-taints) a value.
 /// e.g. pickle.loads re-taints even if the bytes were previously sanitized.
 pub fn is_desanitizer(callee: &str) -> bool {
     let c = callee.to_lowercase();
-    c.contains("pickle.loads") || c.contains("pickle.load")
-        || c.contains("yaml.load") || c.contains("marshal.loads")
-        || c.contains("marshal.load") || c.contains("jsonpickle")
-        || c.contains("readobject") || c.contains("shelve.open")
+    c.contains("pickle.loads")
+        || c.contains("pickle.load")
+        || c.contains("yaml.load")
+        || c.contains("marshal.loads")
+        || c.contains("marshal.load")
+        || c.contains("jsonpickle")
+        || c.contains("readobject")
+        || c.contains("shelve.open")
         || c.contains("dbm.open")
 }
 
@@ -1389,8 +1662,11 @@ pub fn get_sanitized_cwes_for_condition(cond: &str) -> Vec<CWE> {
     if cond_lower.contains("url") || cond_lower.contains("host") || cond_lower.contains("ip") {
         cwes.push(CWE::CWE918);
     }
-    if cond_lower.contains("path") || cond_lower.contains("file") || cond_lower.contains("dir")
-        || cond_lower.contains("startswith") || cond_lower.contains("contains")
+    if cond_lower.contains("path")
+        || cond_lower.contains("file")
+        || cond_lower.contains("dir")
+        || cond_lower.contains("startswith")
+        || cond_lower.contains("contains")
     {
         cwes.push(CWE::CWE22);
     }

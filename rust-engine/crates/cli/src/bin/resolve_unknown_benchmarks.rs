@@ -1,13 +1,13 @@
-use std::fs;
 use std::collections::HashMap;
+use std::fs;
 
 fn main() {
     let java_bench_path = "d:/V2 Backup/benchmarks/benchmark_java.jsonl";
     let python_bench_path = "d:/V2 Backup/benchmarks/benchmark_python.jsonl";
-    
+
     // We want to map (cwe, nodes, edges) -> Vec<Class Name/Test ID>
     let mut size_to_bench: HashMap<(String, usize, usize), Vec<String>> = HashMap::new();
-    
+
     for (path, lang) in &[(java_bench_path, "java"), (python_bench_path, "python")] {
         if let Ok(content) = fs::read_to_string(path) {
             for line in content.lines() {
@@ -18,15 +18,27 @@ fn main() {
                     Ok(v) => v,
                     Err(_) => continue,
                 };
-                let code = data.get("code").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let cwe = data.get("cwe").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                let vulnerable = data.get("vulnerable").and_then(|v| v.as_bool()).unwrap_or(false);
-                
+                let code = data
+                    .get("code")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let cwe = data
+                    .get("cwe")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                let vulnerable = data
+                    .get("vulnerable")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
                 // Parse benchmark ID from code
                 let mut test_id = "unknown".to_string();
                 if let Some(pos) = code.find("BenchmarkTest") {
                     let start = pos;
-                    let end = code[start..].find(|c: char| !c.is_numeric() && !c.is_alphabetic())
+                    let end = code[start..]
+                        .find(|c: char| !c.is_numeric() && !c.is_alphabetic())
                         .map(|idx| start + idx)
                         .unwrap_or(code.len());
                     // Clean up suffix like _get or _post if any
@@ -37,19 +49,28 @@ fn main() {
                         test_id = candidate;
                     }
                 }
-                
+
                 if vulnerable {
                     let mut program = ir::Program::new();
                     let mut gst = symbols::global::GlobalSymbolTable::new();
-                    let filename = if *lang == "java" { "Test.java" } else { "test.py" }.to_string();
+                    let filename = if *lang == "java" {
+                        "Test.java"
+                    } else {
+                        "test.py"
+                    }
+                    .to_string();
                     program.source_files.insert(filename.clone(), code.clone());
-                    
-                    if gst.load_file(&mut program, &code, &filename, &lang.to_string()).is_ok() {
+
+                    if gst
+                        .load_file(&mut program, &code, &filename, &lang.to_string())
+                        .is_ok()
+                    {
                         gst.resolve_inheritance_hierarchy();
                         let cg = symbols::call_graph::CallGraph::build(&program, &gst);
                         let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
-                        
-                        size_to_bench.entry((cwe.clone(), icfg.nodes.len(), icfg.edges.len()))
+
+                        size_to_bench
+                            .entry((cwe.clone(), icfg.nodes.len(), icfg.edges.len()))
                             .or_insert_with(Vec::new)
                             .push(test_id);
                     }
@@ -57,7 +78,7 @@ fn main() {
             }
         }
     }
-    
+
     // Print all non-CWE-22 FNs in the baseline log that we want to map:
     let targets = vec![
         ("CWE-328", 85, 92),
@@ -79,10 +100,13 @@ fn main() {
         ("CWE-78", 68, 63),
         ("CWE-78", 76, 73),
     ];
-    
+
     for (cwe, nodes, edges) in targets {
         if let Some(candidates) = size_to_bench.get(&(cwe.to_string(), nodes, edges)) {
-            println!("Target ({}, nodes={}, edges={}) -> Candidates: {:?}", cwe, nodes, edges, candidates);
+            println!(
+                "Target ({}, nodes={}, edges={}) -> Candidates: {:?}",
+                cwe, nodes, edges, candidates
+            );
         } else {
             // Try matching with small delta (e.g. edge difference of 1 due to virtual __init__.py or siblings)
             let mut matches = Vec::new();
@@ -91,7 +115,10 @@ fn main() {
                     matches.extend(val.clone());
                 }
             }
-            println!("Target ({}, nodes={}, edges={}) -> Near Matches: {:?}", cwe, nodes, edges, matches);
+            println!(
+                "Target ({}, nodes={}, edges={}) -> Near Matches: {:?}",
+                cwe, nodes, edges, matches
+            );
         }
     }
 }

@@ -1,8 +1,8 @@
 use normalizer::{NormalizedKind, NormalizedNode};
 use serde::{Deserialize, Serialize};
 
-pub mod icfg;
 pub mod evaluator;
+pub mod icfg;
 pub use icfg::{IcfgEdge, IcfgEdgeKind, IcfgNode, IcfgNodeKind, InterproceduralCFG};
 
 pub type NodeId = u32;
@@ -135,7 +135,8 @@ impl CfgBuilder {
                     kind: CfgNodeKind::Branch,
                 });
 
-                let cons_entry = self.build_recursive(consequent, branch_id, target_exit, break_target);
+                let cons_entry =
+                    self.build_recursive(consequent, branch_id, target_exit, break_target);
                 if let Some(ce) = cons_entry {
                     self.edges.push(CfgEdge {
                         from: branch_id,
@@ -173,7 +174,9 @@ impl CfgBuilder {
 
                 // Build backwards to link correctly
                 for child in children.iter().rev() {
-                    if let Some(entry) = self.build_recursive(child, parent_entry, current_exit, child_break_target) {
+                    if let Some(entry) =
+                        self.build_recursive(child, parent_entry, current_exit, child_break_target)
+                    {
                         last_entry = Some(entry);
                         current_exit = entry;
                     }
@@ -404,14 +407,14 @@ impl CfgBuilder {
                         id: node_id,
                         kind: CfgNodeKind::Statement,
                     });
-                    
+
                     let raw_trimmed = node.raw.trim();
                     let to_target = if raw_trimmed.starts_with("break") {
                         break_target.unwrap_or(target_exit)
                     } else {
                         target_exit
                     };
-                    
+
                     self.edges.push(CfgEdge {
                         from: node_id,
                         to: to_target,
@@ -422,4 +425,3 @@ impl CfgBuilder {
         }
     }
 }
-

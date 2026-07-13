@@ -1,7 +1,7 @@
-use std::fs;
-use symbols::global::GlobalSymbolTable;
 use ir::Program;
 use serde::Deserialize;
+use std::fs;
+use symbols::global::GlobalSymbolTable;
 
 #[derive(Deserialize)]
 struct HoldoutEntry {
@@ -20,11 +20,13 @@ fn main() {
     let mut gst = GlobalSymbolTable::new();
     let mut program = Program::new();
     let filename = "salt/utils/gitfs.py";
-    gst.load_file(&mut program, &entry.before, filename, &entry.language).unwrap();
+    gst.load_file(&mut program, &entry.before, filename, &entry.language)
+        .unwrap();
 
     let path_file = "D:/RepositoryCache/salt/salt/utils/path.py";
     if let Ok(path_content) = fs::read_to_string(path_file) {
-        gst.load_file(&mut program, &path_content, "salt/utils/path.py", "python").unwrap();
+        gst.load_file(&mut program, &path_content, "salt/utils/path.py", "python")
+            .unwrap();
     }
 
     if let Some(m) = program.methods.get(&ir::MethodId(67)) {

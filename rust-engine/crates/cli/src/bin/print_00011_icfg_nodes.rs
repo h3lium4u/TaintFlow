@@ -11,17 +11,27 @@ fn main() {
             break;
         }
     }
-    
+
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
     let filename = "test.py".to_string();
     program.source_files.insert(filename.clone(), code.clone());
-    gst.load_file(&mut program, &code, &filename, &"java".to_string()).unwrap();
+    gst.load_file(&mut program, &code, &filename, &"java".to_string())
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
-    
+
     for (id, node) in &icfg.nodes {
-        println!("Node {}: inst={:?}", id, node.instruction_id.map(|inst_id| program.instructions.get(&inst_id).unwrap().kind.clone()));
+        println!(
+            "Node {}: inst={:?}",
+            id,
+            node.instruction_id.map(|inst_id| program
+                .instructions
+                .get(&inst_id)
+                .unwrap()
+                .kind
+                .clone())
+        );
     }
 }

@@ -202,7 +202,10 @@ fn test_java_library_stubs_and_sanitizer() {
     }
     println!("--- JAVA ICFG NODES ---");
     for (id, node) in &icfg.nodes {
-        println!("  {:?}: label='{}', inst={:?}", id, node.label, node.instruction_id);
+        println!(
+            "  {:?}: label='{}', inst={:?}",
+            id, node.label, node.instruction_id
+        );
     }
     println!("--- JAVA ICFG EDGES ---");
     for edge in &icfg.edges {
@@ -216,11 +219,17 @@ fn test_java_library_stubs_and_sanitizer() {
     engine.run();
     println!("--- JAVA DETECTED FLOWS ---");
     for flow in &engine.flows {
-        println!("  Flow: sink_node={} sink_var='{}'", flow.sink_node_id, flow.sink_var);
+        println!(
+            "  Flow: sink_node={} sink_var='{}'",
+            flow.sink_node_id, flow.sink_var
+        );
     }
     println!("--- JAVA SUPPRESSED FLOWS ---");
     for flow in &engine.suppressed_flows {
-        println!("  Suppressed Flow: sink_node={} sink_var='{}' reason='{}'", flow.sink_node_id, flow.sink_var, flow.reason);
+        println!(
+            "  Suppressed Flow: sink_node={} sink_var='{}' reason='{}'",
+            flow.sink_node_id, flow.sink_var, flow.reason
+        );
     }
 
     // Verify the flows
@@ -279,7 +288,10 @@ fn test_python_library_stubs_and_sanitizer() {
     }
     println!("--- ICFG NODES ---");
     for (id, node) in &icfg.nodes {
-        println!("  {:?}: label='{}', inst={:?}", id, node.label, node.instruction_id);
+        println!(
+            "  {:?}: label='{}', inst={:?}",
+            id, node.label, node.instruction_id
+        );
     }
     engine.seed_sources(None);
     engine.run();
@@ -344,7 +356,12 @@ fn test_python_collections_tracking() {
     println!("DEBUG: all flows: {:?}", engine.flows);
     for (&node_id, node) in &icfg.nodes {
         if let Some(inst_id) = node.instruction_id {
-            println!("DEBUG: node {}: label={:?}, inst={:?}", node_id, node.label, program.instructions.get(&inst_id));
+            println!(
+                "DEBUG: node {}: label={:?}, inst={:?}",
+                node_id,
+                node.label,
+                program.instructions.get(&inst_id)
+            );
         }
     }
 
@@ -369,7 +386,10 @@ fn test_python_collections_tracking() {
         let method = program.methods.get(&node.method_id).unwrap();
         method.name.contains("test_dict_strong_update") && flow.sink_var == "x"
     });
-    assert!(!has_killed_flow, "Python dict strong update failed to kill taint");
+    assert!(
+        !has_killed_flow,
+        "Python dict strong update failed to kill taint"
+    );
 }
 
 #[test]
@@ -423,7 +443,10 @@ fn test_java_collections_tracking() {
         let method = program.methods.get(&node.method_id).unwrap();
         method.name.contains("testArrayStrongUpdate") && flow.sink_var == "x"
     });
-    assert!(!has_killed_flow, "Java array strong update failed to kill taint");
+    assert!(
+        !has_killed_flow,
+        "Java array strong update failed to kill taint"
+    );
 }
 
 #[test]
@@ -602,8 +625,10 @@ fn test_rc41_stub_sprint() {
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
 
-    gst.load_file(&mut program, java_code, "Test.java", "java").unwrap();
-    gst.load_file(&mut program, python_code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, java_code, "Test.java", "java")
+        .unwrap();
+    gst.load_file(&mut program, python_code, "test.py", "python")
+        .unwrap();
 
     gst.resolve_inheritance_hierarchy();
     let cg = CallGraph::build(&program, &gst);
@@ -617,7 +642,12 @@ fn test_rc41_stub_sprint() {
     println!("DEBUG: all flows: {:#?}", engine.flows);
     for (&node_id, node) in &icfg.nodes {
         if let Some(inst_id) = node.instruction_id {
-            println!("DEBUG: node {}: label={:?}, inst={:?}", node_id, node.label, program.instructions.get(&inst_id));
+            println!(
+                "DEBUG: node {}: label={:?}, inst={:?}",
+                node_id,
+                node.label,
+                program.instructions.get(&inst_id)
+            );
         }
     }
 
@@ -626,26 +656,38 @@ fn test_rc41_stub_sprint() {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("execute") && flow.sink_var == "stmt"
     });
-    assert!(has_stmt_execute, "Taint should propagate through Iterator to stmt.execute");
+    assert!(
+        has_stmt_execute,
+        "Taint should propagate through Iterator to stmt.execute"
+    );
 
     let has_jdbc_update = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("batchUpdate") && flow.sink_var == "cval"
     });
-    assert!(has_jdbc_update, "Taint should propagate through Cookie to batchUpdate");
+    assert!(
+        has_jdbc_update,
+        "Taint should propagate through Cookie to batchUpdate"
+    );
 
     let has_ldap_search = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("search") && (flow.sink_var == "request" || flow.sink_var == "ctx")
     });
-    assert!(has_ldap_search, "Taint should flow to LDAPManager getDirContext/search");
+    assert!(
+        has_ldap_search,
+        "Taint should flow to LDAPManager getDirContext/search"
+    );
 
     // Verify Python flows
     let has_zipfile = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("ZipFile") && flow.sink_var == "tainted_input"
     });
-    assert!(has_zipfile, "Taint should flow to zipfile.ZipFile constructor");
+    assert!(
+        has_zipfile,
+        "Taint should flow to zipfile.ZipFile constructor"
+    );
 
     let has_tarfile = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
@@ -699,14 +741,18 @@ public class BenchmarkTest00323 extends HttpServlet {
 }
     "#;
 
-    gst.load_file(&mut program, code, "BenchmarkTest00323.java", "java").unwrap();
+    gst.load_file(&mut program, code, "BenchmarkTest00323.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
 
     println!("ICFG Nodes:");
     for (id, node) in &icfg.nodes {
-        println!("  Node {}: {:?} (label: '{}', inst_id: {:?})", id, node.kind, node.label, node.instruction_id);
+        println!(
+            "  Node {}: {:?} (label: '{}', inst_id: {:?})",
+            id, node.kind, node.label, node.instruction_id
+        );
     }
     println!("ICFG Edges:");
     for edge in &icfg.edges {
@@ -724,10 +770,16 @@ public class BenchmarkTest00323 extends HttpServlet {
 
     println!("Detected Flows:");
     for flow in &engine.flows {
-        println!("  Flow: sink_node={} sink_var='{}'", flow.sink_node_id, flow.sink_var);
+        println!(
+            "  Flow: sink_node={} sink_var='{}'",
+            flow.sink_node_id, flow.sink_var
+        );
     }
 
-    assert!(engine.flows.is_empty(), "Expected no flows due to branch pruning!");
+    assert!(
+        engine.flows.is_empty(),
+        "Expected no flows due to branch pruning!"
+    );
 }
 
 #[test]
@@ -751,7 +803,8 @@ fn test_rc98_deserialization_and_ssrf() {
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
 
-    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, code, "test.py", "python")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = CallGraph::build(&program, &gst);
     let icfg = InterproceduralCFG::build(&program, &cg);
@@ -762,11 +815,17 @@ fn test_rc98_deserialization_and_ssrf() {
     }
     println!("--- TEST ALL METHODS ---");
     for (id, method) in &program.methods {
-        println!("  {:?}: name='{}', parameters={:?}", id, method.name, method.parameters);
+        println!(
+            "  {:?}: name='{}', parameters={:?}",
+            id, method.name, method.parameters
+        );
     }
     println!("--- TEST ICFG NODES ---");
     for (id, node) in &icfg.nodes {
-        println!("  {:?}: label='{}', inst={:?}, method={:?}", id, node.label, node.instruction_id, node.method_id);
+        println!(
+            "  {:?}: label='{}', inst={:?}, method={:?}",
+            id, node.label, node.instruction_id, node.method_id
+        );
     }
     println!("--- TEST ICFG EDGES ---");
     for edge in &icfg.edges {
@@ -774,13 +833,19 @@ fn test_rc98_deserialization_and_ssrf() {
     }
     println!("--- TEST CALL GRAPH EDGES ---");
     for edge in &cg.edges {
-        println!("  {:?} -> {:?} (inst={:?})", edge.caller, edge.callee, edge.instruction_id);
+        println!(
+            "  {:?} -> {:?} (inst={:?})",
+            edge.caller, edge.callee, edge.instruction_id
+        );
     }
     println!("--- TEST METHOD ENTRY/EXIT MAPS ---");
     for (m_id, entry) in &icfg.method_entry_node {
         let exit = icfg.method_exit_node.get(m_id).unwrap();
         let method = program.methods.get(m_id).unwrap();
-        println!("  Method {:?} ({}) -> Entry: {}, Exit: {}", m_id, method.name, entry, exit);
+        println!(
+            "  Method {:?} ({}) -> Entry: {}, Exit: {}",
+            m_id, method.name, entry, exit
+        );
     }
     println!("--- TEST INSTRUCTION TO NODES ---");
     for (inst_id, nodes) in &icfg.instruction_to_nodes {
@@ -798,28 +863,40 @@ fn test_rc98_deserialization_and_ssrf() {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("dangerous_sink") && flow.sink_var == "data"
     });
-    assert!(has_pickle_flow, "Taint should propagate through pickle.loads to dangerous_sink");
+    assert!(
+        has_pickle_flow,
+        "Taint should propagate through pickle.loads to dangerous_sink"
+    );
 
     // Verify SSRF flow to requests.get
     let has_requests_flow = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("requests.get") && flow.cwe == taint::CWE::CWE918
     });
-    assert!(has_requests_flow, "SSRF to requests.get was not found or has wrong CWE");
+    assert!(
+        has_requests_flow,
+        "SSRF to requests.get was not found or has wrong CWE"
+    );
 
     // Verify SSRF flow to httpx.post
     let has_httpx_flow = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("httpx.post") && flow.cwe == taint::CWE::CWE918
     });
-    assert!(has_httpx_flow, "SSRF to httpx.post was not found or has wrong CWE");
+    assert!(
+        has_httpx_flow,
+        "SSRF to httpx.post was not found or has wrong CWE"
+    );
 
     // Verify SSRF flow to urlopen
     let has_urlopen_flow = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("urlopen") && flow.cwe == taint::CWE::CWE918
     });
-    assert!(has_urlopen_flow, "SSRF to urllib.request.urlopen was not found or has wrong CWE");
+    assert!(
+        has_urlopen_flow,
+        "SSRF to urllib.request.urlopen was not found or has wrong CWE"
+    );
 }
 
 #[test]
@@ -850,7 +927,8 @@ fn test_python_subscript_dispatch_and_subprocess() {
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
 
-    gst.load_file(&mut program, code, "app.py", "python").unwrap();
+    gst.load_file(&mut program, code, "app.py", "python")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = CallGraph::build(&program, &gst);
     let icfg = InterproceduralCFG::build(&program, &cg);
@@ -859,7 +937,10 @@ fn test_python_subscript_dispatch_and_subprocess() {
     for edge in &cg.edges {
         let caller = program.methods.get(&edge.caller).unwrap();
         let callee = program.methods.get(&edge.callee).unwrap();
-        println!("  {} -> {} (inst={:?})", caller.name, callee.name, edge.instruction_id);
+        println!(
+            "  {} -> {} (inst={:?})",
+            caller.name, callee.name, edge.instruction_id
+        );
     }
 
     let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
@@ -873,16 +954,18 @@ fn test_python_subscript_dispatch_and_subprocess() {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("subprocess.run") && flow.cwe == taint::CWE::CWE78
     });
-    assert!(has_run_flow, "Command injection to subprocess.run was not found or has wrong CWE");
+    assert!(
+        has_run_flow,
+        "Command injection to subprocess.run was not found or has wrong CWE"
+    );
 
     // Verify command injection flow through wget_download to subprocess.Popen
     let has_popen_flow = engine.flows.iter().any(|flow| {
         let node = icfg.nodes.get(&flow.sink_node_id).unwrap();
         node.label.contains("subprocess.Popen") && flow.cwe == taint::CWE::CWE78
     });
-    assert!(has_popen_flow, "Command injection to subprocess.Popen was not found or has wrong CWE");
+    assert!(
+        has_popen_flow,
+        "Command injection to subprocess.Popen was not found or has wrong CWE"
+    );
 }
-
-
-
-

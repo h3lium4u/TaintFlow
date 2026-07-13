@@ -29,9 +29,9 @@ impl Exporter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use symbols::GlobalSymbolTable;
-    use symbols::call_graph::CallGraph;
     use cfg::icfg::InterproceduralCFG;
+    use symbols::call_graph::CallGraph;
+    use symbols::GlobalSymbolTable;
 
     #[test]
     fn test_export_facts() {
@@ -41,7 +41,6 @@ mod tests {
         let cg = CallGraph::build(&program, &gst);
         let icfg = InterproceduralCFG::build(&program, &cg);
 
-
         let engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
 
         // Perform the export
@@ -50,7 +49,7 @@ mod tests {
 
         // Verify that exported facts are identical (reproducibility)
         assert_eq!(facts1.taint_flows.len(), facts2.taint_flows.len());
-        
+
         // Verify we can read fields from the exported facts
         assert_eq!(facts1.program.id.0, 1);
         assert!(facts1.taint_flows.is_empty());

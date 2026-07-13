@@ -1,5 +1,5 @@
-use std::fs;
 use std::env;
+use std::fs;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -8,7 +8,7 @@ fn main() {
         return;
     }
     let target_name = &args[1];
-    
+
     let java_bench_path = "d:/V2 Backup/benchmarks/benchmark_java.jsonl";
     let content = fs::read_to_string(java_bench_path).unwrap();
     let mut code = String::new();
@@ -23,23 +23,24 @@ fn main() {
             break;
         }
     }
-    
+
     if code.is_empty() {
         println!("{} not found!", target_name);
         return;
     }
-    
+
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    
+
     let filename = format!("Test_{}.java", cwe.replace("-", "_"));
     program.source_files.insert(filename.clone(), code.clone());
-    
-    gst.load_file(&mut program, &code, &filename, &"java".to_string()).unwrap();
+
+    gst.load_file(&mut program, &code, &filename, &"java".to_string())
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
-    
+
     println!("=== {} ICFG nodes ===", target_name);
     for (id, node) in &icfg.nodes {
         if let Some(inst_id) = node.instruction_id {
@@ -49,19 +50,22 @@ fn main() {
             println!("  Node {}: Entry/Exit", id);
         }
     }
-    
+
     let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
     engine.target_file = Some(filename.clone());
     engine.seed_sources(None);
     engine.run();
-    
+
     println!("=== Tainted Facts ===");
     for f in &engine.tainted_facts {
         println!("  Node {}: {:?}", f.node_id, f);
     }
-    
+
     println!("Flows detected: {}", engine.flows.len());
     for flow in &engine.flows {
-        println!("  Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var);
+        println!(
+            "  Flow CWE: {:?}, sink_node: {}, sink_var: {}",
+            flow.cwe, flow.sink_node_id, flow.sink_var
+        );
     }
 }

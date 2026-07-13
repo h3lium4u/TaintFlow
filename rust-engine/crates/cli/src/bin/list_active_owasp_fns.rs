@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 fn main() {
@@ -21,8 +21,11 @@ fn main() {
             println!("=== FOUND BenchmarkTest00168 ===");
             let mut program = ir::Program::new();
             let mut gst = symbols::global::GlobalSymbolTable::new();
-            
-            if gst.load_file(&mut program, code, "BenchmarkTest00168_python.py", "python").is_ok() {
+
+            if gst
+                .load_file(&mut program, code, "BenchmarkTest00168_python.py", "python")
+                .is_ok()
+            {
                 gst.resolve_inheritance_hierarchy();
                 println!("Instructions:");
                 for (id, inst) in &program.instructions {

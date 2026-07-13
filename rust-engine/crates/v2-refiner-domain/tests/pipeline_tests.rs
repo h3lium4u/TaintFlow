@@ -1,10 +1,10 @@
-use ir::{Program, Method, MethodId, InstructionId, Instruction, InstructionKind};
-use symbols::GlobalSymbolTable;
-use symbols::call_graph::CallGraph;
 use cfg::icfg::InterproceduralCFG;
+use ir::{Instruction, InstructionId, InstructionKind, Method, MethodId, Program};
+use symbols::call_graph::CallGraph;
+use symbols::GlobalSymbolTable;
 use taint::interproc::{InterproceduralTaintEngine, TaintFlow};
 use v2_export_adapter::Exporter;
-use v2_refiner_domain::{PathRefiner, FeasibilityStatus};
+use v2_refiner_domain::{FeasibilityStatus, PathRefiner};
 
 #[test]
 fn test_end_to_end_validation_pipeline() {
@@ -66,7 +66,6 @@ fn test_end_to_end_validation_pipeline() {
     method1.body.push(inst_id_sink1);
     program.methods.insert(method1.id, method1);
 
-
     // ─── Set up Method 2: Infeasible Path ───
     let mut method2 = Method {
         id: MethodId(2),
@@ -109,7 +108,9 @@ fn test_end_to_end_validation_pipeline() {
         },
         file_line: 21,
     };
-    program.instructions.insert(inst_id_assign2_then, inst_assign2_then);
+    program
+        .instructions
+        .insert(inst_id_assign2_then, inst_assign2_then);
 
     let inst_id_assign2_else = InstructionId(50);
     let inst_assign2_else = Instruction {
@@ -120,7 +121,9 @@ fn test_end_to_end_validation_pipeline() {
         },
         file_line: 23,
     };
-    program.instructions.insert(inst_id_assign2_else, inst_assign2_else);
+    program
+        .instructions
+        .insert(inst_id_assign2_else, inst_assign2_else);
 
     let inst_id_sink2 = InstructionId(4);
     let inst_sink2 = Instruction {
@@ -133,7 +136,6 @@ fn test_end_to_end_validation_pipeline() {
     program.instructions.insert(inst_id_sink2, inst_sink2);
     method2.body.push(inst_id_sink2);
     program.methods.insert(method2.id, method2);
-
 
     // ─── Set up Method 3: Unknown Path ───
     let mut method3 = Method {
@@ -167,7 +169,6 @@ fn test_end_to_end_validation_pipeline() {
     method3.body.push(inst_id_sink3);
     program.methods.insert(method3.id, method3);
 
-
     // ─── Run Global Symbol Resolution ───
     let gst = GlobalSymbolTable::new();
     let cg = CallGraph::build(&program, &gst);
@@ -175,7 +176,7 @@ fn test_end_to_end_validation_pipeline() {
 
     // ─── Initialize Engine and Mock Taint Flows ───
     let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
-    
+
     let flow1 = TaintFlow {
         source_node_id: 0,
         sink_node_id: 2,
@@ -221,7 +222,6 @@ fn test_end_to_end_validation_pipeline() {
 
     // ─── Step 3: Filter & Suppress ───
     let mut feasible_count = 0;
-
 
     let mut infeasible_count = 0;
     let mut unknown_count = 0;
@@ -282,91 +282,112 @@ fn test_refiner_arraylist_end_to_end() {
 
     // 16. new ArrayList
     let inst_id_16 = InstructionId(16);
-    program.instructions.insert(inst_id_16, Instruction {
-        id: inst_id_16,
-        kind: InstructionKind::Call {
-            dest: Some("valuesList".to_string()),
-            callee: "new java.util.ArrayList<String>".to_string(),
-            args: Vec::new(),
+    program.instructions.insert(
+        inst_id_16,
+        Instruction {
+            id: inst_id_16,
+            kind: InstructionKind::Call {
+                dest: Some("valuesList".to_string()),
+                callee: "new java.util.ArrayList<String>".to_string(),
+                args: Vec::new(),
+            },
+            file_line: 16,
         },
-        file_line: 16,
-    });
+    );
     method.body.push(inst_id_16);
 
     // 17. valuesList.add("safe")
     let inst_id_17 = InstructionId(17);
-    program.instructions.insert(inst_id_17, Instruction {
-        id: inst_id_17,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "valuesList.add".to_string(),
-            args: vec!["\"safe\"".to_string()],
+    program.instructions.insert(
+        inst_id_17,
+        Instruction {
+            id: inst_id_17,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "valuesList.add".to_string(),
+                args: vec!["\"safe\"".to_string()],
+            },
+            file_line: 17,
         },
-        file_line: 17,
-    });
+    );
     method.body.push(inst_id_17);
 
     // 18. valuesList.add(param)
     let inst_id_18 = InstructionId(18);
-    program.instructions.insert(inst_id_18, Instruction {
-        id: inst_id_18,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "valuesList.add".to_string(),
-            args: vec!["param".to_string()],
+    program.instructions.insert(
+        inst_id_18,
+        Instruction {
+            id: inst_id_18,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "valuesList.add".to_string(),
+                args: vec!["param".to_string()],
+            },
+            file_line: 18,
         },
-        file_line: 18,
-    });
+    );
     method.body.push(inst_id_18);
 
     // 19. valuesList.add("moresafe")
     let inst_id_19 = InstructionId(19);
-    program.instructions.insert(inst_id_19, Instruction {
-        id: inst_id_19,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "valuesList.add".to_string(),
-            args: vec!["\"moresafe\"".to_string()],
+    program.instructions.insert(
+        inst_id_19,
+        Instruction {
+            id: inst_id_19,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "valuesList.add".to_string(),
+                args: vec!["\"moresafe\"".to_string()],
+            },
+            file_line: 19,
         },
-        file_line: 19,
-    });
+    );
     method.body.push(inst_id_19);
 
     // 20. valuesList.remove(0)
     let inst_id_20 = InstructionId(20);
-    program.instructions.insert(inst_id_20, Instruction {
-        id: inst_id_20,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "valuesList.remove".to_string(),
-            args: vec!["\"0\"".to_string()],
+    program.instructions.insert(
+        inst_id_20,
+        Instruction {
+            id: inst_id_20,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "valuesList.remove".to_string(),
+                args: vec!["\"0\"".to_string()],
+            },
+            file_line: 20,
         },
-        file_line: 20,
-    });
+    );
     method.body.push(inst_id_20);
 
     // 21. bar = valuesList.get(1)
     let inst_id_21 = InstructionId(21);
-    program.instructions.insert(inst_id_21, Instruction {
-        id: inst_id_21,
-        kind: InstructionKind::Call {
-            dest: Some("bar".to_string()),
-            callee: "valuesList.get".to_string(),
-            args: vec!["\"1\"".to_string()],
+    program.instructions.insert(
+        inst_id_21,
+        Instruction {
+            id: inst_id_21,
+            kind: InstructionKind::Call {
+                dest: Some("bar".to_string()),
+                callee: "valuesList.get".to_string(),
+                args: vec!["\"1\"".to_string()],
+            },
+            file_line: 21,
         },
-        file_line: 21,
-    });
+    );
     method.body.push(inst_id_21);
 
     // 22. sink
     let inst_id_22 = InstructionId(22);
-    program.instructions.insert(inst_id_22, Instruction {
-        id: inst_id_22,
-        kind: InstructionKind::Sink {
-            name: "sink".to_string(),
+    program.instructions.insert(
+        inst_id_22,
+        Instruction {
+            id: inst_id_22,
+            kind: InstructionKind::Sink {
+                name: "sink".to_string(),
+            },
+            file_line: 22,
         },
-        file_line: 22,
-    });
+    );
     method.body.push(inst_id_22);
 
     program.methods.insert(method.id, method);
@@ -389,7 +410,7 @@ fn test_refiner_arraylist_end_to_end() {
     let mut facts = Exporter::export(&engine);
     facts.icfg_to_inst.clear();
     let refinements = PathRefiner::refine_paths(&facts);
-    
+
     assert_eq!(refinements.len(), 1);
     assert_eq!(refinements[0].status, FeasibilityStatus::Infeasible);
 }
@@ -397,7 +418,7 @@ fn test_refiner_arraylist_end_to_end() {
 #[test]
 fn test_refiner_hashmap_end_to_end() {
     let mut program = Program::new();
-    
+
     // ─── Set up Method: test_hashmap_method ───
     let mut method = Method {
         id: MethodId(1),
@@ -409,89 +430,110 @@ fn test_refiner_hashmap_end_to_end() {
 
     // 10. new HashMap
     let inst_id_10 = InstructionId(10);
-    program.instructions.insert(inst_id_10, Instruction {
-        id: inst_id_10,
-        kind: InstructionKind::Call {
-            dest: Some("map".to_string()),
-            callee: "new java.util.HashMap<String, Object>".to_string(),
-            args: Vec::new(),
+    program.instructions.insert(
+        inst_id_10,
+        Instruction {
+            id: inst_id_10,
+            kind: InstructionKind::Call {
+                dest: Some("map".to_string()),
+                callee: "new java.util.HashMap<String, Object>".to_string(),
+                args: Vec::new(),
+            },
+            file_line: 10,
         },
-        file_line: 10,
-    });
+    );
     method.body.push(inst_id_10);
 
     // 11. map.put("keyA", "safe")
     let inst_id_11 = InstructionId(11);
-    program.instructions.insert(inst_id_11, Instruction {
-        id: inst_id_11,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "map.put".to_string(),
-            args: vec!["\"keyA\"".to_string(), "\"safe\"".to_string()],
+    program.instructions.insert(
+        inst_id_11,
+        Instruction {
+            id: inst_id_11,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "map.put".to_string(),
+                args: vec!["\"keyA\"".to_string(), "\"safe\"".to_string()],
+            },
+            file_line: 11,
         },
-        file_line: 11,
-    });
+    );
     method.body.push(inst_id_11);
 
     // 12. map.put("keyB", param)
     let inst_id_12 = InstructionId(12);
-    program.instructions.insert(inst_id_12, Instruction {
-        id: inst_id_12,
-        kind: InstructionKind::Call {
-            dest: None,
-            callee: "map.put".to_string(),
-            args: vec!["\"keyB\"".to_string(), "param".to_string()],
+    program.instructions.insert(
+        inst_id_12,
+        Instruction {
+            id: inst_id_12,
+            kind: InstructionKind::Call {
+                dest: None,
+                callee: "map.put".to_string(),
+                args: vec!["\"keyB\"".to_string(), "param".to_string()],
+            },
+            file_line: 12,
         },
-        file_line: 12,
-    });
+    );
     method.body.push(inst_id_12);
 
     // 13. bar1 = map.get("keyA")
     let inst_id_13 = InstructionId(13);
-    program.instructions.insert(inst_id_13, Instruction {
-        id: inst_id_13,
-        kind: InstructionKind::Call {
-            dest: Some("bar1".to_string()),
-            callee: "map.get".to_string(),
-            args: vec!["\"keyA\"".to_string()],
+    program.instructions.insert(
+        inst_id_13,
+        Instruction {
+            id: inst_id_13,
+            kind: InstructionKind::Call {
+                dest: Some("bar1".to_string()),
+                callee: "map.get".to_string(),
+                args: vec!["\"keyA\"".to_string()],
+            },
+            file_line: 13,
         },
-        file_line: 13,
-    });
+    );
     method.body.push(inst_id_13);
 
     // 14. bar2 = map.get("keyB")
     let inst_id_14 = InstructionId(14);
-    program.instructions.insert(inst_id_14, Instruction {
-        id: inst_id_14,
-        kind: InstructionKind::Call {
-            dest: Some("bar2".to_string()),
-            callee: "map.get".to_string(),
-            args: vec!["\"keyB\"".to_string()],
+    program.instructions.insert(
+        inst_id_14,
+        Instruction {
+            id: inst_id_14,
+            kind: InstructionKind::Call {
+                dest: Some("bar2".to_string()),
+                callee: "map.get".to_string(),
+                args: vec!["\"keyB\"".to_string()],
+            },
+            file_line: 14,
         },
-        file_line: 14,
-    });
+    );
     method.body.push(inst_id_14);
 
     // 15. sink1
     let inst_id_15 = InstructionId(15);
-    program.instructions.insert(inst_id_15, Instruction {
-        id: inst_id_15,
-        kind: InstructionKind::Sink {
-            name: "sink1".to_string(),
+    program.instructions.insert(
+        inst_id_15,
+        Instruction {
+            id: inst_id_15,
+            kind: InstructionKind::Sink {
+                name: "sink1".to_string(),
+            },
+            file_line: 15,
         },
-        file_line: 15,
-    });
+    );
     method.body.push(inst_id_15);
 
     // 16. sink2
     let inst_id_16 = InstructionId(16);
-    program.instructions.insert(inst_id_16, Instruction {
-        id: inst_id_16,
-        kind: InstructionKind::Sink {
-            name: "sink2".to_string(),
+    program.instructions.insert(
+        inst_id_16,
+        Instruction {
+            id: inst_id_16,
+            kind: InstructionKind::Sink {
+                name: "sink2".to_string(),
+            },
+            file_line: 16,
         },
-        file_line: 16,
-    });
+    );
     method.body.push(inst_id_16);
 
     program.methods.insert(method.id, method);
@@ -502,7 +544,7 @@ fn test_refiner_hashmap_end_to_end() {
     let icfg = InterproceduralCFG::build(&program, &cg);
 
     let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
-    
+
     // Flow 1: param -> bar1 (should be suppressed)
     let flow1 = TaintFlow {
         source_node_id: 0,
@@ -526,9 +568,9 @@ fn test_refiner_hashmap_end_to_end() {
     let mut facts = Exporter::export(&engine);
     facts.icfg_to_inst.clear();
     let refinements = PathRefiner::refine_paths(&facts);
-    
+
     assert_eq!(refinements.len(), 2);
-    
+
     for refinement in &refinements {
         let flow = &facts.taint_flows[refinement.flow_index];
         if flow.sink_var == "bar1" {
@@ -540,5 +582,3 @@ fn test_refiner_hashmap_end_to_end() {
         }
     }
 }
-
-

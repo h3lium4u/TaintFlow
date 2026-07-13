@@ -17,14 +17,15 @@ query = ",".join(items)
     println!("{:#?}", normalized);
 
     let mut engine = TaintEngine::new(10, 5, 200);
-    engine
-        .tainted_symbols
-        .insert("items".to_string(), taint::TaintState {
+    engine.tainted_symbols.insert(
+        "items".to_string(),
+        taint::TaintState {
             tainted: true,
             sanitized_for: std::collections::HashSet::new(),
             source_line: None,
             source_var: None,
-        });
+        },
+    );
     engine.propagate_node(&normalized);
 
     println!("JOIN TEST TAINTED SYMBOLS AFTER PROPAGATION:");

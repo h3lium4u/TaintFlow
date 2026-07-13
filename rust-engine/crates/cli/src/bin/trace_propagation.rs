@@ -22,7 +22,8 @@ fn main() {
 
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    gst.load_file(&mut program, &before, "Test_CWE113.java", "java").unwrap();
+    gst.load_file(&mut program, &before, "Test_CWE113.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -33,8 +34,15 @@ fn main() {
 
     println!("=== VERIFYING TOUCHES SINK FACTS ===");
     for flow in &engine.flows {
-        println!("Flow: sink_node={} sink_var={}", flow.sink_node_id, flow.sink_var);
-        let matching_facts: Vec<_> = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var).collect();
+        println!(
+            "Flow: sink_node={} sink_var={}",
+            flow.sink_node_id, flow.sink_var
+        );
+        let matching_facts: Vec<_> = engine
+            .tainted_facts
+            .iter()
+            .filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var)
+            .collect();
         println!("  Matching facts count: {}", matching_facts.len());
         for fact in matching_facts {
             println!("    Fact: node={} var={}", fact.node_id, fact.var);
@@ -45,7 +53,10 @@ fn main() {
                 curr = parent;
             }
             println!("      Trace steps: {}", steps);
-            println!("      Root source: var='{}' node={}", curr.var, curr.node_id);
+            println!(
+                "      Root source: var='{}' node={}",
+                curr.var, curr.node_id
+            );
         }
     }
 }

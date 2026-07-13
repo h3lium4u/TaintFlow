@@ -23,7 +23,7 @@ fn test_version(
     println!("Running sample {} | repo={} | cwe={}...", idx, repo, cwe);
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    
+
     // Determine target filename
     let filename = if lang.to_lowercase() == "java" {
         format!("Test_{}.java", cwe.replace("-", "_"))
@@ -61,7 +61,12 @@ class LoggingConfigurable:
         self.unresolved_ref = ''
         self.resolved_ref = ''
 "#;
-            let _ = gst.load_file(&mut program, config_code, "traitlets/config/__init__.py", "python");
+            let _ = gst.load_file(
+                &mut program,
+                config_code,
+                "traitlets/config/__init__.py",
+                "python",
+            );
         }
     }
 
@@ -71,11 +76,17 @@ class LoggingConfigurable:
 
     println!("\n=== Types in Symbol Table ===");
     for (type_id, type_info) in &gst.program_index.types {
-        println!("  TypeId({:?}) | FQN: {} | Name: {}", type_id, type_info.fqn, type_info.name);
+        println!(
+            "  TypeId({:?}) | FQN: {} | Name: {}",
+            type_id, type_info.fqn, type_info.name
+        );
     }
     println!("\n=== Methods in Symbol Table ===");
     for (method_id, method_info) in &gst.program_index.methods {
-        println!("  MethodId({:?}) | FQN: {} | Parameters: {:?}", method_id, method_info.fqn, method_info.parameters);
+        println!(
+            "  MethodId({:?}) | FQN: {} | Parameters: {:?}",
+            method_id, method_info.fqn, method_info.parameters
+        );
     }
 
     println!("\n=== All Instructions in Program ===");
@@ -88,7 +99,10 @@ class LoggingConfigurable:
 
     println!("\n=== Call Graph Edges ===");
     for edge in &cg.edges {
-        println!("  Caller: {:?}, Callee: {:?}, Instruction: {:?}", edge.caller, edge.callee, edge.instruction_id);
+        println!(
+            "  Caller: {:?}, Callee: {:?}, Instruction: {:?}",
+            edge.caller, edge.callee, edge.instruction_id
+        );
     }
 
     let mut engine = taint::InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
@@ -103,12 +117,17 @@ class LoggingConfigurable:
 
     println!("\n=== Tainted Facts after run ===");
     for fact in &engine.tainted_facts {
-        let method_name = icfg.nodes.get(&fact.node_id)
+        let method_name = icfg
+            .nodes
+            .get(&fact.node_id)
             .and_then(|n| program.methods.get(&n.method_id))
             .map(|m| m.name.as_str())
             .unwrap_or("?");
-        println!("  node={} method='{}' var='{}'", fact.node_id, method_name, fact.var);
-        
+        println!(
+            "  node={} method='{}' var='{}'",
+            fact.node_id, method_name, fact.var
+        );
+
         let mut curr = fact;
         let mut path = vec![curr];
         while let Some(parent) = engine.parent_map.get(curr) {
@@ -128,8 +147,15 @@ class LoggingConfigurable:
 
     println!("\nFlows detected: {}", engine.flows.len());
     for flow in &engine.flows {
-        println!("  Flow: sink_node={} sink_var='{}' cwe={:?}", flow.sink_node_id, flow.sink_var, flow.cwe);
-        if let Some(fact) = engine.tainted_facts.iter().find(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var) {
+        println!(
+            "  Flow: sink_node={} sink_var='{}' cwe={:?}",
+            flow.sink_node_id, flow.sink_var, flow.cwe
+        );
+        if let Some(fact) = engine
+            .tainted_facts
+            .iter()
+            .find(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var)
+        {
             println!("    Trace path:");
             let mut curr = fact;
             let mut path = vec![curr];
@@ -141,9 +167,17 @@ class LoggingConfigurable:
             for (step_idx, step) in path.iter().enumerate() {
                 let step_node = icfg.nodes.get(&step.node_id).unwrap();
                 let step_method = program.methods.get(&step_node.method_id).unwrap();
-                let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
-                println!("      [{}] node={} method='{}' var='{}' inst={:?}", 
-                    step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind));
+                let step_inst = step_node
+                    .instruction_id
+                    .and_then(|id| program.instructions.get(&id));
+                println!(
+                    "      [{}] node={} method='{}' var='{}' inst={:?}",
+                    step_idx,
+                    step.node_id,
+                    step_method.name,
+                    step.var,
+                    step_inst.map(|i| &i.kind)
+                );
             }
         }
     }
@@ -167,11 +201,27 @@ fn main() {
                 let repo = entry.get("repo").and_then(|v| v.as_str()).unwrap_or("");
                 let source = entry.get("source").and_then(|v| v.as_str()).unwrap_or("");
                 if source == "Vul4J" {
-                    let before = entry.get("before").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                    let after = entry.get("after").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                    let language = entry.get("language").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                    let cwe = entry.get("cwe").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                    
+                    let before = entry
+                        .get("before")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let after = entry
+                        .get("after")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let language = entry
+                        .get("language")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    let cwe = entry
+                        .get("cwe")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+
                     github_samples.push(Sample {
                         before,
                         after,
@@ -189,12 +239,28 @@ fn main() {
     let target_repo = std::env::var("TARGET_REPO").ok();
 
     if let Some(repo_filter) = target_repo {
-        if let Some((idx, sample)) = github_samples.iter().enumerate().find(|(_, s)| s.repo.contains(&repo_filter)) {
-            let code = if version == "before" { &sample.before } else { &sample.after };
+        if let Some((idx, sample)) = github_samples
+            .iter()
+            .enumerate()
+            .find(|(_, s)| s.repo.contains(&repo_filter))
+        {
+            let code = if version == "before" {
+                &sample.before
+            } else {
+                &sample.after
+            };
             println!("--- Source Code ({}) ---", version);
             println!("{}", code);
             println!("-------------------");
-            test_version(code, &sample.language, &sample.cwe, &sample.repo, &sample.commit, idx, base_dir);
+            test_version(
+                code,
+                &sample.language,
+                &sample.cwe,
+                &sample.repo,
+                &sample.commit,
+                idx,
+                base_dir,
+            );
         } else {
             println!("No sample found for repo matching: {}", repo_filter);
         }
@@ -204,13 +270,29 @@ fn main() {
 
         if target_idx < github_samples.len() {
             let sample = &github_samples[target_idx];
-            let code = if version == "before" { &sample.before } else { &sample.after };
+            let code = if version == "before" {
+                &sample.before
+            } else {
+                &sample.after
+            };
             println!("--- Source Code ({}) ---", version);
             println!("{}", code);
             println!("-------------------");
-            test_version(code, &sample.language, &sample.cwe, &sample.repo, &sample.commit, target_idx, base_dir);
+            test_version(
+                code,
+                &sample.language,
+                &sample.cwe,
+                &sample.repo,
+                &sample.commit,
+                target_idx,
+                base_dir,
+            );
         } else {
-            println!("Index {} out of bounds (len={})", target_idx, github_samples.len());
+            println!(
+                "Index {} out of bounds (len={})",
+                target_idx,
+                github_samples.len()
+            );
         }
     }
 }

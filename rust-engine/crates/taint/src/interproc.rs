@@ -1,12 +1,12 @@
 use cfg::icfg::{IcfgEdge, IcfgEdgeKind, IcfgNode, InterproceduralCFG};
-use ir::{InstructionKind, Program, MethodId};
+use ir::{InstructionKind, MethodId, Program};
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet, VecDeque};
-use symbols::call_graph::CallGraph;
-use symbols::global::GlobalSymbolTable;
 use std::cell::RefCell;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::rc::Rc;
 use std::time::Instant;
+use symbols::call_graph::CallGraph;
+use symbols::global::GlobalSymbolTable;
 
 struct ReturnScanStats {
     invocations: u64,
@@ -90,11 +90,14 @@ pub struct InterproceduralTaintEngine<'a> {
     pub suppressed_flows: Vec<SuppressedFlowDiagnostic>,
     pub method_file_paths: HashMap<MethodId, String>,
     pub resolved_call_instructions: HashSet<ir::InstructionId>,
-    pub callee_info_cache: std::cell::RefCell<std::collections::HashMap<(MethodId, String), Option<(String, String)>>>,
-    pub method_insts_cache: std::cell::RefCell<std::collections::HashMap<ir::MethodId, Vec<ir::InstructionId>>>,
+    pub callee_info_cache:
+        std::cell::RefCell<std::collections::HashMap<(MethodId, String), Option<(String, String)>>>,
+    pub method_insts_cache:
+        std::cell::RefCell<std::collections::HashMap<ir::MethodId, Vec<ir::InstructionId>>>,
     pub target_file: Option<String>,
     pub target_and_siblings: HashSet<String>,
-    pub related_types_cache: std::cell::RefCell<std::collections::HashMap<ir::TypeId, Rc<HashSet<ir::TypeId>>>>,
+    pub related_types_cache:
+        std::cell::RefCell<std::collections::HashMap<ir::TypeId, Rc<HashSet<ir::TypeId>>>>,
     pub methods_by_type: HashMap<ir::TypeId, Vec<MethodId>>,
     pub call_sites_by_callee: HashMap<MethodId, Vec<u32>>,
     pub migration_mode: HelperMigrationMode,
@@ -132,7 +135,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
         let mut methods_by_type = HashMap::new();
         for (&m_id, method) in &program.methods {
             if let Some(parent_type_id) = method.parent_type_id {
-                methods_by_type.entry(parent_type_id).or_insert_with(Vec::new).push(m_id);
+                methods_by_type
+                    .entry(parent_type_id)
+                    .or_insert_with(Vec::new)
+                    .push(m_id);
             }
         }
 
@@ -196,7 +202,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         out.push(id);
                         if let Some(inst) = program.instructions.get(&id) {
                             match &inst.kind {
-                                InstructionKind::Branch { then_block, else_block, .. } => {
+                                InstructionKind::Branch {
+                                    then_block,
+                                    else_block,
+                                    ..
+                                } => {
                                     collect_insts(then_block, program, out, visited);
                                     if let Some(eb) = else_block {
                                         collect_insts(eb, program, out, visited);
@@ -205,7 +215,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 InstructionKind::Loop { body, .. } => {
                                     collect_insts(body, program, out, visited);
                                 }
-                                InstructionKind::Try { body, catches, finally, .. } => {
+                                InstructionKind::Try {
+                                    body,
+                                    catches,
+                                    finally,
+                                    ..
+                                } => {
                                     collect_insts(body, program, out, visited);
                                     for catch_id in catches {
                                         collect_insts(&[*catch_id], program, out, visited);
@@ -224,9 +239,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
                 collect_insts(&method.body, self.program, &mut insts, &mut visited);
             }
-            self.method_insts_cache.borrow_mut().insert(method_id, insts);
+            self.method_insts_cache
+                .borrow_mut()
+                .insert(method_id, insts);
         }
-        self.method_insts_cache.borrow().get(&method_id).cloned().unwrap_or_default()
+        self.method_insts_cache
+            .borrow()
+            .get(&method_id)
+            .cloned()
+            .unwrap_or_default()
     }
 
     fn is_vulnerable_context(&self) -> bool {
@@ -308,10 +329,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
             if let Some(inst) = self.program.instructions.get(&id) {
                 if let ir::InstructionKind::Assign { dest, src } = &inst.kind {
                     let src_trimmed = src.trim();
-                    let clean = src_trimmed.replace('"', "").replace('\'', "").trim().to_string();
+                    let clean = src_trimmed
+                        .replace('"', "")
+                        .replace('\'', "")
+                        .trim()
+                        .to_string();
                     let is_lit = (src_trimmed.starts_with('"') && src_trimmed.ends_with('"'))
                         || (src_trimmed.starts_with('\'') && src_trimmed.ends_with('\''))
-                        || clean.chars().all(|c| c.is_ascii_digit() || c == '-' || c == '.');
+                        || clean
+                            .chars()
+                            .all(|c| c.is_ascii_digit() || c == '-' || c == '.');
                     if is_lit {
                         env.insert(dest.clone(), clean);
                     } else if let Some(val) = env.get(src_trimmed).cloned() {
@@ -325,10 +352,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
     pub fn evaluate_constant(&self, method_id: MethodId, expr: &str) -> Option<String> {
         let expr_trimmed = expr.trim();
-        let clean = expr_trimmed.replace('"', "").replace('\'', "").trim().to_string();
+        let clean = expr_trimmed
+            .replace('"', "")
+            .replace('\'', "")
+            .trim()
+            .to_string();
         let is_lit = (expr_trimmed.starts_with('"') && expr_trimmed.ends_with('"'))
             || (expr_trimmed.starts_with('\'') && expr_trimmed.ends_with('\''))
-            || clean.chars().all(|c| c.is_ascii_digit() || c == '-' || c == '.');
+            || clean
+                .chars()
+                .all(|c| c.is_ascii_digit() || c == '-' || c == '.');
         if is_lit {
             return Some(clean);
         }
@@ -344,11 +377,24 @@ impl<'a> InterproceduralTaintEngine<'a> {
             Bool(bool),
             Str(String),
             Ident(String),
-            Plus, Minus, Star, Slash, Percent,
-            Lt, LtEq, Gt, GtEq, EqEq, NotEq,
-            AmpAmp, BarBar, Excl,
-            Question, Colon,
-            LParen, RParen,
+            Plus,
+            Minus,
+            Star,
+            Slash,
+            Percent,
+            Lt,
+            LtEq,
+            Gt,
+            GtEq,
+            EqEq,
+            NotEq,
+            AmpAmp,
+            BarBar,
+            Excl,
+            Question,
+            Colon,
+            LParen,
+            RParen,
         }
 
         #[derive(Clone, Debug, PartialEq)]
@@ -395,7 +441,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             chars.next();
                         }
                     }
-                    if !closed { return None; }
+                    if !closed {
+                        return None;
+                    }
                     tokens.push(Token::Str(s));
                     continue;
                 }
@@ -419,15 +467,42 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     continue;
                 }
                 match c {
-                    '+' => { tokens.push(Token::Plus); chars.next(); }
-                    '-' => { tokens.push(Token::Minus); chars.next(); }
-                    '*' => { tokens.push(Token::Star); chars.next(); }
-                    '/' => { tokens.push(Token::Slash); chars.next(); }
-                    '%' => { tokens.push(Token::Percent); chars.next(); }
-                    '(' => { tokens.push(Token::LParen); chars.next(); }
-                    ')' => { tokens.push(Token::RParen); chars.next(); }
-                    '?' => { tokens.push(Token::Question); chars.next(); }
-                    ':' => { tokens.push(Token::Colon); chars.next(); }
+                    '+' => {
+                        tokens.push(Token::Plus);
+                        chars.next();
+                    }
+                    '-' => {
+                        tokens.push(Token::Minus);
+                        chars.next();
+                    }
+                    '*' => {
+                        tokens.push(Token::Star);
+                        chars.next();
+                    }
+                    '/' => {
+                        tokens.push(Token::Slash);
+                        chars.next();
+                    }
+                    '%' => {
+                        tokens.push(Token::Percent);
+                        chars.next();
+                    }
+                    '(' => {
+                        tokens.push(Token::LParen);
+                        chars.next();
+                    }
+                    ')' => {
+                        tokens.push(Token::RParen);
+                        chars.next();
+                    }
+                    '?' => {
+                        tokens.push(Token::Question);
+                        chars.next();
+                    }
+                    ':' => {
+                        tokens.push(Token::Colon);
+                        chars.next();
+                    }
                     '<' => {
                         chars.next();
                         if chars.peek() == Some(&'=') {
@@ -630,7 +705,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let right = self.parse_additive(eval)?;
                             if eval {
                                 match (left, right) {
-                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l < r); }
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Bool(l < r);
+                                    }
                                     _ => return None,
                                 }
                             } else {
@@ -642,7 +719,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let right = self.parse_additive(eval)?;
                             if eval {
                                 match (left, right) {
-                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l <= r); }
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Bool(l <= r);
+                                    }
                                     _ => return None,
                                 }
                             } else {
@@ -654,7 +733,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let right = self.parse_additive(eval)?;
                             if eval {
                                 match (left, right) {
-                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l > r); }
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Bool(l > r);
+                                    }
                                     _ => return None,
                                 }
                             } else {
@@ -666,7 +747,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let right = self.parse_additive(eval)?;
                             if eval {
                                 match (left, right) {
-                                    (ExprValue::Int(l), ExprValue::Int(r)) => { left = ExprValue::Bool(l >= r); }
+                                    (ExprValue::Int(l), ExprValue::Int(r)) => {
+                                        left = ExprValue::Bool(l >= r);
+                                    }
                                     _ => return None,
                                 }
                             } else {
@@ -741,7 +824,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if eval {
                                 match (left, right) {
                                     (ExprValue::Int(l), ExprValue::Int(r)) => {
-                                        if r == 0 { return None; }
+                                        if r == 0 {
+                                            return None;
+                                        }
                                         left = ExprValue::Int(l.checked_div(r)?);
                                     }
                                     _ => return None,
@@ -756,7 +841,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if eval {
                                 match (left, right) {
                                     (ExprValue::Int(l), ExprValue::Int(r)) => {
-                                        if r == 0 { return None; }
+                                        if r == 0 {
+                                            return None;
+                                        }
                                         left = ExprValue::Int(l.checked_rem(r)?);
                                     }
                                     _ => return None,
@@ -884,20 +971,24 @@ impl<'a> InterproceduralTaintEngine<'a> {
     ) -> bool {
         let oracle_decision = self.is_vulnerable_context();
 
-        let shadow_decision = if let Some((_container, key)) = parse_java_or_python_container_read(tainted_var) {
-            if key != "*" && !key.is_empty() {
-                let target_file = self.target_file.clone().unwrap_or_default();
-                let clean_key_lower = key.to_lowercase();
-                let target_id_lower = target_file.replace(".java", "").replace(".py", "").to_lowercase();
-                let key_matches_target = clean_key_lower.contains(&target_id_lower)
-                    || target_id_lower.contains(&clean_key_lower);
-                key_matches_target
+        let shadow_decision =
+            if let Some((_container, key)) = parse_java_or_python_container_read(tainted_var) {
+                if key != "*" && !key.is_empty() {
+                    let target_file = self.target_file.clone().unwrap_or_default();
+                    let clean_key_lower = key.to_lowercase();
+                    let target_id_lower = target_file
+                        .replace(".java", "")
+                        .replace(".py", "")
+                        .to_lowercase();
+                    let key_matches_target = clean_key_lower.contains(&target_id_lower)
+                        || target_id_lower.contains(&clean_key_lower);
+                    key_matches_target
+                } else {
+                    true
+                }
             } else {
                 true
-            }
-        } else {
-            true
-        };
+            };
 
         // Determine helper-scoped mode configurations
         let helper_str = class_fqn.unwrap_or("");
@@ -1021,10 +1112,18 @@ impl<'a> InterproceduralTaintEngine<'a> {
         // 2. Entry point parameters (e.g. methods with HTTP annotations or 0 incoming GCG call edges)
         for (&method_id, method) in &self.program.methods {
             let name_lower = method.name.to_lowercase();
-            if name_lower.starts_with("__") && name_lower.ends_with("__") && name_lower != "__init__" {
+            if name_lower.starts_with("__")
+                && name_lower.ends_with("__")
+                && name_lower != "__init__"
+            {
                 continue;
             }
-            if name_lower == "<init>" || name_lower.contains(".<init>") || name_lower == "tostring" || name_lower == "hashcode" || name_lower == "equals" {
+            if name_lower == "<init>"
+                || name_lower.contains(".<init>")
+                || name_lower == "tostring"
+                || name_lower == "hashcode"
+                || name_lower == "equals"
+            {
                 continue;
             }
 
@@ -1089,40 +1188,46 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
             let is_in_target = if let Some(m_path) = self.get_method_file_path(method_id) {
                 let m_path_lower = m_path.to_lowercase().replace('\\', "/");
-                let target_norm = self.target_file.as_deref().map(|s| s.to_lowercase().replace('\\', "/"));
-                target_norm.as_ref().map_or(false, |t| m_path_lower.ends_with(t) || t.ends_with(&m_path_lower))
+                let target_norm = self
+                    .target_file
+                    .as_deref()
+                    .map(|s| s.to_lowercase().replace('\\', "/"));
+                target_norm.as_ref().map_or(false, |t| {
+                    m_path_lower.ends_with(t) || t.ends_with(&m_path_lower)
+                })
             } else {
                 false
             };
 
             // Check GCG caller count, ignoring self-calls (recursive calls) and calls from skipped test files
             let mut total_callers = 0;
-            let has_caller = self
-                .call_graph
-                .edges
-                .iter()
-                .any(|edge| {
-                    if edge.callee != method_id || edge.caller == method_id {
-                        return false;
+            let has_caller = self.call_graph.edges.iter().any(|edge| {
+                if edge.callee != method_id || edge.caller == method_id {
+                    return false;
+                }
+                total_callers += 1;
+                if let Some(caller_path) = self.get_method_file_path(edge.caller) {
+                    let path_lower = caller_path.to_lowercase().replace('\\', "/");
+                    let target_norm = self
+                        .target_file
+                        .as_deref()
+                        .map(|s| s.to_lowercase().replace('\\', "/"));
+                    let is_target = target_norm.as_ref().map_or(false, |t| {
+                        path_lower.ends_with(t) || t.ends_with(&path_lower)
+                    });
+                    if is_in_target && !is_target {
+                        return false; // ignore caller from outside the target file when the method itself is in the target file
                     }
-                    total_callers += 1;
-                    if let Some(caller_path) = self.get_method_file_path(edge.caller) {
-                        let path_lower = caller_path.to_lowercase().replace('\\', "/");
-                        let target_norm = self.target_file.as_deref().map(|s| s.to_lowercase().replace('\\', "/"));
-                        let is_target = target_norm.as_ref().map_or(false, |t| path_lower.ends_with(t) || t.ends_with(&path_lower));
-                        if is_in_target && !is_target {
-                            return false; // ignore caller from outside the target file when the method itself is in the target file
-                        }
-                        if path_lower.contains("test_")
-                            || path_lower.contains("_test")
-                            || path_lower.contains("/tests/")
-                            || path_lower.contains("/test/")
-                        {
-                            return false; // ignore this caller since the test file is skipped from seeding
-                        }
+                    if path_lower.contains("test_")
+                        || path_lower.contains("_test")
+                        || path_lower.contains("/tests/")
+                        || path_lower.contains("/test/")
+                    {
+                        return false; // ignore this caller since the test file is skipped from seeding
                     }
-                    true
-                });
+                }
+                true
+            });
             if !has_caller {
                 is_entry = true;
             }
@@ -1139,35 +1244,33 @@ impl<'a> InterproceduralTaintEngine<'a> {
             };
             let method_name_only = method.name.split('.').last().unwrap_or(&method.name);
             let is_private = if is_java {
-                let is_explicit_private = if let Some(method_info) = self.gst.program_index.methods.get(&method_id) {
-                    method_info.visibility.as_deref() == Some("private")
-                } else {
-                    false
-                };
-                is_explicit_private || (method_name_only.starts_with('_') && !method_name_only.starts_with("__"))
+                let is_explicit_private =
+                    if let Some(method_info) = self.gst.program_index.methods.get(&method_id) {
+                        method_info.visibility.as_deref() == Some("private")
+                    } else {
+                        false
+                    };
+                is_explicit_private
+                    || (method_name_only.starts_with('_') && !method_name_only.starts_with("__"))
             } else {
                 method_name_only.starts_with('_') && !method_name_only.starts_with("__")
             };
-            let has_incoming_edges = self
-                .call_graph
-                .edges
-                .iter()
-                .any(|edge| {
-                    if edge.callee != method_id || edge.caller == method_id {
+            let has_incoming_edges = self.call_graph.edges.iter().any(|edge| {
+                if edge.callee != method_id || edge.caller == method_id {
+                    return false;
+                }
+                if let Some(caller_path) = self.get_method_file_path(edge.caller) {
+                    let path_lower = caller_path.to_lowercase().replace('\\', "/");
+                    if path_lower.contains("test_")
+                        || path_lower.contains("_test")
+                        || path_lower.contains("/tests/")
+                        || path_lower.contains("/test/")
+                    {
                         return false;
                     }
-                    if let Some(caller_path) = self.get_method_file_path(edge.caller) {
-                        let path_lower = caller_path.to_lowercase().replace('\\', "/");
-                        if path_lower.contains("test_")
-                            || path_lower.contains("_test")
-                            || path_lower.contains("/tests/")
-                            || path_lower.contains("/test/")
-                        {
-                            return false;
-                        }
-                    }
-                    true
-                });
+                }
+                true
+            });
             if (is_python || is_java) && is_private && !has_incoming_edges {
                 is_entry = false;
             }
@@ -1189,9 +1292,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 if let Some(path) = self.get_method_file_path(method_id) {
                     let path_lower = path.to_lowercase();
                     let path_norm = path_lower.replace('\\', "/");
-                    let target_norm = self.target_file.as_deref().map(|s| s.to_lowercase().replace('\\', "/"));
-                    let is_target = target_norm.as_ref().map_or(false, |t| path_norm.ends_with(t) || t.ends_with(&path_norm));
-                    if !is_target && path_norm.ends_with(".py")
+                    let target_norm = self
+                        .target_file
+                        .as_deref()
+                        .map(|s| s.to_lowercase().replace('\\', "/"));
+                    let is_target = target_norm
+                        .as_ref()
+                        .map_or(false, |t| path_norm.ends_with(t) || t.ends_with(&path_norm));
+                    if !is_target
+                        && path_norm.ends_with(".py")
                         && (path_norm.contains("test_")
                             || path_norm.contains("_test")
                             || path_norm.contains("/tests/")
@@ -1264,7 +1373,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         || class_fqn.contains("LDAPManager")
                                         || class_fqn.contains("Utils");
                                     if is_helper {
-                                        should_taint = self.determine_helper_propagation_decision(Some(&class_fqn), callee, d);
+                                        should_taint = self.determine_helper_propagation_decision(
+                                            Some(&class_fqn),
+                                            callee,
+                                            d,
+                                        );
                                     }
                                     if should_taint {
                                         let domain = crate::map_source_to_domain(&class_fqn);
@@ -1328,7 +1441,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     let mut matched_dest_and_src = None;
                     if let InstructionKind::Assign { dest, src } = &inst.kind {
                         matched_dest_and_src = Some((dest, src));
-                    } else if let InstructionKind::Call { dest: Some(d), callee, .. } = &inst.kind {
+                    } else if let InstructionKind::Call {
+                        dest: Some(d),
+                        callee,
+                        ..
+                    } = &inst.kind
+                    {
                         matched_dest_and_src = Some((d, callee));
                     }
 
@@ -1352,7 +1470,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 format!("self.req.{}", suffix),
                             ];
 
-                            let is_prefixed = prefixes_to_check.iter().any(|p| src_lower.contains(p.as_str()));
+                            let is_prefixed = prefixes_to_check
+                                .iter()
+                                .any(|p| src_lower.contains(p.as_str()));
 
                             let suffix_check = if suffix == "get" || suffix == "post" {
                                 if attr.contains("GET") || attr.contains("POST") {
@@ -1450,7 +1570,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if is_src {
                                 if let Some(d) = dest {
                                     let domain = crate::map_source_to_domain(callee);
-                                    let seeded_var = if self.is_container_source_expression(callee) {
+                                    let seeded_var = if self.is_container_source_expression(callee)
+                                    {
                                         format!("{}[\"*\"]", d)
                                     } else {
                                         d.clone()
@@ -1538,7 +1659,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
             let mut arg_seeds: Vec<(u32, Vec<String>)> = Vec::new();
 
             // Pass 1: scan all methods in the target file
-            let target_methods: Vec<ir::MethodId> = self.program.methods
+            let target_methods: Vec<ir::MethodId> = self
+                .program
+                .methods
                 .iter()
                 .filter_map(|(&mid, _)| {
                     let file_path_opt = self.get_method_file_path(mid);
@@ -1547,7 +1670,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let res = p_norm.ends_with(&target_norm) || target_norm.ends_with(&p_norm);
                         res
                     });
-                    if in_target { Some(mid) } else { None }
+                    if in_target {
+                        Some(mid)
+                    } else {
+                        None
+                    }
                 })
                 .collect();
 
@@ -1574,18 +1701,27 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             match &inst.kind {
                                 InstructionKind::Call { dest, callee, args } => {
                                     let callee_lower = callee.to_lowercase();
-                                    if callee_lower.contains("getenv") || callee_lower.contains("environ") {
+                                    if callee_lower.contains("getenv")
+                                        || callee_lower.contains("environ")
+                                    {
                                         has_gating_markers = true;
                                         break;
                                     }
-                                    if callee_lower.contains("self.") || callee_lower.contains("this.") || callee_lower.contains("cls.") {
+                                    if callee_lower.contains("self.")
+                                        || callee_lower.contains("this.")
+                                        || callee_lower.contains("cls.")
+                                    {
                                         has_gating_markers = true;
                                         break;
                                     }
                                     if let Some(d) = dest {
                                         let dl = d.to_lowercase();
-                                        if dl.contains("self.") || dl.contains("this.") || dl.contains("cls.")
-                                            || dl == "self" || dl == "this" || dl == "cls"
+                                        if dl.contains("self.")
+                                            || dl.contains("this.")
+                                            || dl.contains("cls.")
+                                            || dl == "self"
+                                            || dl == "this"
+                                            || dl == "cls"
                                         {
                                             has_gating_markers = true;
                                             break;
@@ -1594,9 +1730,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     let mut arg_gated = false;
                                     for arg in args {
                                         let al = arg.to_lowercase();
-                                        if al.contains("self.") || al.contains("this.") || al.contains("cls.")
-                                            || al == "self" || al == "this" || al == "cls"
-                                            || al.contains("environ") || al.contains("getenv")
+                                        if al.contains("self.")
+                                            || al.contains("this.")
+                                            || al.contains("cls.")
+                                            || al == "self"
+                                            || al == "this"
+                                            || al == "cls"
+                                            || al.contains("environ")
+                                            || al.contains("getenv")
                                         {
                                             arg_gated = true;
                                             break;
@@ -1606,7 +1747,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         has_gating_markers = true;
                                         break;
                                     }
-                                    if callee_lower.contains("open") || callee_lower.contains("read") || callee_lower.contains("load") {
+                                    if callee_lower.contains("open")
+                                        || callee_lower.contains("read")
+                                        || callee_lower.contains("load")
+                                    {
                                         has_gating_markers = true;
                                         break;
                                     }
@@ -1614,21 +1758,34 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 InstructionKind::Assign { dest, src } => {
                                     let dest_lower = dest.to_lowercase();
                                     let src_lower = src.to_lowercase();
-                                    if dest_lower.contains("self.") || dest_lower.contains("this.") || dest_lower.contains("cls.")
-                                        || dest_lower == "self" || dest_lower == "this" || dest_lower == "cls"
-                                        || src_lower.contains("self.") || src_lower.contains("this.") || src_lower.contains("cls.")
-                                        || src_lower == "self" || src_lower == "this" || src_lower == "cls"
+                                    if dest_lower.contains("self.")
+                                        || dest_lower.contains("this.")
+                                        || dest_lower.contains("cls.")
+                                        || dest_lower == "self"
+                                        || dest_lower == "this"
+                                        || dest_lower == "cls"
+                                        || src_lower.contains("self.")
+                                        || src_lower.contains("this.")
+                                        || src_lower.contains("cls.")
+                                        || src_lower == "self"
+                                        || src_lower == "this"
+                                        || src_lower == "cls"
                                     {
                                         has_gating_markers = true;
                                         break;
                                     }
-                                    if dest_lower.contains("environ") || dest_lower.contains("getenv")
-                                        || src_lower.contains("environ") || src_lower.contains("getenv")
+                                    if dest_lower.contains("environ")
+                                        || dest_lower.contains("getenv")
+                                        || src_lower.contains("environ")
+                                        || src_lower.contains("getenv")
                                     {
                                         has_gating_markers = true;
                                         break;
                                     }
-                                    if src_lower.contains("open") || src_lower.contains("read") || src_lower.contains("load") {
+                                    if src_lower.contains("open")
+                                        || src_lower.contains("read")
+                                        || src_lower.contains("load")
+                                    {
                                         has_gating_markers = true;
                                         break;
                                     }
@@ -1666,7 +1823,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         // (B) Seed the sink's non-trivial arguments at the ICFG node for this call
                         // Find the ICFG node whose instruction_id matches inst_id
                         for (&node_id, node) in &self.icfg.nodes {
-                            if node.instruction_id == Some(inst_id) && node.method_id == *method_id {
+                            if node.instruction_id == Some(inst_id) && node.method_id == *method_id
+                            {
                                 let seed_args: Vec<String> = args
                                     .iter()
                                     .filter(|a| {
@@ -1678,7 +1836,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             && al != "true"
                                             && al != "false"
                                             && al != "none"
-                                            && al.chars().next().map_or(true, |c| !c.is_ascii_digit())
+                                            && al
+                                                .chars()
+                                                .next()
+                                                .map_or(true, |c| !c.is_ascii_digit())
                                     })
                                     .cloned()
                                     .collect();
@@ -1699,10 +1860,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     self.program.instructions.get(&iid).map_or(false, |inst| {
                         if let InstructionKind::Call { callee, .. } = &inst.kind {
                             let c = callee.to_lowercase();
-                            c.contains("pickle.load") || c.contains("yaml.load")
-                                || c.contains("marshal.load") || c.contains("deserialize")
-                                || c.contains("joblib.load") || c.contains("torch.load")
-                                || c.contains("msgpack.unpackb") || c.contains("jsonpickle.decode")
+                            c.contains("pickle.load")
+                                || c.contains("yaml.load")
+                                || c.contains("marshal.load")
+                                || c.contains("deserialize")
+                                || c.contains("joblib.load")
+                                || c.contains("torch.load")
+                                || c.contains("msgpack.unpackb")
+                                || c.contains("jsonpickle.decode")
                         } else {
                             false
                         }
@@ -1841,7 +2006,6 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 || f.ends_with(&format!(".{}", src_str))
                         });
                         if is_static_read {
-
                             let domain = crate::map_source_to_domain(src_str);
                             self.tainted_facts.insert(TaintFact {
                                 node_id,
@@ -1903,7 +2067,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
         // Helper: check if a method expression is a getAttribute call
         let is_get_attribute = |callee: &str| -> bool {
             let cl = callee.to_lowercase();
-            cl.ends_with(".getattribute") || cl == "getattribute" || cl.ends_with(".get") || cl == "get"
+            cl.ends_with(".getattribute")
+                || cl == "getattribute"
+                || cl.ends_with(".get")
+                || cl == "get"
         };
 
         // Helper: check if receiver looks like a session object
@@ -1926,11 +2093,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
         };
 
         // First, collect all variables that are tainted at this point (from prior passes).
-        let seeded_vars: HashSet<String> = self
-            .tainted_facts
-            .iter()
-            .map(|f| f.var.clone())
-            .collect();
+        let seeded_vars: HashSet<String> =
+            self.tainted_facts.iter().map(|f| f.var.clone()).collect();
 
         // Map: attribute_key → true (tainted stored)
         let mut session_tainted_keys: HashSet<String> = HashSet::new();
@@ -1940,7 +2104,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 if let Some(inst) = self.program.instructions.get(&inst_id) {
                     match &inst.kind {
                         InstructionKind::Call { callee, args, .. } => {
-                            if is_session_receiver(method_id, callee) && is_set_attribute(callee) && args.len() >= 2 {
+                            if is_session_receiver(method_id, callee)
+                                && is_set_attribute(callee)
+                                && args.len() >= 2
+                            {
                                 let key_raw = args[0].trim();
                                 let attr_key = key_raw
                                     .replace('"', "")
@@ -1952,7 +2119,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 let value_lower = value_expr.to_lowercase();
                                 let is_tainted_val = is_taint_origin(value_expr)
                                     || seeded_vars.contains(value_expr.as_str())
-                                    || seeded_vars.iter().any(|sv| value_lower.contains(&sv.to_lowercase()));
+                                    || seeded_vars
+                                        .iter()
+                                        .any(|sv| value_lower.contains(&sv.to_lowercase()));
                                 if is_tainted_val && !attr_key.is_empty() {
                                     session_tainted_keys.insert(attr_key.clone());
                                     // Also store the wildcard marker for unknown-key setAttribute
@@ -1967,7 +2136,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if dest_lower.contains("session") {
                                 let mut current = dest.clone();
                                 let mut keys = Vec::new();
-                                while let Some((container, key)) = parse_java_or_python_container_read(&current) {
+                                while let Some((container, key)) =
+                                    parse_java_or_python_container_read(&current)
+                                {
                                     keys.push(key);
                                     current = container;
                                 }
@@ -1975,7 +2146,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     let src_lower = src.to_lowercase();
                                     let is_tainted_val = is_taint_origin(src)
                                         || seeded_vars.contains(src.as_str())
-                                        || seeded_vars.iter().any(|sv| src_lower.contains(&sv.to_lowercase()));
+                                        || seeded_vars
+                                            .iter()
+                                            .any(|sv| src_lower.contains(&sv.to_lowercase()));
                                     if is_tainted_val {
                                         for key in keys {
                                             if !key.is_empty() {
@@ -2000,7 +2173,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 if let Some(inst_id) = node.instruction_id {
                     if let Some(inst) = self.program.instructions.get(&inst_id) {
                         match &inst.kind {
-                            InstructionKind::Call { dest: Some(dest), callee, args } => {
+                            InstructionKind::Call {
+                                dest: Some(dest),
+                                callee,
+                                args,
+                            } => {
                                 if is_get_attribute(callee) && args.len() >= 1 {
                                     let key_raw = args[0].trim();
                                     let attr_key = key_raw
@@ -2010,7 +2187,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         .to_string();
                                     let is_tainted_key = session_tainted_keys.contains(&attr_key)
                                         || session_tainted_keys.contains("*");
-                                    if is_session_receiver(node.method_id, callee) && is_tainted_key {
+                                    if is_session_receiver(node.method_id, callee) && is_tainted_key
+                                    {
                                         new_facts.push(TaintFact {
                                             node_id,
                                             context: 0,
@@ -2026,19 +2204,22 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if src_lower.contains("session") {
                                     let mut current = src.clone();
                                     let mut keys = Vec::new();
-                                    while let Some((container, key)) = parse_java_or_python_container_read(&current) {
+                                    while let Some((container, key)) =
+                                        parse_java_or_python_container_read(&current)
+                                    {
                                         keys.push(key);
                                         current = container;
                                     }
                                     if current.to_lowercase().contains("session") {
-                                        let is_tainted = keys.iter().any(|k| session_tainted_keys.contains(k))
-                                            || session_tainted_keys.contains("*")
-                                            || keys.is_empty();
+                                        let is_tainted =
+                                            keys.iter().any(|k| session_tainted_keys.contains(k))
+                                                || session_tainted_keys.contains("*")
+                                                || keys.is_empty();
                                         if is_tainted {
-                                        new_facts.push(TaintFact {
-                                            node_id,
-                                            context: 0,
-                                            var: dest.clone(),
+                                            new_facts.push(TaintFact {
+                                                node_id,
+                                                context: 0,
+                                                var: dest.clone(),
                                                 sanitized_for: std::collections::BTreeSet::new(),
                                                 source_domain: crate::CweDomain::Generic,
                                             });
@@ -2059,7 +2240,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
     fn postprocess_fact(&self, mut fact: TaintFact) -> TaintFact {
         if let Some(node) = self.icfg.nodes.get(&fact.node_id) {
             if let Some(file_path) = self.get_method_file_path(node.method_id) {
-                let file_line = node.instruction_id
+                let file_line = node
+                    .instruction_id
                     .and_then(|inst_id| self.program.instructions.get(&inst_id))
                     .map(|i| i.file_line)
                     .unwrap_or(0);
@@ -2073,7 +2255,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
         fact
     }
 
-    fn add_fact(&mut self, worklist: &mut VecDeque<TaintFact>, initial_fact: TaintFact, initial_parent: Option<&TaintFact>) {
+    fn add_fact(
+        &mut self,
+        worklist: &mut VecDeque<TaintFact>,
+        initial_fact: TaintFact,
+        initial_parent: Option<&TaintFact>,
+    ) {
         let mut local_queue = VecDeque::new();
         local_queue.push_back((initial_fact, initial_parent.cloned()));
 
@@ -2089,7 +2276,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 worklist.push_back(processed.clone());
 
                 // Collection-level fallback: if any array element becomes tainted, mark the array as tainted.
-                if let Some((container, key)) = parse_java_or_python_container_read(&processed.var) {
+                if let Some((container, key)) = parse_java_or_python_container_read(&processed.var)
+                {
                     // Only treat it as an array/list if the key is not a string literal map key (does not have quotes).
                     if !raw_key_has_quotes(&processed.var) {
                         // To support strong updates on constant array indices, we only taint the container
@@ -2109,42 +2297,69 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
 
                 // Instance field cross-method propagation
-                if (processed.var.starts_with("self.") || processed.var.starts_with("this.")) && !processed.var.contains('(') {
+                if (processed.var.starts_with("self.") || processed.var.starts_with("this."))
+                    && !processed.var.contains('(')
+                {
                     if let Some(dot_idx) = processed.var.find('.') {
                         let field_name = &processed.var[dot_idx + 1..];
                         if let Some(node) = self.icfg.nodes.get(&processed.node_id) {
-                            if let Some(current_method) = self.program.methods.get(&node.method_id) {
+                            if let Some(current_method) = self.program.methods.get(&node.method_id)
+                            {
                                 if let Some(parent_type_id) = current_method.parent_type_id {
                                     // Find all related types in the hierarchy
                                     let related_types = self.get_related_types(parent_type_id);
                                     for &m_type_id in related_types.iter() {
                                         if let Some(m_ids) = self.methods_by_type.get(&m_type_id) {
                                             for &m_id in m_ids {
-                                                if related_types.contains(&m_type_id) && m_id != node.method_id {
+                                                if related_types.contains(&m_type_id)
+                                                    && m_id != node.method_id
+                                                {
                                                     // Seed the field at the entry node of this other method!
-                                                    if let Some(&entry_node_id) = self.icfg.method_entry_node.get(&m_id) {
-                                                        if let Some(method) = self.program.methods.get(&m_id) {
-                                                            let is_java = self.method_file_paths.get(&m_id)
-                                                                .map_or(false, |path| path.ends_with(".java"));
+                                                    if let Some(&entry_node_id) =
+                                                        self.icfg.method_entry_node.get(&m_id)
+                                                    {
+                                                        if let Some(method) =
+                                                            self.program.methods.get(&m_id)
+                                                        {
+                                                            let is_java = self
+                                                                .method_file_paths
+                                                                .get(&m_id)
+                                                                .map_or(false, |path| {
+                                                                    path.ends_with(".java")
+                                                                });
                                                             let receiver_prefix = if is_java {
                                                                 "this.".to_string()
                                                             } else {
-                                                                if let Some(first_param) = method.parameters.first() {
+                                                                if let Some(first_param) =
+                                                                    method.parameters.first()
+                                                                {
                                                                     format!("{}.", first_param)
                                                                 } else {
                                                                     "self.".to_string()
                                                                 }
                                                             };
-                                                            let target_var = format!("{}{}", receiver_prefix, field_name);
+                                                            let target_var = format!(
+                                                                "{}{}",
+                                                                receiver_prefix, field_name
+                                                            );
                                                             let next_fact = TaintFact {
                                                                 node_id: entry_node_id,
                                                                 context: 0,
                                                                 var: target_var,
-                                                                sanitized_for: processed.sanitized_for.clone(),
-                                                                source_domain: processed.source_domain,
+                                                                sanitized_for: processed
+                                                                    .sanitized_for
+                                                                    .clone(),
+                                                                source_domain: processed
+                                                                    .source_domain,
                                                             };
-                                                            if !self.tainted_facts.contains(&next_fact) {
-                                                                local_queue.push_back((next_fact, Some(processed.clone())));
+                                                            if !self
+                                                                .tainted_facts
+                                                                .contains(&next_fact)
+                                                            {
+                                                                local_queue.push_back((
+                                                                    next_fact,
+                                                                    Some(processed.clone()),
+                                                                ));
                                                             }
                                                         }
                                                     }
@@ -2186,7 +2401,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 if let Some(ref parent_name) = ty.parent_type {
                     let cleaned_parent = clean_class_name(parent_name);
                     for (other_tid, other_ty) in &self.program.types {
-                        if clean_class_name(&other_ty.name) == cleaned_parent && !visited.contains(other_tid) {
+                        if clean_class_name(&other_ty.name) == cleaned_parent
+                            && !visited.contains(other_tid)
+                        {
                             visited.insert(*other_tid);
                             related.insert(*other_tid);
                             queue.push_back(*other_tid);
@@ -2197,7 +2414,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 let cleaned_current = clean_class_name(&ty.name);
                 for (other_tid, other_ty) in &self.program.types {
                     if let Some(ref other_parent) = other_ty.parent_type {
-                        if clean_class_name(other_parent) == cleaned_current && !visited.contains(other_tid) {
+                        if clean_class_name(other_parent) == cleaned_current
+                            && !visited.contains(other_tid)
+                        {
                             visited.insert(*other_tid);
                             related.insert(*other_tid);
                             queue.push_back(*other_tid);
@@ -2207,7 +2426,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
         }
         let rc_related = Rc::new(related);
-        self.related_types_cache.borrow_mut().insert(type_id, rc_related.clone());
+        self.related_types_cache
+            .borrow_mut()
+            .insert(type_id, rc_related.clone());
         rc_related
     }
 
@@ -2313,8 +2534,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if is_context_match {
                                 let parent_ctx =
                                     *self.parent_contexts.get(&callee_context).unwrap_or(&0);
-                                let new_vars =
-                                    self.bind_return_value(callee_context, edge.to, Some(node.method_id), &fact.var);
+                                let new_vars = self.bind_return_value(
+                                    callee_context,
+                                    edge.to,
+                                    Some(node.method_id),
+                                    &fact.var,
+                                );
                                 for new_var in new_vars {
                                     let next_fact = TaintFact {
                                         node_id: edge.to,
@@ -2338,7 +2563,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 // the callee method, where the caller's instruction == return_node's
                                 // instruction (they share the same InstructionId in the ICFG).
                                 let start_time = Instant::now();
-                                let call_site_ids: Vec<u32> = if let Some(candidates) = self.call_sites_by_callee.get(&callee_method_id) {
+                                let call_site_ids: Vec<u32> = if let Some(candidates) =
+                                    self.call_sites_by_callee.get(&callee_method_id)
+                                {
                                     let candidates_len = candidates.len();
                                     let res: Vec<u32> = candidates
                                         .iter()
@@ -2412,7 +2639,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
         println!("[ENGINE] finished after {} iterations", iterations);
         RETURN_SCAN_INSTRUMENTATION.with(|stats| {
             let s = stats.borrow();
-            let avg = if s.invocations > 0 { s.total_candidates as f64 / s.invocations as f64 } else { 0.0 };
+            let avg = if s.invocations > 0 {
+                s.total_candidates as f64 / s.invocations as f64
+            } else {
+                0.0
+            };
             println!("=================================");
             println!("RETURN SCAN HOTSPOT ANALYSIS");
             println!("---------------------------------");
@@ -2424,12 +2655,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
         });
     }
 
-    fn check_sink_flow_domain(&mut self, fact: &TaintFact, target_cwe: crate::CWE, node_id: u32, sink_var: &str) -> bool {
+    fn check_sink_flow_domain(
+        &mut self,
+        fact: &TaintFact,
+        target_cwe: crate::CWE,
+        node_id: u32,
+        sink_var: &str,
+    ) -> bool {
         if target_cwe == crate::CWE::CWE22 {
             if let Some(node) = self.icfg.nodes.get(&node_id) {
                 let file_path = self.get_method_file_path(node.method_id);
                 if let Some(path_str) = file_path {
-                    let file_line = node.instruction_id
+                    let file_line = node
+                        .instruction_id
                         .and_then(|inst_id| self.program.instructions.get(&inst_id))
                         .map(|i| i.file_line)
                         .unwrap_or(0);
@@ -2452,22 +2690,26 @@ impl<'a> InterproceduralTaintEngine<'a> {
             crate::CWE::CWE327 => crate::CweDomain::Crypto,
             _ => crate::CweDomain::Generic,
         };
-        let allowed = fact.source_domain == sink_domain 
-            || fact.source_domain == crate::CweDomain::Generic 
+        let allowed = fact.source_domain == sink_domain
+            || fact.source_domain == crate::CweDomain::Generic
             || sink_domain == crate::CweDomain::Generic
             || sink_domain == crate::CweDomain::Xss
             || sink_domain == crate::CweDomain::Command
             || sink_domain == crate::CweDomain::PathTraversal
             || sink_domain == crate::CweDomain::Deserialization
             || sink_domain == crate::CweDomain::Ldap
-            || (sink_domain == crate::CweDomain::Sql && fact.source_domain == crate::CweDomain::PathTraversal);
+            || (sink_domain == crate::CweDomain::Sql
+                && fact.source_domain == crate::CweDomain::PathTraversal);
         if !allowed {
             self.suppressed_flows.push(SuppressedFlowDiagnostic {
                 sink_node_id: node_id,
                 sink_var: sink_var.to_string(),
                 source_domain: fact.source_domain,
                 sink_domain,
-                reason: format!("Mismatched domains: Source ({:?}) != Sink ({:?})", fact.source_domain, sink_domain),
+                reason: format!(
+                    "Mismatched domains: Source ({:?}) != Sink ({:?})",
+                    fact.source_domain, sink_domain
+                ),
             });
         }
         allowed
@@ -2485,8 +2727,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         while let Some(parent) = self.parent_map.get(&curr_fact) {
                             if let Some(parent_node) = self.icfg.nodes.get(&parent.node_id) {
                                 if let Some(parent_inst_id) = parent_node.instruction_id {
-                                    if let Some(parent_inst) = self.program.instructions.get(&parent_inst_id) {
-                                        if let InstructionKind::Call { callee, .. } = &parent_inst.kind {
+                                    if let Some(parent_inst) =
+                                        self.program.instructions.get(&parent_inst_id)
+                                    {
+                                        if let InstructionKind::Call { callee, .. } =
+                                            &parent_inst.kind
+                                        {
                                             let c_lower = callee.to_lowercase();
                                             if c_lower.contains("decode")
                                                 || c_lower.contains("unescape")
@@ -2524,7 +2770,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             || raw_lower.contains("delete from")
                             || raw_lower.contains("where ");
 
-                        let is_target_sink = is_html_context || is_file_context || is_sql_context || passed_through_decoder;
+                        let is_target_sink = is_html_context
+                            || is_file_context
+                            || is_sql_context
+                            || passed_through_decoder;
 
                         if is_target_sink {
                             if expr_uses_var(expr, &fact.var) {
@@ -2558,7 +2807,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     InstructionKind::Sink { name } => {
                         if expr_uses_var(name, &fact.var) {
                             let file_path = self.get_method_file_path(node.method_id);
-                            let target_cwe = crate::map_sink_to_cwe_heuristic(name, file_path).unwrap_or(crate::CWE::CWE79);
+                            let target_cwe = crate::map_sink_to_cwe_heuristic(name, file_path)
+                                .unwrap_or(crate::CWE::CWE79);
                             if fact.sanitized_for.contains(&target_cwe) {
                                 return None;
                             }
@@ -2591,13 +2841,24 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if stub.kind == crate::stubs::StubKind::Sink {
                                     is_sink = true;
                                     allowed_sink_indices = stub.propagates_from.clone();
-                                    target_cwe = crate::map_sink_to_cwe_heuristic(&method_name, file_path)
-                                        .or_else(|| crate::map_sink_to_cwe_heuristic(callee, file_path))
-                                        .or_else(|| crate::map_sink_to_cwe_heuristic(&class_fqn, file_path))
-                                        .unwrap_or(crate::CWE::CWE79);
+                                    target_cwe =
+                                        crate::map_sink_to_cwe_heuristic(&method_name, file_path)
+                                            .or_else(|| {
+                                                crate::map_sink_to_cwe_heuristic(callee, file_path)
+                                            })
+                                            .or_else(|| {
+                                                crate::map_sink_to_cwe_heuristic(
+                                                    &class_fqn, file_path,
+                                                )
+                                            })
+                                            .unwrap_or(crate::CWE::CWE79);
 
                                     if target_cwe == crate::CWE::CWE502 {
-                                        if !is_deserialization_sink_check(callee, Some(&class_fqn), args) {
+                                        if !is_deserialization_sink_check(
+                                            callee,
+                                            Some(&class_fqn),
+                                            args,
+                                        ) {
                                             is_sink = false;
                                         }
                                     }
@@ -2612,9 +2873,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             || class_fqn_lower.contains("ldapcontext")
                                             || file_path.map_or(false, |p| {
                                                 let p_lower = p.to_lowercase();
-                                                p_lower.contains("cwe90") || p_lower.contains("cwe_90")
+                                                p_lower.contains("cwe90")
+                                                    || p_lower.contains("cwe_90")
                                             });
-                                        if is_ldap && (clean_method_lower == "search" || clean_method_lower == "lookup" || clean_method_lower == "query") {
+                                        if is_ldap
+                                            && (clean_method_lower == "search"
+                                                || clean_method_lower == "lookup"
+                                                || clean_method_lower == "query")
+                                        {
                                             target_cwe = crate::CWE::CWE90;
                                         }
                                     }
@@ -2626,8 +2892,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let clean_method = callee.split('.').last().unwrap_or(callee);
                             let clean_method_lower = clean_method.to_lowercase();
                             let callee_lower = callee.to_lowercase();
-                            
-                            let resolved_class_fqn_lower = resolved_class_fqn.as_ref().map(|s| s.to_lowercase());
+
+                            let resolved_class_fqn_lower =
+                                resolved_class_fqn.as_ref().map(|s| s.to_lowercase());
                             let is_ldap_context = callee_lower.contains("ldap")
                                 || callee_lower.contains("dircontext")
                                 || callee_lower.contains("ldapmanager")
@@ -2646,10 +2913,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                             // RC83: Detect XPath context for evaluate/compile sinks
                             let is_xpath_context = callee_lower.contains("xpath")
-                                || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| fqn.contains("xpath"))
+                                || resolved_class_fqn_lower
+                                    .as_ref()
+                                    .map_or(false, |fqn| fqn.contains("xpath"))
                                 || file_path.map_or(false, |p| {
                                     let p_lower = p.to_lowercase();
-                                    p_lower.contains("cwe643") || p_lower.contains("cwe_643") || p_lower.contains("xpath")
+                                    p_lower.contains("cwe643")
+                                        || p_lower.contains("cwe_643")
+                                        || p_lower.contains("xpath")
                                 });
 
                             // RC84: Detect Java File, Stream, and Files sinks
@@ -2667,21 +2938,29 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 || callee_lower == "open"
                                 || callee_lower.contains(".open")
                                 || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
-                                    fqn.contains("java.io.file") || fqn.ends_with(".file") 
-                                        || fqn.contains("java.nio.file.files") || fqn.ends_with(".files")
-                                        || fqn.contains("java.nio.file.paths") || fqn.ends_with(".paths")
-                                        || fqn.contains("java.nio.file.path") || fqn.ends_with(".path")
+                                    fqn.contains("java.io.file")
+                                        || fqn.ends_with(".file")
+                                        || fqn.contains("java.nio.file.files")
+                                        || fqn.ends_with(".files")
+                                        || fqn.contains("java.nio.file.paths")
+                                        || fqn.ends_with(".paths")
+                                        || fqn.contains("java.nio.file.path")
+                                        || fqn.ends_with(".path")
                                 })
-                                || (clean_method_lower == "<init>" && resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
-                                    fqn.contains("java.io.file") || fqn.ends_with(".file")
-                                }));
+                                || (clean_method_lower == "<init>"
+                                    && resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
+                                        fqn.contains("java.io.file") || fqn.ends_with(".file")
+                                    }));
 
                             // RC84/RC91: Detect unsafe deserialization (CWE-502) sinks
                             // Only flag libraries that allow arbitrary code execution during deserialization.
                             // json.loads/ujson/orjson are JSON-only parsers — they CANNOT execute code
                             // and are commonly used as SAFE replacements in patched code (would cause FPs).
-                            let is_deserialization_sink = is_deserialization_sink_check(callee, resolved_class_fqn.as_deref(), args);
-
+                            let is_deserialization_sink = is_deserialization_sink_check(
+                                callee,
+                                resolved_class_fqn.as_deref(),
+                                args,
+                            );
 
                             // RC91: Detect ORM raw-query sinks (CWE-89)
                             // Only fire when we have evidence of an ORM context (resolved FQN
@@ -2798,9 +3077,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 || callee_lower.contains("batchprocess")
                             {
                                 is_sink = true;
-                                if is_ldap_context && (clean_method_lower == "search" || clean_method_lower == "lookup" || clean_method_lower == "query") {
+                                if is_ldap_context
+                                    && (clean_method_lower == "search"
+                                        || clean_method_lower == "lookup"
+                                        || clean_method_lower == "query")
+                                {
                                     target_cwe = crate::CWE::CWE90;
-                                } else if is_xpath_context && (clean_method_lower == "evaluate" || clean_method_lower == "compile") {
+                                } else if is_xpath_context
+                                    && (clean_method_lower == "evaluate"
+                                        || clean_method_lower == "compile")
+                                {
                                     target_cwe = crate::CWE::CWE643;
                                 } else if is_file_constructor_sink {
                                     target_cwe = crate::CWE::CWE22;
@@ -2820,19 +3106,27 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     target_cwe = crate::CWE::CWE89;
                                 } else if is_command_sink {
                                     target_cwe = crate::CWE::CWE78;
-                                } else if callee_lower == "requests.request" || callee_lower == "requests.options" {
+                                } else if callee_lower == "requests.request"
+                                    || callee_lower == "requests.options"
+                                {
                                     target_cwe = crate::CWE::CWE918;
                                 } else if clean_method_lower == "addheader"
                                     || clean_method_lower == "setheader"
                                     || clean_method_lower == "addcookie"
                                     || clean_method_lower == "sendredirect"
                                     || clean_method_lower == "setcontenttype"
-                                  {
+                                {
                                     target_cwe = crate::CWE::CWE113;
                                 } else {
-                                    target_cwe = crate::map_sink_to_cwe_heuristic(&callee_lower, file_path)
-                                        .or_else(|| crate::map_sink_to_cwe_heuristic(&clean_method_lower, file_path))
-                                        .unwrap_or(crate::CWE::CWE79);
+                                    target_cwe =
+                                        crate::map_sink_to_cwe_heuristic(&callee_lower, file_path)
+                                            .or_else(|| {
+                                                crate::map_sink_to_cwe_heuristic(
+                                                    &clean_method_lower,
+                                                    file_path,
+                                                )
+                                            })
+                                            .unwrap_or(crate::CWE::CWE79);
                                 }
                             }
                         }
@@ -2840,7 +3134,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         if is_sink {
                             let method_lower = method_name_opt
                                 .map(|m| m.to_lowercase())
-                                .unwrap_or_else(|| callee.split('.').last().unwrap_or(callee).to_lowercase());
+                                .unwrap_or_else(|| {
+                                    callee.split('.').last().unwrap_or(callee).to_lowercase()
+                                });
 
                             let is_write_method = method_lower == "write"
                                 || method_lower == "print"
@@ -2851,9 +3147,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                             if target_cwe == crate::CWE::CWE22 && is_write_method {
                                 let callee_lower = callee.to_lowercase();
-                                let resolved_class_fqn_lower = resolved_class_fqn.as_ref().map(|s| s.to_lowercase());
+                                let resolved_class_fqn_lower =
+                                    resolved_class_fqn.as_ref().map(|s| s.to_lowercase());
                                 let is_nio_files = callee_lower.contains("java.nio.file.files")
-                                    || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| fqn.contains("java.nio.file.files"));
+                                    || resolved_class_fqn_lower
+                                        .as_ref()
+                                        .map_or(false, |fqn| fqn.contains("java.nio.file.files"));
                                 if !is_nio_files {
                                     return None; // Bypass content-writing methods for path traversal sinks (except Files.write)
                                 }
@@ -2867,9 +3166,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             {
                                 if method_lower == "format" || method_lower == "printf" {
                                     // RC83: Accept chained getWriter().printf() — callee may contain getwriter
-                                    let callee_contains_writer = callee.to_lowercase().contains("getwriter")
-                                        || callee.to_lowercase().contains("writer")
-                                        || callee.to_lowercase().contains("response");
+                                    let callee_contains_writer =
+                                        callee.to_lowercase().contains("getwriter")
+                                            || callee.to_lowercase().contains("writer")
+                                            || callee.to_lowercase().contains("response");
                                     if let Some(receiver) = get_receiver_name_safe(callee) {
                                         let rec_lower = receiver.to_lowercase();
                                         let is_web_writer = rec_lower.contains("writer")
@@ -2924,7 +3224,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                 continue;
                                             }
                                         }
-                                        if self.check_sink_flow_domain(fact, target_cwe, node.id, arg) {
+                                        if self
+                                            .check_sink_flow_domain(fact, target_cwe, node.id, arg)
+                                        {
                                             return Some(target_cwe);
                                         }
                                     }
@@ -2953,7 +3255,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     // Gating rule 1: open / os.open path traversal gating
                                     let callee_lower = callee.to_lowercase();
                                     if target_cwe == crate::CWE::CWE22 {
-                                        if callee_lower == "open" || callee_lower.ends_with(".open") || callee_lower == "os.open" || callee_lower.ends_with(".os.open") {
+                                        if callee_lower == "open"
+                                            || callee_lower.ends_with(".open")
+                                            || callee_lower == "os.open"
+                                            || callee_lower.ends_with(".os.open")
+                                        {
                                             if arg_idx > 0 {
                                                 continue;
                                             }
@@ -3040,12 +3346,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if let Some(receiver) = get_receiver_name_safe(callee) {
                                     if expr_uses_var(&receiver, &fact.var) {
                                         if expression_contains_sanitizer(&receiver) {
-                                            let cwes = crate::get_sanitized_cwes_for_callee(&receiver);
+                                            let cwes =
+                                                crate::get_sanitized_cwes_for_callee(&receiver);
                                             if cwes.contains(&target_cwe) {
                                                 return None;
                                             }
                                         }
-                                        if self.check_sink_flow_domain(fact, target_cwe, node.id, &receiver) {
+                                        if self.check_sink_flow_domain(
+                                            fact, target_cwe, node.id, &receiver,
+                                        ) {
                                             return Some(target_cwe);
                                         }
                                     }
@@ -3060,9 +3369,13 @@ impl<'a> InterproceduralTaintEngine<'a> {
         None
     }
 
-    fn apply_transfer_function(&self, dest_node_id: u32, fact: &TaintFact) -> Vec<(String, std::collections::BTreeSet<crate::CWE>)> {
+    fn apply_transfer_function(
+        &self,
+        dest_node_id: u32,
+        fact: &TaintFact,
+    ) -> Vec<(String, std::collections::BTreeSet<crate::CWE>)> {
         let results = self.apply_transfer_function_internal(dest_node_id, fact);
-        
+
         let mut expanded_results = Vec::new();
         for (var, san) in results {
             if var.contains(',') && !var.contains('(') && !var.contains('[') {
@@ -3080,7 +3393,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
         expanded_results
     }
 
-    fn apply_transfer_function_internal(&self, dest_node_id: u32, fact: &TaintFact) -> Vec<(String, std::collections::BTreeSet<crate::CWE>)> {
+    fn apply_transfer_function_internal(
+        &self,
+        dest_node_id: u32,
+        fact: &TaintFact,
+    ) -> Vec<(String, std::collections::BTreeSet<crate::CWE>)> {
         let node = match self.icfg.nodes.get(&dest_node_id) {
             Some(n) => n,
             None => return vec![(fact.var.clone(), fact.sanitized_for.clone())],
@@ -3095,7 +3412,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         } else if let Some((_, _)) = parse_java_or_python_container_read(dest) {
                             false
                         } else {
-                            if let Some((c_var, _)) = parse_java_or_python_container_read(&fact.var) {
+                            if let Some((c_var, _)) = parse_java_or_python_container_read(&fact.var)
+                            {
                                 dest.trim().to_lowercase() == c_var.to_lowercase()
                             } else {
                                 expr_uses_var(dest, &fact.var)
@@ -3103,7 +3421,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         };
 
                         let src_to_check = if src.contains('?') && src.contains(':') {
-                            self.evaluate_constant(node.method_id, src).unwrap_or_else(|| src.clone())
+                            self.evaluate_constant(node.method_id, src)
+                                .unwrap_or_else(|| src.clone())
                         } else {
                             src.clone()
                         };
@@ -3113,18 +3432,30 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let mut propagated = false;
 
                         if let Some((fact_container, fact_key)) = &var_access_opt {
-                            if let Some((src_container, src_key)) = parse_java_or_python_container_read(&src_to_check) {
+                            if let Some((src_container, src_key)) =
+                                parse_java_or_python_container_read(&src_to_check)
+                            {
                                 if src_container.to_lowercase() == fact_container.to_lowercase() {
-                                    if fact_key == "*" || src_key == "*" || src_key.to_lowercase() == fact_key.to_lowercase() {
+                                    if fact_key == "*"
+                                        || src_key == "*"
+                                        || src_key.to_lowercase() == fact_key.to_lowercase()
+                                    {
                                         results.push((dest.clone(), fact.sanitized_for.clone()));
                                         propagated = true;
                                     }
                                 }
                             }
-                            if !propagated && src_to_check.trim().to_lowercase() == fact_container.to_lowercase() {
-                                let key_str = self.evaluate_constant(node.method_id, fact_key)
+                            if !propagated
+                                && src_to_check.trim().to_lowercase()
+                                    == fact_container.to_lowercase()
+                            {
+                                let key_str = self
+                                    .evaluate_constant(node.method_id, fact_key)
                                     .unwrap_or_else(|| "*".to_string());
-                                results.push((format!("{}[\"{}\"]", dest, key_str), fact.sanitized_for.clone()));
+                                results.push((
+                                    format!("{}[\"{}\"]", dest, key_str),
+                                    fact.sanitized_for.clone(),
+                                ));
                                 propagated = true;
                             }
                         }
@@ -3160,11 +3491,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     }
                     InstructionKind::Call { dest, callee, args } => {
                         let mut resolved_class_fqn = None;
-                        if let Some((class_fqn, _)) = self.resolve_callee_info(node.method_id, callee) {
+                        if let Some((class_fqn, _)) =
+                            self.resolve_callee_info(node.method_id, callee)
+                        {
                             resolved_class_fqn = Some(class_fqn);
                         }
 
-                        if is_deserialization_sink_check(callee, resolved_class_fqn.as_deref(), args) {
+                        if is_deserialization_sink_check(
+                            callee,
+                            resolved_class_fqn.as_deref(),
+                            args,
+                        ) {
                             let mut is_propagating = false;
                             for arg in args {
                                 if expr_uses_var(arg, &fact.var) {
@@ -3183,8 +3520,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             // ref_path is in both dest and args; it must survive for
                             // interprocedural propagation into the callee.
                             let is_in_args = args.iter().any(|a| expr_uses_var(a, &fact.var));
-                            let is_overwritten = dest.as_ref().map_or(false, |d| expr_uses_var(d, &fact.var))
-                                && !is_in_args;
+                            let is_overwritten =
+                                dest.as_ref().map_or(false, |d| expr_uses_var(d, &fact.var))
+                                    && !is_in_args;
                             let mut results = Vec::new();
                             if is_propagating {
                                 if let Some(d) = dest {
@@ -3205,7 +3543,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let method_lower = method_name.to_lowercase();
 
                         if method_lower == "setsecure" {
-                            let is_true = args.first().map_or(false, |a| a.trim().to_lowercase() == "true");
+                            let is_true = args
+                                .first()
+                                .map_or(false, |a| a.trim().to_lowercase() == "true");
                             if is_true {
                                 if let Some(receiver) = get_receiver_name(callee) {
                                     if expr_uses_var(&receiver, &fact.var) {
@@ -3213,7 +3553,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         new_san.insert(crate::CWE::CWE614);
                                         return vec![
                                             (receiver.clone(), new_san.clone()),
-                                            (fact.var.clone(), new_san)
+                                            (fact.var.clone(), new_san),
                                         ];
                                     }
                                 }
@@ -3223,10 +3563,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         // RC97 fix: same guard — if var is also in args, it is not killed by
                         // its presence in the dest (return-value tuple unpacking).
                         let is_in_args = args.iter().any(|a| expr_uses_var(a, &fact.var));
-                        let mut is_overwritten = dest
-                            .as_ref()
-                            .map_or(false, |d| expr_uses_var(d, &fact.var))
-                            && !is_in_args;
+                        let mut is_overwritten =
+                            dest.as_ref().map_or(false, |d| expr_uses_var(d, &fact.var))
+                                && !is_in_args;
 
                         let mut results = Vec::new();
                         let receiver_opt = get_receiver_name_safe(callee);
@@ -3257,26 +3596,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 handled_as_collection = true;
                                 if expr_uses_var(&args[1], &fact.var) {
                                     let key_raw = args[0].trim();
-                                    let key_str = self.evaluate_constant(node.method_id, key_raw)
+                                    let key_str = self
+                                        .evaluate_constant(node.method_id, key_raw)
                                         .unwrap_or_else(|| "*".to_string());
-                                    results.push((format!("{}[\"{}\"]", r, key_str), fact.sanitized_for.clone()));
+                                    results.push((
+                                        format!("{}[\"{}\"]", r, key_str),
+                                        fact.sanitized_for.clone(),
+                                    ));
                                 }
                             } else if is_list_add && args.len() >= 1 {
                                 handled_as_collection = true;
-                                if args.len() == 2 && (method_lower == "add" || method_lower == "insert") {
+                                if args.len() == 2
+                                    && (method_lower == "add" || method_lower == "insert")
+                                {
                                     if expr_uses_var(&args[1], &fact.var) {
                                         let idx_raw = args[0].trim();
-                                        let idx_str = self.evaluate_constant(node.method_id, idx_raw)
+                                        let idx_str = self
+                                            .evaluate_constant(node.method_id, idx_raw)
                                             .unwrap_or_else(|| "*".to_string());
-                                        results.push((format!("{}[\"{}\"]", r, idx_str), fact.sanitized_for.clone()));
+                                        results.push((
+                                            format!("{}[\"{}\"]", r, idx_str),
+                                            fact.sanitized_for.clone(),
+                                        ));
                                     }
                                 } else {
                                     if expr_uses_var(&args[0], &fact.var) {
                                         let mut has_loop = false;
-                                        let all_insts = self.get_all_method_instructions(node.method_id);
+                                        let all_insts =
+                                            self.get_all_method_instructions(node.method_id);
                                         for inst_id in &all_insts {
-                                            if let Some(inst) = self.program.instructions.get(inst_id) {
-                                                if matches!(inst.kind, InstructionKind::Loop { .. }) {
+                                            if let Some(inst) =
+                                                self.program.instructions.get(inst_id)
+                                            {
+                                                if matches!(inst.kind, InstructionKind::Loop { .. })
+                                                {
                                                     has_loop = true;
                                                     break;
                                                 }
@@ -3292,23 +3645,47 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                 if Some(*inst_id) == node.instruction_id {
                                                     break;
                                                 }
-                                                if let Some(inst) = self.program.instructions.get(inst_id) {
+                                                if let Some(inst) =
+                                                    self.program.instructions.get(inst_id)
+                                                {
                                                     match &inst.kind {
-                                                        InstructionKind::Call { dest: Some(d), callee: c, .. } => {
-                                                            if d == r && c.to_lowercase().contains("arraylist") {
+                                                        InstructionKind::Call {
+                                                            dest: Some(d),
+                                                            callee: c,
+                                                            ..
+                                                        } => {
+                                                            if d == r
+                                                                && c.to_lowercase()
+                                                                    .contains("arraylist")
+                                                            {
                                                                 is_local_arraylist = true;
                                                             }
                                                         }
-                                                        InstructionKind::Call { dest: _, callee: c, args: a } => {
-                                                            if let Some(rec) = get_receiver_name_safe(c) {
+                                                        InstructionKind::Call {
+                                                            dest: _,
+                                                            callee: c,
+                                                            args: a,
+                                                        } => {
+                                                            if let Some(rec) =
+                                                                get_receiver_name_safe(c)
+                                                            {
                                                                 if &rec == r {
-                                                                    let method_name = c.split('.').last().unwrap_or(c);
-                                                                    let method_lower = method_name.to_lowercase();
-                                                                    if method_lower == "add" && a.len() == 1 {
+                                                                    let method_name = c
+                                                                        .split('.')
+                                                                        .last()
+                                                                        .unwrap_or(c);
+                                                                    let method_lower =
+                                                                        method_name.to_lowercase();
+                                                                    if method_lower == "add"
+                                                                        && a.len() == 1
+                                                                    {
                                                                         add_count += 1;
-                                                                    } else if method_lower == "remove" {
+                                                                    } else if method_lower
+                                                                        == "remove"
+                                                                    {
                                                                         failed = true;
-                                                                    } else if method_lower != "get" {
+                                                                    } else if method_lower != "get"
+                                                                    {
                                                                         failed = true;
                                                                     }
                                                                 }
@@ -3326,37 +3703,67 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         }
 
                                         if is_local_arraylist && !failed && !has_loop {
-                                            results.push((format!("{}[\"{}\"]", r, add_count), fact.sanitized_for.clone()));
+                                            results.push((
+                                                format!("{}[\"{}\"]", r, add_count),
+                                                fact.sanitized_for.clone(),
+                                            ));
                                         } else {
-                                            results.push((format!("{}[\"{}\"]", r, "*"), fact.sanitized_for.clone()));
+                                            results.push((
+                                                format!("{}[\"{}\"]", r, "*"),
+                                                fact.sanitized_for.clone(),
+                                            ));
                                         }
                                     }
                                 }
-                            } else if is_list_remove && args.len() == 1 && node.kind == cfg::icfg::IcfgNodeKind::Call && self.is_receiver_local_arraylist(node.method_id, node.instruction_id, r) {
+                            } else if is_list_remove
+                                && args.len() == 1
+                                && node.kind == cfg::icfg::IcfgNodeKind::Call
+                                && self.is_receiver_local_arraylist(
+                                    node.method_id,
+                                    node.instruction_id,
+                                    r,
+                                )
+                            {
                                 handled_as_collection = true;
                                 is_overwritten = true;
                                 let idx_raw = args[0].trim();
-                                let idx_str = self.evaluate_constant(node.method_id, idx_raw)
+                                let idx_str = self
+                                    .evaluate_constant(node.method_id, idx_raw)
                                     .unwrap_or_else(|| "*".to_string());
-                                
+
                                 let clean_var = fact.var.trim();
-                                if let Some((receiver, key)) = parse_java_or_python_container_read(clean_var) {
+                                if let Some((receiver, key)) =
+                                    parse_java_or_python_container_read(clean_var)
+                                {
                                     if receiver.to_lowercase() == r.to_lowercase() {
                                         if let Ok(k) = idx_str.parse::<i64>() {
                                             if let Ok(n) = key.parse::<i64>() {
                                                 if n > k {
-                                                    results.push((format!("{}[\"{}\"]", r, n - 1), fact.sanitized_for.clone()));
+                                                    results.push((
+                                                        format!("{}[\"{}\"]", r, n - 1),
+                                                        fact.sanitized_for.clone(),
+                                                    ));
                                                 } else if n < k {
-                                                    results.push((format!("{}[\"{}\"]", r, n), fact.sanitized_for.clone()));
+                                                    results.push((
+                                                        format!("{}[\"{}\"]", r, n),
+                                                        fact.sanitized_for.clone(),
+                                                    ));
                                                 }
                                             } else if key == "*" {
-                                                results.push((format!("{}[\"*\"]", r), fact.sanitized_for.clone()));
+                                                results.push((
+                                                    format!("{}[\"*\"]", r),
+                                                    fact.sanitized_for.clone(),
+                                                ));
                                             }
                                         } else {
-                                            results.push((format!("{}[\"*\"]", r), fact.sanitized_for.clone()));
+                                            results.push((
+                                                format!("{}[\"*\"]", r),
+                                                fact.sanitized_for.clone(),
+                                            ));
                                         }
                                     } else {
-                                        results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                        results
+                                            .push((fact.var.clone(), fact.sanitized_for.clone()));
                                     }
                                 } else if clean_var.to_lowercase() == r.to_lowercase() {
                                     results.push((fact.var.clone(), fact.sanitized_for.clone()));
@@ -3365,15 +3772,23 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 handled_as_collection = true;
                                 if let Some(d) = dest {
                                     let key_raw = args[0].trim();
-                                    let key_str = self.evaluate_constant(node.method_id, key_raw)
+                                    let key_str = self
+                                        .evaluate_constant(node.method_id, key_raw)
                                         .unwrap_or_else(|| "*".to_string());
-                                    
+
                                     let equiv_access = format!("{}[\"{}\"]", r, key_str);
                                     if expr_uses_var(&equiv_access, &fact.var) {
                                         results.push((d.clone(), fact.sanitized_for.clone()));
-                                        let is_arraylist = self.is_receiver_local_arraylist(node.method_id, node.instruction_id, r);
+                                        let is_arraylist = self.is_receiver_local_arraylist(
+                                            node.method_id,
+                                            node.instruction_id,
+                                            r,
+                                        );
                                         if !is_arraylist || key_str == "*" {
-                                            results.push((format!("{}[\"*\"]", d), fact.sanitized_for.clone()));
+                                            results.push((
+                                                format!("{}[\"*\"]", d),
+                                                fact.sanitized_for.clone(),
+                                            ));
                                         }
                                     }
                                 }
@@ -3388,7 +3803,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         }
 
                         if !handled_as_collection {
-                            let is_sanitizer_call = self.is_sanitizer_call_site(node.method_id, callee);
+                            let is_sanitizer_call =
+                                self.is_sanitizer_call_site(node.method_id, callee);
 
                             if is_sanitizer_call {
                                 let mut is_sanitized = false;
@@ -3426,8 +3842,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             let mut is_propagating = false;
                                             if let Some(ref indices) = stub.propagates_from {
                                                 if indices.is_empty() {
-                                                    if let Some(receiver) = get_receiver_name_safe(callee) {
-                                                        if expr_uses_var(&receiver, &fact.var) || fact.var.starts_with(&format!("{}.", receiver)) {
+                                                    if let Some(receiver) =
+                                                        get_receiver_name_safe(callee)
+                                                    {
+                                                        if expr_uses_var(&receiver, &fact.var)
+                                                            || fact.var.starts_with(&format!(
+                                                                "{}.",
+                                                                receiver
+                                                            ))
+                                                        {
                                                             is_propagating = true;
                                                         }
                                                     }
@@ -3446,34 +3869,55 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                         is_propagating = true;
                                                     }
                                                 }
-                                                if let Some(receiver) = get_receiver_name_safe(callee) {
-                                                    if expr_uses_var(&receiver, &fact.var) || fact.var.starts_with(&format!("{}.", receiver)) {
+                                                if let Some(receiver) =
+                                                    get_receiver_name_safe(callee)
+                                                {
+                                                    if expr_uses_var(&receiver, &fact.var)
+                                                        || fact
+                                                            .var
+                                                            .starts_with(&format!("{}.", receiver))
+                                                    {
                                                         is_propagating = true;
                                                     }
                                                 }
                                             }
 
-                                            let is_benchmark_helper = self.is_benchmark_helper(Some(&class_fqn), callee);
-                                            if is_benchmark_helper && !self.determine_helper_propagation_decision(Some(&class_fqn), callee, &fact.var) {
+                                            let is_benchmark_helper =
+                                                self.is_benchmark_helper(Some(&class_fqn), callee);
+                                            if is_benchmark_helper
+                                                && !self.determine_helper_propagation_decision(
+                                                    Some(&class_fqn),
+                                                    callee,
+                                                    &fact.var,
+                                                )
+                                            {
                                                 is_propagating = false;
                                             }
 
                                             if is_propagating {
-                                                let propagated_san = if crate::is_desanitizer(callee) {
-                                                    std::collections::BTreeSet::new()
-                                                } else {
-                                                    fact.sanitized_for.clone()
-                                                };
+                                                let propagated_san =
+                                                    if crate::is_desanitizer(callee) {
+                                                        std::collections::BTreeSet::new()
+                                                    } else {
+                                                        fact.sanitized_for.clone()
+                                                    };
                                                 if let Some(d) = dest {
-                                                    results.push((d.clone(), propagated_san.clone()));
+                                                    results
+                                                        .push((d.clone(), propagated_san.clone()));
                                                 }
-                                                if let Some(receiver) = get_receiver_name_safe(callee) {
+                                                if let Some(receiver) =
+                                                    get_receiver_name_safe(callee)
+                                                {
                                                     println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='stub'", callee, receiver, fact.var, receiver, dest_node_id);
-                                                    results.push((receiver, propagated_san.clone()));
+                                                    results
+                                                        .push((receiver, propagated_san.clone()));
                                                 }
                                             }
                                             if !is_overwritten || is_propagating {
-                                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                                results.push((
+                                                    fact.var.clone(),
+                                                    fact.sanitized_for.clone(),
+                                                ));
                                             }
                                             return results;
                                         }
@@ -3502,9 +3946,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     }
                                 }
                                 if is_propagating {
-                                    let is_juliet = self.target_file.as_ref().map_or(false, |tf| {
-                                        tf.to_lowercase().contains("cwe")
-                                    });
+                                    let is_juliet = self
+                                        .target_file
+                                        .as_ref()
+                                        .map_or(false, |tf| tf.to_lowercase().contains("cwe"));
                                     if is_juliet && callee.to_lowercase().contains("good") {
                                         is_propagating = false;
                                     }
@@ -3514,12 +3959,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             let (is_benchmark_helper, class_fqn_opt) = if let Some((class_fqn, _)) =
                                 self.resolve_callee_info(node.method_id, callee)
                             {
-                                (self.is_benchmark_helper(Some(&class_fqn), callee), Some(class_fqn))
+                                (
+                                    self.is_benchmark_helper(Some(&class_fqn), callee),
+                                    Some(class_fqn),
+                                )
                             } else {
                                 (self.is_benchmark_helper(None, callee), None)
                             };
 
-                            if is_benchmark_helper && !self.determine_helper_propagation_decision(class_fqn_opt.as_deref(), callee, &fact.var) {
+                            if is_benchmark_helper
+                                && !self.determine_helper_propagation_decision(
+                                    class_fqn_opt.as_deref(),
+                                    callee,
+                                    &fact.var,
+                                )
+                            {
                                 is_propagating = false;
                             }
 
@@ -3547,25 +4001,55 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     // to the receiver. Setters bind parameters into placeholders; the JDBC driver
                                     // handles escaping, so the statement object itself is never tainted by the value.
                                     // Match on the method-name suffix to be independent of receiver variable name.
-                                    static JDBC_SETTERS: std::sync::OnceLock<std::collections::HashSet<&'static str>> = std::sync::OnceLock::new();
+                                    static JDBC_SETTERS: std::sync::OnceLock<
+                                        std::collections::HashSet<&'static str>,
+                                    > = std::sync::OnceLock::new();
                                     let jdbc_setters = JDBC_SETTERS.get_or_init(|| {
                                         [
-                                            "setstring", "setint", "setlong", "setdouble", "setfloat",
-                                            "setboolean", "setbytes", "setbyte", "setshort",
-                                            "setbigdecimal", "setdate", "settimestamp", "settime",
-                                            "setobject", "setnull", "setblob", "setclob", "setarray",
-                                            "setnstring", "setnclob", "setncharacterstream",
-                                            "seturl", "setref", "setrowid", "setsqlxml",
-                                            "setcharacterstream", "setbinarystream",
-                                            "setasciistream", "setunicodestream",
-                                        ].iter().copied().collect()
+                                            "setstring",
+                                            "setint",
+                                            "setlong",
+                                            "setdouble",
+                                            "setfloat",
+                                            "setboolean",
+                                            "setbytes",
+                                            "setbyte",
+                                            "setshort",
+                                            "setbigdecimal",
+                                            "setdate",
+                                            "settimestamp",
+                                            "settime",
+                                            "setobject",
+                                            "setnull",
+                                            "setblob",
+                                            "setclob",
+                                            "setarray",
+                                            "setnstring",
+                                            "setnclob",
+                                            "setncharacterstream",
+                                            "seturl",
+                                            "setref",
+                                            "setrowid",
+                                            "setsqlxml",
+                                            "setcharacterstream",
+                                            "setbinarystream",
+                                            "setasciistream",
+                                            "setunicodestream",
+                                        ]
+                                        .iter()
+                                        .copied()
+                                        .collect()
                                     });
-                                    let method_suffix = callee_lower.rsplit('.').next().unwrap_or(&callee_lower);
+                                    let method_suffix =
+                                        callee_lower.rsplit('.').next().unwrap_or(&callee_lower);
                                     let is_jdbc_setter = jdbc_setters.contains(method_suffix);
                                     // Secondary fallback: original keyword-based guard for descriptively-named receivers
-                                    let is_db_setter = (callee_lower.contains(".set") || callee_lower.starts_with("set"))
-                                        && (callee_lower.contains("statement") || callee_lower.contains("prepared")
-                                            || callee_lower.contains("query") || callee_lower.contains("sql")
+                                    let is_db_setter = (callee_lower.contains(".set")
+                                        || callee_lower.starts_with("set"))
+                                        && (callee_lower.contains("statement")
+                                            || callee_lower.contains("prepared")
+                                            || callee_lower.contains("query")
+                                            || callee_lower.contains("sql")
                                             || callee_lower.contains("conn"));
                                     if !is_jdbc_setter && !is_db_setter {
                                         println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='fallback'", callee, receiver, fact.var, receiver, dest_node_id);
@@ -3588,8 +4072,15 @@ impl<'a> InterproceduralTaintEngine<'a> {
         vec![(fact.var.clone(), fact.sanitized_for.clone())]
     }
 
-    fn is_receiver_local_arraylist(&self, method_id: ir::MethodId, instruction_id: Option<ir::InstructionId>, r: &str) -> bool {
-        let Some(inst_id) = instruction_id else { return false; };
+    fn is_receiver_local_arraylist(
+        &self,
+        method_id: ir::MethodId,
+        instruction_id: Option<ir::InstructionId>,
+        r: &str,
+    ) -> bool {
+        let Some(inst_id) = instruction_id else {
+            return false;
+        };
         let mut has_loop = false;
         let all_insts = self.get_all_method_instructions(method_id);
         for id in &all_insts {
@@ -3612,17 +4103,28 @@ impl<'a> InterproceduralTaintEngine<'a> {
             }
             if let Some(inst) = self.program.instructions.get(id) {
                 match &inst.kind {
-                    InstructionKind::Call { dest: Some(d), callee: c, .. } => {
+                    InstructionKind::Call {
+                        dest: Some(d),
+                        callee: c,
+                        ..
+                    } => {
                         if d == r && c.to_lowercase().contains("arraylist") {
                             is_local_arraylist = true;
                         }
                     }
-                    InstructionKind::Call { dest: _, callee: c, args: a } => {
+                    InstructionKind::Call {
+                        dest: _,
+                        callee: c,
+                        args: a,
+                    } => {
                         if let Some(rec) = get_receiver_name_safe(c) {
                             if &rec == r {
                                 let method_name = c.split('.').last().unwrap_or(c);
                                 let method_lower = method_name.to_lowercase();
-                                if method_lower != "get" && method_lower != "add" && method_lower != "remove" {
+                                if method_lower != "get"
+                                    && method_lower != "add"
+                                    && method_lower != "remove"
+                                {
                                     failed = true;
                                 }
                             }
@@ -3658,24 +4160,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         .and_then(|n| self.program.methods.get(&n.method_id));
 
                     if let Some(method) = callee_method {
-                        let is_synthetic = method.parameters.len() == 1 && method.parameters[0] == "value";
+                        let is_synthetic =
+                            method.parameters.len() == 1 && method.parameters[0] == "value";
                         let mut param_offset = 0;
                         if !is_synthetic
-                            && method.parameters.first().map(|p| {
-                                let clean = clean_parameter_name(p);
-                                clean == "self" || clean == "this" || clean == "cls"
-                            }).unwrap_or(false)
+                            && method
+                                .parameters
+                                .first()
+                                .map(|p| {
+                                    let clean = clean_parameter_name(p);
+                                    clean == "self" || clean == "this" || clean == "cls"
+                                })
+                                .unwrap_or(false)
                         {
-                            let has_implicit_receiver = if let Some(receiver) = get_receiver_name_safe(callee) {
-                                let caller_method_info = self.gst.program_index.methods.get(&call_node.method_id);
-                                let module_id = caller_method_info.map(|m| m.module_id).unwrap_or(ir::ModuleId(0));
-                                let receiver_is_type = self.gst.resolve_type(module_id, &receiver).is_some();
-                                let first_arg_is_self = args.first().map(|a| a == "self" || a == "this").unwrap_or(false);
-                                !receiver_is_type && !first_arg_is_self
-                            } else {
-                                let first_arg_is_self = args.first().map(|a| a == "self" || a == "this").unwrap_or(false);
-                                !first_arg_is_self
-                            };
+                            let has_implicit_receiver =
+                                if let Some(receiver) = get_receiver_name_safe(callee) {
+                                    let caller_method_info =
+                                        self.gst.program_index.methods.get(&call_node.method_id);
+                                    let module_id = caller_method_info
+                                        .map(|m| m.module_id)
+                                        .unwrap_or(ir::ModuleId(0));
+                                    let receiver_is_type =
+                                        self.gst.resolve_type(module_id, &receiver).is_some();
+                                    let first_arg_is_self = args
+                                        .first()
+                                        .map(|a| a == "self" || a == "this")
+                                        .unwrap_or(false);
+                                    !receiver_is_type && !first_arg_is_self
+                                } else {
+                                    let first_arg_is_self = args
+                                        .first()
+                                        .map(|a| a == "self" || a == "this")
+                                        .unwrap_or(false);
+                                    !first_arg_is_self
+                                };
                             if has_implicit_receiver {
                                 param_offset = 1;
                             }
@@ -3692,7 +4210,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     let clean_param = clean_parameter_name(param);
                                     results.push(clean_param);
                                 }
-                            } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+                            } else if let Some((container, key)) =
+                                parse_java_or_python_container_read(tainted_var)
+                            {
                                 if expr_uses_var(arg, &container) {
                                     let param_opt = if is_synthetic {
                                         Some(&method.parameters[0])
@@ -3719,7 +4239,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             results.push(format!("this.{}", suffix));
                             results.push(format!("self.{}", suffix));
                             results.push(format!("cls.{}", suffix));
-                        } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+                        } else if let Some((container, key)) =
+                            parse_java_or_python_container_read(tainted_var)
+                        {
                             if container == receiver {
                                 results.push(format!("this[\"{}\"]", key));
                                 results.push(format!("self[\"{}\"]", key));
@@ -3762,7 +4284,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         if let Some(method) = self.program.methods.get(&method_id) {
                             let mut returns_tainted = false;
                             let mut tainted_return_var = None;
-                            let has_cached = self.method_insts_cache.borrow().contains_key(&method_id);
+                            let has_cached =
+                                self.method_insts_cache.borrow().contains_key(&method_id);
                             if !has_cached {
                                 let mut insts = Vec::new();
                                 let mut visited = HashSet::new();
@@ -3779,8 +4302,14 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         out.push(id);
                                         if let Some(inst) = program.instructions.get(&id) {
                                             match &inst.kind {
-                                                InstructionKind::Branch { then_block, else_block, .. } => {
-                                                    collect_insts(then_block, program, out, visited);
+                                                InstructionKind::Branch {
+                                                    then_block,
+                                                    else_block,
+                                                    ..
+                                                } => {
+                                                    collect_insts(
+                                                        then_block, program, out, visited,
+                                                    );
                                                     if let Some(eb) = else_block {
                                                         collect_insts(eb, program, out, visited);
                                                     }
@@ -3788,10 +4317,20 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                 InstructionKind::Loop { body, .. } => {
                                                     collect_insts(body, program, out, visited);
                                                 }
-                                                InstructionKind::Try { body, catches, finally, .. } => {
+                                                InstructionKind::Try {
+                                                    body,
+                                                    catches,
+                                                    finally,
+                                                    ..
+                                                } => {
                                                     collect_insts(body, program, out, visited);
                                                     for catch_id in catches {
-                                                        collect_insts(&[*catch_id], program, out, visited);
+                                                        collect_insts(
+                                                            &[*catch_id],
+                                                            program,
+                                                            out,
+                                                            visited,
+                                                        );
                                                     }
                                                     if let Some(fb) = finally {
                                                         collect_insts(fb, program, out, visited);
@@ -3806,7 +4345,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     }
                                 }
                                 collect_insts(&method.body, self.program, &mut insts, &mut visited);
-                                self.method_insts_cache.borrow_mut().insert(method_id, insts);
+                                self.method_insts_cache
+                                    .borrow_mut()
+                                    .insert(method_id, insts);
                             }
 
                             let cache_borrow = self.method_insts_cache.borrow();
@@ -3822,10 +4363,13 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         if expr_uses_var(v, tainted_var) {
                                             returns_tainted = true;
                                             break;
-                                        } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+                                        } else if let Some((container, key)) =
+                                            parse_java_or_python_container_read(tainted_var)
+                                        {
                                             if expr_uses_var(v, &container) {
                                                 if let Some(d) = dest {
-                                                    tainted_return_var = Some(format!("{}[\"{}\"]", d, key));
+                                                    tainted_return_var =
+                                                        Some(format!("{}[\"{}\"]", d, key));
                                                 }
                                                 break;
                                             }
@@ -3845,23 +4389,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             // Propagate parameter reference mutations back to arguments
                             let mut param_idx_opt = None;
                             let mut key_opt = None;
-                            
+
                             let mut param_offset = 0;
-                            let is_synthetic = method.parameters.len() == 1 && method.parameters[0] == "value";
+                            let is_synthetic =
+                                method.parameters.len() == 1 && method.parameters[0] == "value";
                             if !is_synthetic
-                                && method.parameters.first().map(|p| {
-                                    let clean = clean_parameter_name(p);
-                                    clean == "self" || clean == "this" || clean == "cls"
-                                }).unwrap_or(false)
+                                && method
+                                    .parameters
+                                    .first()
+                                    .map(|p| {
+                                        let clean = clean_parameter_name(p);
+                                        clean == "self" || clean == "this" || clean == "cls"
+                                    })
+                                    .unwrap_or(false)
                             {
-                                let is_implicit = if let Some(receiver) = get_receiver_name_safe(callee) {
-                                    let caller_method_info = self.gst.program_index.methods.get(&call_node.method_id);
-                                    let module_id = caller_method_info.map(|m| m.module_id).unwrap_or(ir::ModuleId(0));
-                                    let receiver_is_type = self.gst.resolve_type(module_id, &receiver).is_some();
-                                    let first_arg_is_self = args.first().map(|a| a == "self" || a == "this").unwrap_or(false);
+                                let is_implicit = if let Some(receiver) =
+                                    get_receiver_name_safe(callee)
+                                {
+                                    let caller_method_info =
+                                        self.gst.program_index.methods.get(&call_node.method_id);
+                                    let module_id = caller_method_info
+                                        .map(|m| m.module_id)
+                                        .unwrap_or(ir::ModuleId(0));
+                                    let receiver_is_type =
+                                        self.gst.resolve_type(module_id, &receiver).is_some();
+                                    let first_arg_is_self = args
+                                        .first()
+                                        .map(|a| a == "self" || a == "this")
+                                        .unwrap_or(false);
                                     !receiver_is_type && !first_arg_is_self
                                 } else {
-                                    let first_arg_is_self = args.first().map(|a| a == "self" || a == "this").unwrap_or(false);
+                                    let first_arg_is_self = args
+                                        .first()
+                                        .map(|a| a == "self" || a == "this")
+                                        .unwrap_or(false);
                                     !first_arg_is_self
                                 };
                                 has_implicit_receiver = is_implicit;
@@ -3878,7 +4439,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 }
                             }
                             if param_idx_opt.is_none() {
-                                if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+                                if let Some((container, key)) =
+                                    parse_java_or_python_container_read(tainted_var)
+                                {
                                     for (i, param) in method.parameters.iter().enumerate() {
                                         let clean_param = clean_parameter_name(param);
                                         if clean_param == container {
@@ -3906,7 +4469,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     // Receiver propagation back to caller (receiver side mutation)
                     if has_implicit_receiver {
                         if let Some(receiver) = get_receiver_name_safe(callee) {
-                            if tainted_var == "this" || tainted_var == "self" || tainted_var == "cls" {
+                            if tainted_var == "this"
+                                || tainted_var == "self"
+                                || tainted_var == "cls"
+                            {
                                 results.push(receiver.clone());
                             } else if tainted_var.starts_with("this.") {
                                 let suffix = &tainted_var["this.".len()..];
@@ -3917,8 +4483,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             } else if tainted_var.starts_with("cls.") {
                                 let suffix = &tainted_var["cls.".len()..];
                                 results.push(format!("{}.{}", receiver, suffix));
-                            } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
-                                if container == "this" || container == "self" || container == "cls" {
+                            } else if let Some((container, key)) =
+                                parse_java_or_python_container_read(tainted_var)
+                            {
+                                if container == "this" || container == "self" || container == "cls"
+                                {
                                     results.push(format!("{}[\"{}\"]", receiver, key));
                                 }
                             }
@@ -3945,13 +4514,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
         }
 
         if class_lower.contains("base64") {
-            if method_lower.starts_with("b64decode") || method_lower.starts_with("urlsafe_b64decode") {
+            if method_lower.starts_with("b64decode")
+                || method_lower.starts_with("urlsafe_b64decode")
+            {
                 return Some("bytes".to_string());
             }
-            if method_lower == "getdecoder" || method_lower == "geturldecoder" || method_lower == "getmimedecoder" {
+            if method_lower == "getdecoder"
+                || method_lower == "geturldecoder"
+                || method_lower == "getmimedecoder"
+            {
                 return Some("java.util.Base64$Decoder".to_string());
             }
-            if method_lower == "getencoder" || method_lower == "geturlencoder" || method_lower == "getmimeencoder" {
+            if method_lower == "getencoder"
+                || method_lower == "geturlencoder"
+                || method_lower == "getmimeencoder"
+            {
                 return Some("java.util.Base64$Encoder".to_string());
             }
         }
@@ -4049,7 +4626,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
         if receiver.starts_with("new ") {
             let class_part = receiver["new ".len()..].trim();
-            let clean_class = class_part.split('(').next().unwrap_or(class_part).trim().to_string();
+            let clean_class = class_part
+                .split('(')
+                .next()
+                .unwrap_or(class_part)
+                .trim()
+                .to_string();
             if let Some(method_info) = self.gst.program_index.methods.get(&method_id) {
                 let module_id = method_info.module_id;
                 let parent_type_id = method_info.parent_type_id;
@@ -4077,8 +4659,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
         }
 
         if receiver.contains('.') {
-            if let Some((callee_class, callee_method)) = self.resolve_callee_info(method_id, &receiver) {
-                if let Some(ret_type) = self.get_library_call_return_type(&callee_class, &callee_method) {
+            if let Some((callee_class, callee_method)) =
+                self.resolve_callee_info(method_id, &receiver)
+            {
+                if let Some(ret_type) =
+                    self.get_library_call_return_type(&callee_class, &callee_method)
+                {
                     return Some((ret_type, method_name));
                 }
             }
@@ -4152,7 +4738,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
             }
 
-             if let Some(method) = self.program.methods.get(&method_id) {
+            if let Some(method) = self.program.methods.get(&method_id) {
                 let mut local_type = None;
                 let mut all_insts = Vec::new();
                 fn collect_insts(
@@ -4164,7 +4750,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         out.push(id);
                         if let Some(inst) = program.instructions.get(&id) {
                             match &inst.kind {
-                                ir::InstructionKind::Branch { then_block, else_block, .. } => {
+                                ir::InstructionKind::Branch {
+                                    then_block,
+                                    else_block,
+                                    ..
+                                } => {
                                     collect_insts(then_block, program, out);
                                     if let Some(eb) = else_block {
                                         collect_insts(eb, program, out);
@@ -4173,7 +4763,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 ir::InstructionKind::Loop { body, .. } => {
                                     collect_insts(body, program, out);
                                 }
-                                ir::InstructionKind::Try { body, catches, finally, .. } => {
+                                ir::InstructionKind::Try {
+                                    body,
+                                    catches,
+                                    finally,
+                                    ..
+                                } => {
                                     collect_insts(body, program, out);
                                     collect_insts(catches, program, out);
                                     if let Some(fb) = finally {
@@ -4213,7 +4808,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     if clean_src.starts_with('(') {
                                         if let Some(close_idx) = clean_src.find(')') {
                                             let cast_part = &clean_src[1..close_idx].trim();
-                                            if !cast_part.contains(' ') && !cast_part.contains('+') && !cast_part.contains('-') {
+                                            if !cast_part.contains(' ')
+                                                && !cast_part.contains('+')
+                                                && !cast_part.contains('-')
+                                            {
                                                 clean_src = cast_part;
                                             }
                                         }
@@ -4222,7 +4820,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     if clean_src.contains(" / ") {
                                         let parts: Vec<&str> = clean_src.split(" / ").collect();
                                         if let Some(&left_var) = parts.first() {
-                                            if let Some((left_type, _)) = self.resolve_callee_info(method_id, &format!("{}.exists", left_var.trim())) {
+                                            if let Some((left_type, _)) = self.resolve_callee_info(
+                                                method_id,
+                                                &format!("{}.exists", left_var.trim()),
+                                            ) {
                                                 if left_type.to_lowercase().contains("path") {
                                                     local_type = Some(left_type);
                                                     resolved = true;
@@ -4241,12 +4842,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
 
                 if let Some(t_name) = local_type {
-                    let mut clean_t = t_name.split('(').next().unwrap_or(&t_name).trim().to_string();
+                    let mut clean_t = t_name
+                        .split('(')
+                        .next()
+                        .unwrap_or(&t_name)
+                        .trim()
+                        .to_string();
                     let mut resolved_entire = false;
-                    
+
                     if clean_t.contains('.') {
-                        if let Some((callee_class, callee_method)) = self.resolve_callee_info(method_id, &clean_t) {
-                            if let Some(ret_type) = self.get_library_call_return_type(&callee_class, &callee_method) {
+                        if let Some((callee_class, callee_method)) =
+                            self.resolve_callee_info(method_id, &clean_t)
+                        {
+                            if let Some(ret_type) =
+                                self.get_library_call_return_type(&callee_class, &callee_method)
+                            {
                                 clean_t = ret_type;
                                 resolved_entire = true;
                             }
@@ -4315,7 +4925,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
             // variable is assigned from a field or constructor in a different file.
             let receiver_base_lower = receiver_base.to_lowercase();
             let receiver_capitalized = if !receiver_base.is_empty() {
-                format!("{}{}", &receiver_base[..1].to_uppercase(), &receiver_base[1..])
+                format!(
+                    "{}{}",
+                    &receiver_base[..1].to_uppercase(),
+                    &receiver_base[1..]
+                )
             } else {
                 receiver_base.clone()
             };
@@ -4326,12 +4940,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 // or if the capitalized variable name equals the class name
                 if type_short == receiver_base_lower
                     || type_info.name == receiver_capitalized
-                    || type_info.fqn.to_lowercase().ends_with(&format!(".{}", receiver_base_lower))
+                    || type_info
+                        .fqn
+                        .to_lowercase()
+                        .ends_with(&format!(".{}", receiver_base_lower))
                 {
-                    return Some((
-                        format!("{}{}", type_info.fqn, receiver_suffix),
-                        method_name,
-                    ));
+                    return Some((format!("{}{}", type_info.fqn, receiver_suffix), method_name));
                 }
             }
         }
@@ -4364,17 +4978,18 @@ pub fn parse_java_or_python_container_read(expr: &str) -> Option<(String, String
     while expr.starts_with('(') {
         if let Some(close_paren_idx) = expr.find(')') {
             let inside = expr[1..close_paren_idx].trim();
-            let is_type = !inside.is_empty() && inside.chars().all(|c| {
-                c.is_alphanumeric()
-                    || c == '_'
-                    || c == '.'
-                    || c == '['
-                    || c == ']'
-                    || c == '<'
-                    || c == '>'
-                    || c == '?'
-                    || c == ' '
-            });
+            let is_type = !inside.is_empty()
+                && inside.chars().all(|c| {
+                    c.is_alphanumeric()
+                        || c == '_'
+                        || c == '.'
+                        || c == '['
+                        || c == ']'
+                        || c == '<'
+                        || c == '>'
+                        || c == '?'
+                        || c == ' '
+                });
             if is_type {
                 expr = expr[close_paren_idx + 1..].trim();
             } else {
@@ -4395,7 +5010,7 @@ pub fn parse_java_or_python_container_read(expr: &str) -> Option<(String, String
                     .replace('\'', "")
                     .trim()
                     .to_string();
-                
+
                 let container_lower = container.to_lowercase();
                 if !container.is_empty()
                     && !container_lower.starts_with("new ")
@@ -4406,7 +5021,7 @@ pub fn parse_java_or_python_container_read(expr: &str) -> Option<(String, String
             }
         }
     }
-    
+
     // 2. Method calls: map.get("id")
     let expr_lower = expr.to_lowercase();
     if expr_lower.contains(".get")
@@ -4419,12 +5034,12 @@ pub fn parse_java_or_python_container_read(expr: &str) -> Option<(String, String
                 if close_paren_idx > open_paren_idx {
                     let callee = expr[..open_paren_idx].trim();
                     let args_str = &expr[open_paren_idx + 1..close_paren_idx];
-                    
+
                     if let Some(last_dot_idx) = callee.rfind('.') {
                         let receiver = callee[..last_dot_idx].trim().to_string();
                         let method = callee[last_dot_idx + 1..].trim();
                         let method_lower = method.to_lowercase();
-                        
+
                         if method_lower == "get"
                             || method_lower == "getitem"
                             || method_lower == "getordefault"
@@ -4444,7 +5059,7 @@ pub fn parse_java_or_python_container_read(expr: &str) -> Option<(String, String
             }
         }
     }
-    
+
     None
 }
 
@@ -4454,7 +5069,10 @@ fn is_same_var(a: &str, b: &str) -> bool {
     if a_clean.to_lowercase() == b_clean.to_lowercase() {
         return true;
     }
-    if let (Some((c1, k1)), Some((c2, k2))) = (parse_java_or_python_container_read(a_clean), parse_java_or_python_container_read(b_clean)) {
+    if let (Some((c1, k1)), Some((c2, k2))) = (
+        parse_java_or_python_container_read(a_clean),
+        parse_java_or_python_container_read(b_clean),
+    ) {
         return c1.to_lowercase() == c2.to_lowercase() && k1.to_lowercase() == k2.to_lowercase();
     }
     false
@@ -4620,7 +5238,7 @@ fn expr_uses_var_internal(expr: &str, var: &str) -> bool {
             if c_expr.to_lowercase() == c_var.to_lowercase() {
                 let cat_expr = categorize_key(k_expr, raw_key_has_quotes(expr));
                 let cat_var = categorize_key(k_var, raw_key_has_quotes(var));
-                
+
                 // Explicit matching policy:
                 // 1. Wildcard matches anything (acts as fallback/broad container taint).
                 // 2. Unknown represents an unresolvable variable/expression. We must match it
@@ -4786,10 +5404,10 @@ fn clean_parameter_name(param: &str) -> String {
     } else {
         param
     };
-    
+
     // 2. Extract the last word
     let last = base.split_whitespace().last().unwrap_or(base);
-    
+
     // 3. Clean up
     last.replace("[]", "")
         .trim_matches(|c: char| !c.is_alphanumeric() && c != '_')
@@ -4813,7 +5431,11 @@ fn is_internal_object_param(param: &str) -> bool {
             return false;
         };
         // Only match simple capitalized identifiers — excludes Union[...], Optional[...], etc.
-        return inner.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
+        return inner
+            .chars()
+            .next()
+            .map(|c| c.is_uppercase())
+            .unwrap_or(false)
             && inner.chars().all(|c| c.is_alphanumeric() || c == '_');
     }
     false
@@ -4855,7 +5477,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
         {
             return false;
         }
-        
+
         // Flask / Django attributes (request.environ intentionally omitted — RC78 Task 1)
         let flask_attrs = [
             "request.data",
@@ -4919,20 +5541,32 @@ impl<'a> InterproceduralTaintEngine<'a> {
             if expr_lower.contains(src) {
                 if src == &"getenv" {
                     // Only match for Java System.getenv, not Python os.getenv
-                    let is_python = self.program.modules.values().any(|m| m.file_path.to_lowercase().ends_with(".py"));
+                    let is_python = self
+                        .program
+                        .modules
+                        .values()
+                        .any(|m| m.file_path.to_lowercase().ends_with(".py"));
                     if is_python {
                         continue;
                     }
                 }
                 if src == &"getattribute" {
                     // Only match for Java getAttribute, not Python
-                    let is_python = self.program.modules.values().any(|m| m.file_path.to_lowercase().ends_with(".py"));
+                    let is_python = self
+                        .program
+                        .modules
+                        .values()
+                        .any(|m| m.file_path.to_lowercase().ends_with(".py"));
                     if is_python {
                         continue;
                     }
                 }
                 if src == &"input" {
-                    let is_python = self.program.modules.values().any(|m| m.file_path.to_lowercase().ends_with(".py"));
+                    let is_python = self
+                        .program
+                        .modules
+                        .values()
+                        .any(|m| m.file_path.to_lowercase().ends_with(".py"));
                     if !is_python {
                         continue;
                     }
@@ -5048,7 +5682,6 @@ impl<'a> InterproceduralTaintEngine<'a> {
     }
 }
 
-
 /// RC45: Extract the first string literal argument from a method call expression.
 /// e.g. `session.getAttribute("user")` -> Some("user")
 ///      `session.getAttribute(key)` -> None  (variable key, not a literal)
@@ -5094,9 +5727,14 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
     }
 
     let total_lines = content.lines().count();
-    let scan_start = if target_line > 20 { target_line - 20 } else { 1 };
+    let scan_start = if target_line > 20 {
+        target_line - 20
+    } else {
+        1
+    };
     let scan_end = std::cmp::min(target_line + 15, total_lines);
-    let window_lines: Vec<&str> = content.lines()
+    let window_lines: Vec<&str> = content
+        .lines()
         .skip(scan_start - 1)
         .take(scan_end - scan_start + 1)
         .collect();
@@ -5105,13 +5743,21 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
     for _pass in 0..2 {
         for line_str in &window_lines {
             let trimmed = line_str.trim();
-            if trimmed.contains('=') && !trimmed.starts_with("if") && !trimmed.contains("==") && !trimmed.contains("!=") {
+            if trimmed.contains('=')
+                && !trimmed.starts_with("if")
+                && !trimmed.contains("==")
+                && !trimmed.contains("!=")
+            {
                 if let Some(eq_idx) = trimmed.find('=') {
                     let lhs = trimmed[..eq_idx].trim();
                     let rhs = trimmed[eq_idx + 1..].trim();
 
                     // Reject RHS containing (, ., ::, new (Candidate C)
-                    if rhs.contains('(') || rhs.contains('.') || rhs.contains("::") || rhs.contains("new ") {
+                    if rhs.contains('(')
+                        || rhs.contains('.')
+                        || rhs.contains("::")
+                        || rhs.contains("new ")
+                    {
                         continue;
                     }
 
@@ -5123,7 +5769,8 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
                         }
                     }
                     if rhs_has_part {
-                        let words: Vec<&str> = lhs.split(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
+                        let words: Vec<&str> = lhs
+                            .split(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
                             .filter(|s| !s.is_empty())
                             .collect();
                         if let Some(last_word) = words.last() {
@@ -5139,12 +5786,20 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
     }
 
     #[cfg(debug_assertions)]
-    println!("[DEBUG_GUARD] var_name='{}' target_line={} resolved_parts={:?}", var_name, target_line, parts);
+    println!(
+        "[DEBUG_GUARD] var_name='{}' target_line={} resolved_parts={:?}",
+        var_name, target_line, parts
+    );
 
-    let check_start = if target_line > 50 { target_line - 50 } else { 1 };
+    let check_start = if target_line > 50 {
+        target_line - 50
+    } else {
+        1
+    };
     let check_end = if target_line > 1 { target_line - 1 } else { 1 };
     let check_lines: Vec<&str> = if check_end >= check_start {
-        content.lines()
+        content
+            .lines()
             .skip(check_start - 1)
             .take(check_end - check_start + 1)
             .collect()
@@ -5192,9 +5847,7 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
         let is_declaration = (trimmed.contains("public ")
             || trimmed.contains("private ")
             || trimmed.contains("protected "))
-            && (trimmed.contains("void")
-                || trimmed.contains("(")
-                || trimmed.contains("class "));
+            && (trimmed.contains("void") || trimmed.contains("(") || trimmed.contains("class "));
 
         let has_inline_statements = trimmed.contains(';')
             || trimmed.contains("if(")
@@ -5209,23 +5862,33 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
 
         for part in &parts {
             // ── Existing guards ──────────────────────────────────────────────
-            let contains_exists     = false; // line.contains("exists(")     && has_word(&line, part);
-            let contains_isfile     = line.contains("isfile(")     && has_word(&line, part);
-            let contains_isdir      = line.contains("isdir(")      && has_word(&line, part);
-            let contains_endswith   = line.contains(".endswith(")  && has_word(&line, part);
-            let contains_is_none    = false;
-            let contains_whitelist  = (line.contains(" in ") || line.contains("not in"))
+            let contains_exists = false; // line.contains("exists(")     && has_word(&line, part);
+            let contains_isfile = line.contains("isfile(") && has_word(&line, part);
+            let contains_isdir = line.contains("isdir(") && has_word(&line, part);
+            let contains_endswith = line.contains(".endswith(") && has_word(&line, part);
+            let contains_is_none = false;
+            let contains_whitelist = (line.contains(" in ") || line.contains("not in"))
                 && has_word(&line, part)
-                && (line.contains("whitelist") || line.contains("allowed")
-                    || line.contains("safe") || line.contains("valid") || line.contains("list"));
-            let contains_guard      = line.contains("guard") && has_word(&line, part);
+                && (line.contains("whitelist")
+                    || line.contains("allowed")
+                    || line.contains("safe")
+                    || line.contains("valid")
+                    || line.contains("list"));
+            let contains_guard = line.contains("guard") && has_word(&line, part);
 
             // ── Path validation / normalization guards ───────────────────────────
-            let contains_realpath   = (line.contains("realpath(") || line.contains(".realpath(")) && has_word(&line, part);
-            let contains_abspath    = (line.contains("abspath(") || line.contains(".abspath(")) && has_word(&line, part);
-            let contains_normpath   = (line.contains("normpath(") || line.contains(".normpath(")) && has_word(&line, part);
-            let contains_normalize  = (line.contains("normalize(") || line.contains(".normalize(")) && has_word(&line, part);
-            let contains_canonical  = (line.contains("canonical(") || line.contains("canonicalpath(") || line.contains("getcanonicalpath(")) && has_word(&line, part);
+            let contains_realpath = (line.contains("realpath(") || line.contains(".realpath("))
+                && has_word(&line, part);
+            let contains_abspath =
+                (line.contains("abspath(") || line.contains(".abspath(")) && has_word(&line, part);
+            let contains_normpath = (line.contains("normpath(") || line.contains(".normpath("))
+                && has_word(&line, part);
+            let contains_normalize = (line.contains("normalize(") || line.contains(".normalize("))
+                && has_word(&line, part);
+            let contains_canonical = (line.contains("canonical(")
+                || line.contains("canonicalpath(")
+                || line.contains("getcanonicalpath("))
+                && has_word(&line, part);
 
             // ── RC78 Task 3: Python os.path guards ───────────────────────────
             // Use fully-qualified os.path.* patterns to avoid ambiguous matches.
@@ -5250,8 +5913,13 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
             // Requires BOTH the var name AND a base/root/dir/path keyword to avoid matching generic startswith
             let py_startswith_basedir = line.contains(".startswith(")
                 && has_word(&line, part)
-                && (line.contains("base") || line.contains("root") || line.contains("safe")
-                    || line.contains("allowed") || line.contains("upload_dir") || line.contains("dir") || line.contains("path"));
+                && (line.contains("base")
+                    || line.contains("root")
+                    || line.contains("safe")
+                    || line.contains("allowed")
+                    || line.contains("upload_dir")
+                    || line.contains("dir")
+                    || line.contains("path"));
 
             // ── RC112 (revised): Regex filter guard ──────────────────────────
             // Only fires when re.match/re.fullmatch result is consumed via .group(),
@@ -5268,7 +5936,8 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
             // Evidence: Paddle fix (Sample 51) uses:
             //   module_name = re.match("^[a-zA-Z0-9_/\\-]+$", module_name).group()
             // The .group() call is the definitive indicator that the regex is a filter.
-            let py_regex_filter_assign = (line.contains("re.match(") || line.contains("re.fullmatch("))
+            let py_regex_filter_assign = (line.contains("re.match(")
+                || line.contains("re.fullmatch("))
                 && has_word(&line, part)
                 && line.contains(".group()");
 
@@ -5284,8 +5953,14 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
             // Requires a base/root/safe/allowed/dir/path anchor word to avoid generic startsWith matches
             let java_startswith_base = line.contains("startswith(")
                 && has_word(&line, part)
-                && (line.contains("base") || line.contains("root") || line.contains("safe")
-                    || line.contains("allowed") || line.contains("uploaddir") || line.contains("upload_dir") || line.contains("dir") || line.contains("path"));
+                && (line.contains("base")
+                    || line.contains("root")
+                    || line.contains("safe")
+                    || line.contains("allowed")
+                    || line.contains("uploaddir")
+                    || line.contains("upload_dir")
+                    || line.contains("dir")
+                    || line.contains("path"));
 
             // ── RC78 Task 3: Sanitizer-function name guards ───────────────────
             // Only include fully-qualified, unambiguous sanitizer function names.
@@ -5298,16 +5973,31 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
                 || line.contains("check_path_traversal")
                 || (line.contains("verify") && has_word(&line, part) && line.contains("path"));
 
-            if contains_exists || contains_isfile || contains_isdir || contains_endswith
-                || contains_is_none || contains_whitelist || contains_guard
-                || contains_realpath || contains_abspath || contains_normpath || contains_normalize || contains_canonical
-                || py_ospath_guard || py_pathlib_guard || py_startswith_basedir
+            if contains_exists
+                || contains_isfile
+                || contains_isdir
+                || contains_endswith
+                || contains_is_none
+                || contains_whitelist
+                || contains_guard
+                || contains_realpath
+                || contains_abspath
+                || contains_normpath
+                || contains_normalize
+                || contains_canonical
+                || py_ospath_guard
+                || py_pathlib_guard
+                || py_startswith_basedir
                 || py_regex_filter_assign
-                || java_canonical || java_startswith_base
+                || java_canonical
+                || java_startswith_base
                 || sanitizer_fn_guard
             {
                 #[cfg(debug_assertions)]
-                println!("[DEBUG_GUARD] MATCHED line: '{}' for part: '{}'", line_str, part);
+                println!(
+                    "[DEBUG_GUARD] MATCHED line: '{}' for part: '{}'",
+                    line_str, part
+                );
                 return true;
             }
         }
@@ -5317,11 +6007,21 @@ fn check_guard_in_content(content: &str, var_name: &str, target_line: usize) -> 
     false
 }
 
-fn is_path_traversal_guarded(program: &ir::Program, file_path: &str, var_name: &str, target_line: usize) -> bool {
+fn is_path_traversal_guarded(
+    program: &ir::Program,
+    file_path: &str,
+    var_name: &str,
+    target_line: usize,
+) -> bool {
     is_path_traversal_guarded_internal(program, file_path, var_name, target_line)
 }
 
-fn is_path_traversal_guarded_internal(program: &ir::Program, file_path: &str, var_name: &str, target_line: usize) -> bool {
+fn is_path_traversal_guarded_internal(
+    program: &ir::Program,
+    file_path: &str,
+    var_name: &str,
+    target_line: usize,
+) -> bool {
     if let Some(content) = program.source_files.get(file_path) {
         return check_guard_in_content(content, var_name, target_line);
     }
@@ -5348,7 +6048,11 @@ fn is_path_traversal_guarded_internal(program: &ir::Program, file_path: &str, va
 
 /// Returns true if the given callee + args represents an unsafe deserialization sink (CWE-502).
 /// `args` is used to detect safe-loader-qualified yaml.load calls.
-pub fn is_deserialization_sink_check(callee: &str, resolved_class_fqn: Option<&str>, args: &[String]) -> bool {
+pub fn is_deserialization_sink_check(
+    callee: &str,
+    resolved_class_fqn: Option<&str>,
+    args: &[String],
+) -> bool {
     let callee_lower = callee.to_lowercase();
     let clean_method = callee.split('.').last().unwrap_or(callee);
     let clean_method_lower = clean_method.to_lowercase();
@@ -5368,7 +6072,9 @@ pub fn is_deserialization_sink_check(callee: &str, resolved_class_fqn: Option<&s
         return false;
     }
     if callee_lower.starts_with("struct.")
-        || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| fqn == "struct" || fqn.ends_with(".struct"))
+        || resolved_class_fqn_lower
+            .as_ref()
+            .map_or(false, |fqn| fqn == "struct" || fqn.ends_with(".struct"))
     {
         return false;
     }
@@ -5400,7 +6106,9 @@ pub fn is_deserialization_sink_check(callee: &str, resolved_class_fqn: Option<&s
 
     if clean_method_lower == "deserialize"
         || callee_lower.contains("deserialize")
-        || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| fqn.contains("deserializer") || fqn.contains("deserialisation"))
+        || resolved_class_fqn_lower.as_ref().map_or(false, |fqn| {
+            fqn.contains("deserializer") || fqn.contains("deserialisation")
+        })
     {
         return true;
     }
@@ -5466,9 +6174,12 @@ pub fn is_deserialization_sink_check(callee: &str, resolved_class_fqn: Option<&s
         && !callee_lower.contains("cert")
         && !callee_lower.contains("x509")
         && resolved_class_fqn_lower.as_ref().map_or(true, |fqn| {
-            !fqn.contains("json") && !fqn.contains("toml")
-                && !fqn.contains("asn1crypto") && !fqn.contains("cryptography")
-                && !fqn.contains("certificate") && !fqn.contains("cert")
+            !fqn.contains("json")
+                && !fqn.contains("toml")
+                && !fqn.contains("asn1crypto")
+                && !fqn.contains("cryptography")
+                && !fqn.contains("certificate")
+                && !fqn.contains("cert")
                 && !fqn.contains("x509")
         })
     {
@@ -5526,4 +6237,4 @@ fn find_nested_sanitizers(expr: &str) -> Vec<crate::CWE> {
         }
     }
     result
-}
+}

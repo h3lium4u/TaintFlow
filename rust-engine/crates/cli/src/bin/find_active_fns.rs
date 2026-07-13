@@ -38,8 +38,11 @@ fn main() {
         let mut program = ir::Program::new();
         let mut gst = symbols::global::GlobalSymbolTable::new();
         let filename = format!("{}.java", class_name);
-        
-        if gst.load_file(&mut program, &sample.code, &filename, &sample.language).is_ok() {
+
+        if gst
+            .load_file(&mut program, &sample.code, &filename, &sample.language)
+            .is_ok()
+        {
             gst.resolve_inheritance_hierarchy();
             let cg = symbols::call_graph::CallGraph::build(&program, &gst);
             let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);

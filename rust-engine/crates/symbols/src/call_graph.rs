@@ -116,14 +116,18 @@ impl CallGraph {
                         let parts: Vec<&str> = clean_param.split(':').collect();
                         if parts.len() == 2 {
                             let var_name = parts[0].trim();
-                            let type_name = parts[1].trim().split('=').next().unwrap_or(parts[1]).trim();
+                            let type_name =
+                                parts[1].trim().split('=').next().unwrap_or(parts[1]).trim();
                             local_types.insert(var_name.to_string(), type_name.to_string());
                         }
                     } else {
                         // Java style parameter declarations: TypeName var_name (or Annotation TypeName var_name)
                         let parts: Vec<&str> = clean_param.split_whitespace().collect();
                         if parts.len() >= 2 {
-                            let var_name = parts.last().unwrap().trim_matches(|c: char| !c.is_alphanumeric() && c != '_');
+                            let var_name = parts
+                                .last()
+                                .unwrap()
+                                .trim_matches(|c: char| !c.is_alphanumeric() && c != '_');
                             let mut type_name = "";
                             for word in parts.iter().rev().skip(1) {
                                 let clean_word = word.trim();
@@ -133,7 +137,8 @@ impl CallGraph {
                                 }
                             }
                             if !type_name.is_empty() && !var_name.is_empty() {
-                                let clean_type = type_name.split('<').next().unwrap_or(type_name).to_string();
+                                let clean_type =
+                                    type_name.split('<').next().unwrap_or(type_name).to_string();
                                 local_types.insert(var_name.to_string(), clean_type);
                             }
                         }
@@ -156,7 +161,11 @@ impl CallGraph {
                     out.push(id);
                     if let Some(inst) = program.instructions.get(&id) {
                         match &inst.kind {
-                            InstructionKind::Branch { then_block, else_block, .. } => {
+                            InstructionKind::Branch {
+                                then_block,
+                                else_block,
+                                ..
+                            } => {
                                 collect_insts(then_block, program, out, visited);
                                 if let Some(eb) = else_block {
                                     collect_insts(eb, program, out, visited);
@@ -165,7 +174,12 @@ impl CallGraph {
                             InstructionKind::Loop { body, .. } => {
                                 collect_insts(body, program, out, visited);
                             }
-                            InstructionKind::Try { body, catches, finally, .. } => {
+                            InstructionKind::Try {
+                                body,
+                                catches,
+                                finally,
+                                ..
+                            } => {
                                 collect_insts(body, program, out, visited);
                                 collect_insts(catches, program, out, visited);
                                 if let Some(fb) = finally {
@@ -201,10 +215,17 @@ impl CallGraph {
                                     let obj = parts[0];
                                     let method_name = parts[1];
                                     if let Some(obj_type) = local_types.get(obj) {
-                                        let clean_obj_type = obj_type.split('<').next().unwrap_or(obj_type).trim();
-                                        if let Some(type_id) = gst.resolve_type(module_id, clean_obj_type) {
-                                            if let Some(m_id) = gst.resolve_method(type_id, method_name) {
-                                                if let Some(m_info) = gst.program_index.methods.get(&m_id) {
+                                        let clean_obj_type =
+                                            obj_type.split('<').next().unwrap_or(obj_type).trim();
+                                        if let Some(type_id) =
+                                            gst.resolve_type(module_id, clean_obj_type)
+                                        {
+                                            if let Some(m_id) =
+                                                gst.resolve_method(type_id, method_name)
+                                            {
+                                                if let Some(m_info) =
+                                                    gst.program_index.methods.get(&m_id)
+                                                {
                                                     if let Some(ref rt) = m_info.return_type {
                                                         resolved_return_type = Some(rt.clone());
                                                     }
@@ -214,7 +235,8 @@ impl CallGraph {
                                     }
                                 }
                                 if let Some(rt) = resolved_return_type {
-                                    let clean_rt = rt.split('<').next().unwrap_or(&rt).trim().to_string();
+                                    let clean_rt =
+                                        rt.split('<').next().unwrap_or(&rt).trim().to_string();
                                     local_types.insert(d.clone(), clean_rt);
                                 } else {
                                     local_types.insert(d.clone(), callee.clone());
@@ -263,7 +285,12 @@ impl CallGraph {
                                 obj_type_name = Some(t.clone());
                             } else if obj_name.starts_with("new ") {
                                 let type_part = obj_name["new ".len()..].trim();
-                                let clean_type = type_part.split('(').next().unwrap_or(type_part).trim().to_string();
+                                let clean_type = type_part
+                                    .split('(')
+                                    .next()
+                                    .unwrap_or(type_part)
+                                    .trim()
+                                    .to_string();
                                 obj_type_name = Some(clean_type);
                             }
 
@@ -294,167 +321,206 @@ impl CallGraph {
                                             a.contains("Autowired")
                                                 || a.contains("Inject")
                                                 || a.contains("Resource")
-                                          });
-                                          if has_di {
-                                              let fallback_type = format!(
-                                                  "{}{}",
-                                                  obj_name[..1].to_uppercase(),
-                                                  &obj_name[1..]
-                                              );
-                                              obj_type_name = Some(fallback_type);
-                                          }
-                                      }
-                                  }
-                              }
+                                        });
+                                        if has_di {
+                                            let fallback_type = format!(
+                                                "{}{}",
+                                                obj_name[..1].to_uppercase(),
+                                                &obj_name[1..]
+                                            );
+                                            obj_type_name = Some(fallback_type);
+                                        }
+                                    }
+                                }
+                            }
 
-                              let mut resolved_type_id = None;
-                              if obj_name == "self" || obj_name == "this" {
-                                  resolved_type_id = caller_class_id;
-                              }
+                            let mut resolved_type_id = None;
+                            if obj_name == "self" || obj_name == "this" {
+                                resolved_type_id = caller_class_id;
+                            }
 
-                              if let Some(ref t_name) = obj_type_name {
-                                  let clean_t_name = t_name.split('<').next().unwrap_or(t_name).trim();
-                                  resolved_type_id = resolved_type_id.or_else(|| gst.resolve_type(module_id, clean_t_name));
-                                  if resolved_type_id.is_none() {
-                                      if let Some(class_id) = caller_class_id {
-                                          if let Some(parent_info) = gst.program_index.types.get(&class_id) {
-                                              let candidate = format!("{}.{}", parent_info.fqn, clean_t_name);
-                                              if let Some(&id) = gst.type_index.fqn_to_id.get(&candidate) {
-                                                  resolved_type_id = Some(id);
-                                              }
-                                          }
-                                      }
-                                  }
-                              }
+                            if let Some(ref t_name) = obj_type_name {
+                                let clean_t_name =
+                                    t_name.split('<').next().unwrap_or(t_name).trim();
+                                resolved_type_id = resolved_type_id
+                                    .or_else(|| gst.resolve_type(module_id, clean_t_name));
+                                if resolved_type_id.is_none() {
+                                    if let Some(class_id) = caller_class_id {
+                                        if let Some(parent_info) =
+                                            gst.program_index.types.get(&class_id)
+                                        {
+                                            let candidate =
+                                                format!("{}.{}", parent_info.fqn, clean_t_name);
+                                            if let Some(&id) =
+                                                gst.type_index.fqn_to_id.get(&candidate)
+                                            {
+                                                resolved_type_id = Some(id);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
-                              if let Some(type_id) = resolved_type_id {
-                                  let mut candidates = Vec::new();
+                            if let Some(type_id) = resolved_type_id {
+                                let mut candidates = Vec::new();
 
-                                  // Direct method on the type
-                                  if let Some(m_id) = gst.resolve_method(type_id, method_name) {
-                                      candidates.push((m_id, EdgeType::DirectCall));
-                                  }
+                                // Direct method on the type
+                                if let Some(m_id) = gst.resolve_method(type_id, method_name) {
+                                    candidates.push((m_id, EdgeType::DirectCall));
+                                }
 
-                                  // Virtual/Interface resolution via CHA
-                                  if let Some(type_info) = gst.program_index.types.get(&type_id) {
-                                      match type_info.kind {
-                                          TypeKind::Interface => {
-                                              let mut implementors = HashSet::new();
-                                              for key in &[&type_info.fqn, &type_info.name] {
-                                                  if let Some(impls) = gst.interface_to_implementors.get(*key) {
-                                                      for &impl_type_id in impls {
-                                                          implementors.insert(impl_type_id);
-                                                          let mut visited = HashSet::new();
-                                                          get_all_subclasses(gst, impl_type_id, &mut visited);
-                                                          implementors.extend(visited);
-                                                      }
-                                                  }
-                                              }
-                                              // RTA Check: only resolve to the implementor method if the implementor is instantiated
-                                              let mut instantiated_implementors = Vec::new();
-                                              for &impl_id in &implementors {
-                                                  if let Some(impl_info) = gst.program_index.types.get(&impl_id) {
-                                                      if instantiated_types.contains(&impl_info.name)
-                                                          || instantiated_types.contains(&impl_info.fqn)
-                                                      {
-                                                          instantiated_implementors.push(impl_id);
-                                                      }
-                                                  }
-                                              }
+                                // Virtual/Interface resolution via CHA
+                                if let Some(type_info) = gst.program_index.types.get(&type_id) {
+                                    match type_info.kind {
+                                        TypeKind::Interface => {
+                                            let mut implementors = HashSet::new();
+                                            for key in &[&type_info.fqn, &type_info.name] {
+                                                if let Some(impls) =
+                                                    gst.interface_to_implementors.get(*key)
+                                                {
+                                                    for &impl_type_id in impls {
+                                                        implementors.insert(impl_type_id);
+                                                        let mut visited = HashSet::new();
+                                                        get_all_subclasses(
+                                                            gst,
+                                                            impl_type_id,
+                                                            &mut visited,
+                                                        );
+                                                        implementors.extend(visited);
+                                                    }
+                                                }
+                                            }
+                                            // RTA Check: only resolve to the implementor method if the implementor is instantiated
+                                            let mut instantiated_implementors = Vec::new();
+                                            for &impl_id in &implementors {
+                                                if let Some(impl_info) =
+                                                    gst.program_index.types.get(&impl_id)
+                                                {
+                                                    if instantiated_types.contains(&impl_info.name)
+                                                        || instantiated_types
+                                                            .contains(&impl_info.fqn)
+                                                    {
+                                                        instantiated_implementors.push(impl_id);
+                                                    }
+                                                }
+                                            }
 
-                                              let targets_to_resolve = if !instantiated_implementors.is_empty() {
-                                                  instantiated_implementors
-                                              } else {
-                                                  implementors.into_iter().collect()
-                                              };
+                                            let targets_to_resolve =
+                                                if !instantiated_implementors.is_empty() {
+                                                    instantiated_implementors
+                                                } else {
+                                                    implementors.into_iter().collect()
+                                                };
 
-                                              for impl_type_id in targets_to_resolve {
-                                                  if let Some(m_id) = gst.resolve_method(impl_type_id, method_name) {
-                                                      candidates.push((m_id, EdgeType::InterfaceCall));
-                                                  }
-                                              }
-                                          }
-                                          TypeKind::Class => {
-                                              let mut subclasses = HashSet::new();
-                                              let mut visited = HashSet::new();
-                                              get_all_subclasses(gst, type_id, &mut visited);
-                                              subclasses.extend(visited);
+                                            for impl_type_id in targets_to_resolve {
+                                                if let Some(m_id) =
+                                                    gst.resolve_method(impl_type_id, method_name)
+                                                {
+                                                    candidates
+                                                        .push((m_id, EdgeType::InterfaceCall));
+                                                }
+                                            }
+                                        }
+                                        TypeKind::Class => {
+                                            let mut subclasses = HashSet::new();
+                                            let mut visited = HashSet::new();
+                                            get_all_subclasses(gst, type_id, &mut visited);
+                                            subclasses.extend(visited);
 
-                                              // RTA Check: only resolve to the subclass method if the subclass is instantiated
-                                              let mut instantiated_subclasses = Vec::new();
-                                              for &sub_id in &subclasses {
-                                                  if let Some(sub_info) = gst.program_index.types.get(&sub_id) {
-                                                      if instantiated_types.contains(&sub_info.name)
-                                                          || instantiated_types.contains(&sub_info.fqn)
-                                                      {
-                                                          instantiated_subclasses.push(sub_id);
-                                                      }
-                                                  }
-                                              }
+                                            // RTA Check: only resolve to the subclass method if the subclass is instantiated
+                                            let mut instantiated_subclasses = Vec::new();
+                                            for &sub_id in &subclasses {
+                                                if let Some(sub_info) =
+                                                    gst.program_index.types.get(&sub_id)
+                                                {
+                                                    if instantiated_types.contains(&sub_info.name)
+                                                        || instantiated_types
+                                                            .contains(&sub_info.fqn)
+                                                    {
+                                                        instantiated_subclasses.push(sub_id);
+                                                    }
+                                                }
+                                            }
 
-                                              let targets_to_resolve = if !instantiated_subclasses.is_empty() {
-                                                  instantiated_subclasses
-                                              } else {
-                                                  subclasses.into_iter().collect()
-                                              };
+                                            let targets_to_resolve =
+                                                if !instantiated_subclasses.is_empty() {
+                                                    instantiated_subclasses
+                                                } else {
+                                                    subclasses.into_iter().collect()
+                                                };
 
-                                              for sub_type_id in targets_to_resolve {
-                                                  if let Some(m_id) = gst.resolve_method(sub_type_id, method_name) {
-                                                      candidates.push((m_id, EdgeType::VirtualCall));
-                                                  }
-                                              }
-                                          }
-                                          TypeKind::Enum => {}
-                                      }
-                                  }
+                                            for sub_type_id in targets_to_resolve {
+                                                if let Some(m_id) =
+                                                    gst.resolve_method(sub_type_id, method_name)
+                                                {
+                                                    candidates.push((m_id, EdgeType::VirtualCall));
+                                                }
+                                            }
+                                        }
+                                        TypeKind::Enum => {}
+                                    }
+                                }
 
-                                  resolved_targets.extend(candidates);
-                              } else {
-                                  // Module-level function call resolution
-                                  let resolved_module_fqn = if let Some(fqn) = gst.resolve_import(module_id, obj_name) {
-                                      let mut path_parts = vec![fqn.as_str()];
-                                      path_parts.extend(&parts[1..parts.len() - 1]);
-                                      path_parts.join(".")
-                                  } else {
-                                      receiver_path.clone()
-                                  };
-                                  
-                                  let candidate_fqn = format!("{}.{}", resolved_module_fqn, method_name);
-                                  if let Some(&m_id) = gst.method_index.fqn_to_id.get(&candidate_fqn) {
-                                      resolved_targets.push((m_id, EdgeType::DirectCall));
-                                  } else if let Some(&type_id) = gst.type_index.fqn_to_id.get(&candidate_fqn) {
-                                      let constructor_name = if gst.resolve_method(type_id, "<init>").is_some() {
-                                          "<init>"
-                                      } else {
-                                          "__init__"
-                                      };
-                                      if let Some(m_id) = gst.resolve_method(type_id, constructor_name) {
-                                          resolved_targets.push((m_id, EdgeType::DirectCall));
-                                      }
-                                  }
+                                resolved_targets.extend(candidates);
+                            } else {
+                                // Module-level function call resolution
+                                let resolved_module_fqn =
+                                    if let Some(fqn) = gst.resolve_import(module_id, obj_name) {
+                                        let mut path_parts = vec![fqn.as_str()];
+                                        path_parts.extend(&parts[1..parts.len() - 1]);
+                                        path_parts.join(".")
+                                    } else {
+                                        receiver_path.clone()
+                                    };
 
-                                  // RC97: Name-based method resolution fallback.
-                                  // When the receiver type is unresolved (e.g. from tuple
-                                  // unpacking like `client, uri = fixture`), fall back to
-                                  // matching any class method in the program by name.
-                                  // This is a standard duck-typing heuristic for Python.
-                                  if resolved_targets.is_empty() {
-                                      let is_external_import = if let Some(fqn) = gst.resolve_import(module_id, obj_name) {
-                                          !gst.type_index.fqn_to_id.contains_key(&fqn)
-                                      } else {
-                                          false
-                                      };
+                                let candidate_fqn =
+                                    format!("{}.{}", resolved_module_fqn, method_name);
+                                if let Some(&m_id) = gst.method_index.fqn_to_id.get(&candidate_fqn)
+                                {
+                                    resolved_targets.push((m_id, EdgeType::DirectCall));
+                                } else if let Some(&type_id) =
+                                    gst.type_index.fqn_to_id.get(&candidate_fqn)
+                                {
+                                    let constructor_name =
+                                        if gst.resolve_method(type_id, "<init>").is_some() {
+                                            "<init>"
+                                        } else {
+                                            "__init__"
+                                        };
+                                    if let Some(m_id) =
+                                        gst.resolve_method(type_id, constructor_name)
+                                    {
+                                        resolved_targets.push((m_id, EdgeType::DirectCall));
+                                    }
+                                }
 
-                                      if !is_external_import {
-                                          for (m_id, m_info) in &gst.program_index.methods {
-                                              if m_info.name == *method_name && m_info.parent_type_id.is_some() {
-                                                  resolved_targets.push((*m_id, EdgeType::DirectCall));
-                                              }
-                                          }
-                                      }
-                                  }
-                              }
-                          } else if parts.len() == 1 {
+                                // RC97: Name-based method resolution fallback.
+                                // When the receiver type is unresolved (e.g. from tuple
+                                // unpacking like `client, uri = fixture`), fall back to
+                                // matching any class method in the program by name.
+                                // This is a standard duck-typing heuristic for Python.
+                                if resolved_targets.is_empty() {
+                                    let is_external_import = if let Some(fqn) =
+                                        gst.resolve_import(module_id, obj_name)
+                                    {
+                                        !gst.type_index.fqn_to_id.contains_key(&fqn)
+                                    } else {
+                                        false
+                                    };
+
+                                    if !is_external_import {
+                                        for (m_id, m_info) in &gst.program_index.methods {
+                                            if m_info.name == *method_name
+                                                && m_info.parent_type_id.is_some()
+                                            {
+                                                resolved_targets
+                                                    .push((*m_id, EdgeType::DirectCall));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if parts.len() == 1 {
                             let method_name = parts[0];
                             let mut resolved = false;
 
@@ -471,13 +537,18 @@ impl CallGraph {
                                 if let Some(fqn) = gst.resolve_import(module_id, method_name) {
                                     if let Some(&m_id) = gst.method_index.fqn_to_id.get(&fqn) {
                                         resolved_targets.push((m_id, EdgeType::DirectCall));
-                                    } else if let Some(&type_id) = gst.type_index.fqn_to_id.get(&fqn) {
-                                        let constructor_name = if gst.resolve_method(type_id, "<init>").is_some() {
-                                            "<init>"
-                                        } else {
-                                            "__init__"
-                                        };
-                                        if let Some(m_id) = gst.resolve_method(type_id, constructor_name) {
+                                    } else if let Some(&type_id) =
+                                        gst.type_index.fqn_to_id.get(&fqn)
+                                    {
+                                        let constructor_name =
+                                            if gst.resolve_method(type_id, "<init>").is_some() {
+                                                "<init>"
+                                            } else {
+                                                "__init__"
+                                            };
+                                        if let Some(m_id) =
+                                            gst.resolve_method(type_id, constructor_name)
+                                        {
                                             resolved_targets.push((m_id, EdgeType::DirectCall));
                                         }
                                     }
@@ -602,11 +673,7 @@ fn resolve_framework_routing(
     }
 }
 
-fn get_all_subclasses(
-    gst: &GlobalSymbolTable,
-    parent_id: TypeId,
-    visited: &mut HashSet<TypeId>,
-) {
+fn get_all_subclasses(gst: &GlobalSymbolTable, parent_id: TypeId, visited: &mut HashSet<TypeId>) {
     if let Some(subs) = gst.parent_to_children.get(&parent_id) {
         for &sub_id in subs {
             if visited.insert(sub_id) {

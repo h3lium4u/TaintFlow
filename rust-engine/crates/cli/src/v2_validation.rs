@@ -1,10 +1,10 @@
+use rayon::prelude::*;
 use serde::Deserialize;
 use std::cell::RefCell;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::panic;
 use std::path::Path;
-use rayon::prelude::*;
 
 thread_local! {
     static THREAD_LOG: RefCell<Option<Vec<String>>> = RefCell::new(None);
@@ -37,7 +37,6 @@ macro_rules! println {
         });
     };
 }
-
 
 #[derive(Deserialize)]
 struct HoldoutEntry {
@@ -93,7 +92,23 @@ struct SplitMetrics {
     no_flow_found: usize,
 }
 
-fn get_target_filename(_repo: &str, _commit: &str, _code: &str) -> String {
+fn get_target_filename(repo: &str, commit: &str, code: &str) -> String {
+    if !repo.is_empty() && repo != "unknown" && !commit.is_empty() {
+        let _repo_name = repo
+            .split('/')
+            .last()
+            .unwrap_or("")
+            .trim_end_matches(".git");
+        let local_folder = repo_name_to_local_folder(repo);
+        let local_root = std::path::Path::new("D:/RepositoryCache").join(local_folder);
+        if local_root.exists() {
+            if let Some(modified_files) = get_modified_files_from_git(&local_root, commit) {
+                if let Some(path) = match_cohort_code_to_path(repo, commit, code, &modified_files) {
+                    return path;
+                }
+            }
+        }
+    }
     "test.py".to_string()
 }
 
@@ -139,7 +154,12 @@ class ParallelEnv:
         let fleet_code = r#"
 fleet = None
 "#;
-        let _ = gst.load_file(program, fleet_code, "paddle/incubate/distributed/fleet/parameter_server/distribute_transpiler.py", "python");
+        let _ = gst.load_file(
+            program,
+            fleet_code,
+            "paddle/incubate/distributed/fleet/parameter_server/distribute_transpiler.py",
+            "python",
+        );
 
         let log_code = r#"
 def get_logger():
@@ -152,7 +172,12 @@ class ProgramTranslator:
     def __init__(self):
         pass
 "#;
-        let _ = gst.load_file(program, prog_code, "paddle/jit/dy2static/program_translator.py", "python");
+        let _ = gst.load_file(
+            program,
+            prog_code,
+            "paddle/jit/dy2static/program_translator.py",
+            "python",
+        );
 
         let utils_code = r#"
 class Dy2StTestBase:
@@ -166,7 +191,12 @@ def test_legacy_and_pt_and_pir(func):
 
         let download_path = base_dir.join("scratch/paddle_download.py");
         if let Ok(download_code) = std::fs::read_to_string(download_path) {
-            let _ = gst.load_file(program, &download_code, "paddle/utils/download.py", "python");
+            let _ = gst.load_file(
+                program,
+                &download_code,
+                "paddle/utils/download.py",
+                "python",
+            );
         }
 
         // HDFSClient stub — models upload/makedirs as path-traversal sinks (commit 49bec176)
@@ -193,7 +223,12 @@ class HDFSClient:
     def cat(self, hdfs_path):
         return ""
 "#;
-        let _ = gst.load_file(program, hdfs_code, "paddle/distributed/fleet/utils/fs.py", "python");
+        let _ = gst.load_file(
+            program,
+            hdfs_code,
+            "paddle/distributed/fleet/utils/fs.py",
+            "python",
+        );
     }
 
     if repo.contains("label-studio-sdk") {
@@ -202,7 +237,12 @@ def get_env(name, default=None):
     import os
     return os.environ.get(name, default)
 "#;
-        let _ = gst.load_file(program, params_code, "label_studio_sdk/_extensions/label_studio_tools/core/utils/params.py", "python");
+        let _ = gst.load_file(
+            program,
+            params_code,
+            "label_studio_sdk/_extensions/label_studio_tools/core/utils/params.py",
+            "python",
+        );
     }
 
     if repo.contains("binderhub") {
@@ -218,7 +258,12 @@ class LoggingConfigurable:
         self.unresolved_ref = ''
         self.resolved_ref = ''
 "#;
-        let _ = gst.load_file(program, config_code, "traitlets/config/__init__.py", "python");
+        let _ = gst.load_file(
+            program,
+            config_code,
+            "traitlets/config/__init__.py",
+            "python",
+        );
 
         // Cache + utils stubs from relative import
         let utils_code = r#"
@@ -237,7 +282,12 @@ class _OCSPResponseValidationResultCache(SFDictFileCache):
     def _deserialize(cls, r_file):
         return {}
 "#;
-        let _ = gst.load_file(program, ocsp_code, "snowflake/connector/ocsp_snowflake.py", "python");
+        let _ = gst.load_file(
+            program,
+            ocsp_code,
+            "snowflake/connector/ocsp_snowflake.py",
+            "python",
+        );
     }
 
     if repo.contains("OctoPrint") {
@@ -328,8 +378,18 @@ class SqlAlchemyStore:
     def __init__(self, db_uri=None, default_artifact_root=None):
         pass
 "#;
-        let _ = gst.load_file(program, store_code, "mlflow/store/tracking/file_store.py", "python");
-        let _ = gst.load_file(program, store_code, "mlflow/store/model_registry/file_store.py", "python");
+        let _ = gst.load_file(
+            program,
+            store_code,
+            "mlflow/store/tracking/file_store.py",
+            "python",
+        );
+        let _ = gst.load_file(
+            program,
+            store_code,
+            "mlflow/store/model_registry/file_store.py",
+            "python",
+        );
     }
 
     if repo.contains("firefighter") {
@@ -357,7 +417,12 @@ class JiraWebhookUpdateSerializer(Serializer):
 class JiraWebhookCommentSerializer(Serializer):
     pass
 "#;
-        let _ = gst.load_file(program, drf_code, "firefighter/raid/serializers.py", "python");
+        let _ = gst.load_file(
+            program,
+            drf_code,
+            "firefighter/raid/serializers.py",
+            "python",
+        );
     }
 
     if repo.contains("salt") {
@@ -401,7 +466,10 @@ def nested(*args, **kwargs):
     }
 
     if repo.contains("snowflake") {
-        let is_secure = program.methods.values().any(|m| m.name.contains("test_json_cache_serialization_and_deserialization"));
+        let is_secure = program.methods.values().any(|m| {
+            m.name
+                .contains("test_json_cache_serialization_and_deserialization")
+        });
         if is_secure {
             let ocsp_code = r#"
 class _OCSPResponseValidationResultCache:
@@ -415,7 +483,12 @@ class _OCSPResponseValidationResultCache:
 class SnowflakeOCSP:
     pass
 "#;
-            let _ = gst.load_file(program, ocsp_code, "snowflake/connector/ocsp_snowflake.py", "python");
+            let _ = gst.load_file(
+                program,
+                ocsp_code,
+                "snowflake/connector/ocsp_snowflake.py",
+                "python",
+            );
         } else {
             let ocsp_code = r#"
 from snowflake.connector.cache import SFDictFileCache
@@ -425,7 +498,12 @@ class SnowflakeOCSP:
     pass
 _cache = _OCSPResponseValidationResultCache("dummy_path")
 "#;
-            let _ = gst.load_file(program, ocsp_code, "snowflake/connector/ocsp_snowflake.py", "python");
+            let _ = gst.load_file(
+                program,
+                ocsp_code,
+                "snowflake/connector/ocsp_snowflake.py",
+                "python",
+            );
         }
     }
 }
@@ -615,11 +693,15 @@ fn run_v2_analysis_safe(
             }
         };
 
-        program.source_files.insert(filename.clone(), code_clone.clone());
+        program
+            .source_files
+            .insert(filename.clone(), code_clone.clone());
         insert_virtual_inits(&mut program, &filename);
 
         for (sib_code, sib_filename) in &siblings_clone {
-            program.source_files.insert(sib_filename.clone(), sib_code.clone());
+            program
+                .source_files
+                .insert(sib_filename.clone(), sib_code.clone());
             insert_virtual_inits(&mut program, sib_filename);
         }
 
@@ -630,7 +712,9 @@ fn run_v2_analysis_safe(
             );
         }
 
-        let target_loaded = gst.load_file(&mut program, &code_clone, &filename, &lang_clone).is_ok();
+        let target_loaded = gst
+            .load_file(&mut program, &code_clone, &filename, &lang_clone)
+            .is_ok();
         let t_load_target = t0.elapsed();
 
         if !target_loaded {
@@ -645,7 +729,14 @@ fn run_v2_analysis_safe(
 
         let t2 = std::time::Instant::now();
         if !repo_clone.is_empty() && repo_clone != "unknown" {
-            load_mock_helpers(&mut program, &mut gst, &repo_clone, &commit_clone, &lang_clone, &base_dir_clone);
+            load_mock_helpers(
+                &mut program,
+                &mut gst,
+                &repo_clone,
+                &commit_clone,
+                &lang_clone,
+                &base_dir_clone,
+            );
         }
         let t_load_mocks = t2.elapsed();
 
@@ -660,22 +751,31 @@ fn run_v2_analysis_safe(
         let cg = symbols::call_graph::CallGraph::build(&program, &gst);
 
         // Minimal diagnostic-only enhancement to the cohort/sibling resolution pipeline
-        if std::env::var("VALIDATION_DIAGNOSTICS").map(|val| val == "1" || val.to_lowercase() == "true").unwrap_or(false) {
+        if std::env::var("VALIDATION_DIAGNOSTICS")
+            .map(|val| val == "1" || val.to_lowercase() == "true")
+            .unwrap_or(false)
+        {
             let mut diag_cohort_paths = vec![filename.to_lowercase().replace('\\', "/")];
             for (_, sib_filename) in &siblings_clone {
                 diag_cohort_paths.push(sib_filename.to_lowercase().replace('\\', "/"));
             }
 
             // Identify all module IDs that belong to the compiled cohort
-            let cohort_module_ids: std::collections::HashSet<ir::ModuleId> = program.modules.iter()
+            let cohort_module_ids: std::collections::HashSet<ir::ModuleId> = program
+                .modules
+                .iter()
                 .filter(|(_, m)| {
                     let path = m.file_path.to_lowercase().replace('\\', "/");
-                    diag_cohort_paths.iter().any(|c| path.ends_with(c) || c.ends_with(&path))
+                    diag_cohort_paths
+                        .iter()
+                        .any(|c| path.ends_with(c) || c.ends_with(&path))
                 })
                 .map(|(&m_id, _)| m_id)
                 .collect();
 
-            let cohort_module_names: std::collections::HashSet<String> = program.modules.iter()
+            let cohort_module_names: std::collections::HashSet<String> = program
+                .modules
+                .iter()
                 .filter(|(&m_id, _)| cohort_module_ids.contains(&m_id))
                 .map(|(_, m)| m.name.clone())
                 .collect();
@@ -729,7 +829,9 @@ fn run_v2_analysis_safe(
                         // Check if any edge goes to a callee not in the cohort
                         if let Some(edges) = cg.caller_to_edges.get(&mid) {
                             for edge in edges {
-                                if let Some(callee_info) = gst.program_index.methods.get(&edge.callee) {
+                                if let Some(callee_info) =
+                                    gst.program_index.methods.get(&edge.callee)
+                                {
                                     if !cohort_module_ids.contains(&callee_info.module_id) {
                                         missing_classes_functions.insert(callee_info.fqn.clone());
                                     }
@@ -753,7 +855,7 @@ fn run_v2_analysis_safe(
                 visited: &'a mut std::collections::HashSet<ir::InstructionId>,
                 out: &'a mut Vec<ir::InstructionId>,
             }
-            
+
             impl<'a> InstCollector<'a> {
                 fn collect(&mut self, ids: &[ir::InstructionId]) {
                     for &id in ids {
@@ -763,7 +865,11 @@ fn run_v2_analysis_safe(
                         self.out.push(id);
                         if let Some(inst) = self.program.instructions.get(&id) {
                             match &inst.kind {
-                                ir::InstructionKind::Branch { then_block, else_block, .. } => {
+                                ir::InstructionKind::Branch {
+                                    then_block,
+                                    else_block,
+                                    ..
+                                } => {
                                     self.collect(then_block);
                                     if let Some(eb) = else_block {
                                         self.collect(eb);
@@ -772,7 +878,12 @@ fn run_v2_analysis_safe(
                                 ir::InstructionKind::Loop { body, .. } => {
                                     self.collect(body);
                                 }
-                                ir::InstructionKind::Try { body, catches, finally, .. } => {
+                                ir::InstructionKind::Try {
+                                    body,
+                                    catches,
+                                    finally,
+                                    ..
+                                } => {
                                     self.collect(body);
                                     self.collect(catches);
                                     if let Some(fb) = finally {
@@ -807,12 +918,20 @@ fn run_v2_analysis_safe(
                             if let Some(inst) = program.instructions.get(&inst_id) {
                                 if let ir::InstructionKind::Call { callee, .. } = &inst.kind {
                                     // Find edges associated with this call site
-                                    let edges: Vec<&symbols::CallEdge> = cg.edges.iter()
-                                        .filter(|e| e.caller == caller_id && e.instruction_id == Some(inst_id))
+                                    let edges: Vec<&symbols::CallEdge> = cg
+                                        .edges
+                                        .iter()
+                                        .filter(|e| {
+                                            e.caller == caller_id
+                                                && e.instruction_id == Some(inst_id)
+                                        })
                                         .collect();
 
                                     let caller_fqn = &method_info.fqn;
-                                    let caller_file = gst.program_index.modules.get(&method_info.module_id)
+                                    let caller_file = gst
+                                        .program_index
+                                        .modules
+                                        .get(&method_info.module_id)
                                         .map(|m| m.file_path.as_str())
                                         .unwrap_or("unknown");
 
@@ -824,16 +943,26 @@ fn run_v2_analysis_safe(
                                     } else {
                                         let mut resolved_to_cohort = false;
                                         for edge in &edges {
-                                            if let Some(callee_info) = gst.program_index.methods.get(&edge.callee) {
-                                                if cohort_module_ids.contains(&callee_info.module_id) {
+                                            if let Some(callee_info) =
+                                                gst.program_index.methods.get(&edge.callee)
+                                            {
+                                                if cohort_module_ids
+                                                    .contains(&callee_info.module_id)
+                                                {
                                                     resolved_to_cohort = true;
                                                     break;
                                                 }
                                             }
                                         }
                                         if !resolved_to_cohort {
-                                            let stub_targets: Vec<String> = edges.iter()
-                                                .filter_map(|e| gst.program_index.methods.get(&e.callee).map(|m| m.fqn.clone()))
+                                            let stub_targets: Vec<String> = edges
+                                                .iter()
+                                                .filter_map(|e| {
+                                                    gst.program_index
+                                                        .methods
+                                                        .get(&e.callee)
+                                                        .map(|m| m.fqn.clone())
+                                                })
                                                 .collect();
                                             println!(
                                                 "[COHORT_DIAGNOSTIC] Skipped Cohort Call Edge: Call to '{}' in method '{}' (file: '{}') resolved to external/stub definition(s) {:?} (target definition unavailable in cohort).",
@@ -906,14 +1035,21 @@ fn run_v2_analysis_safe(
             if refinement.status == v2_refiner_domain::FeasibilityStatus::Infeasible {
                 let flow = &facts.taint_flows[refinement.flow_index];
                 infeasible_sinks.insert((flow.sink_node_id, flow.sink_var.clone()));
-                infeasible_reasons.insert((flow.sink_node_id, flow.sink_var.clone()), refinement.reason.clone());
+                infeasible_reasons.insert(
+                    (flow.sink_node_id, flow.sink_var.clone()),
+                    refinement.reason.clone(),
+                );
             }
         }
 
         let mut flows_touching_target = Vec::new();
         for flow in &engine.flows {
             let mut touches = false;
-            for fact in engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var) {
+            for fact in engine
+                .tainted_facts
+                .iter()
+                .filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var)
+            {
                 let mut curr = fact;
                 let mut path_facts = vec![curr];
                 while let Some(parent) = engine.parent_map.get(curr) {
@@ -925,7 +1061,9 @@ fn run_v2_analysis_safe(
                     if let Some(step_node) = icfg.nodes.get(&f_step.node_id) {
                         if let Some(path) = engine.get_method_file_path(step_node.method_id) {
                             let path_norm = path.to_lowercase().replace('\\', "/");
-                            if cohort_paths.iter().any(|c_path| path_norm.ends_with(c_path) || c_path.ends_with(&path_norm)) {
+                            if cohort_paths.iter().any(|c_path| {
+                                path_norm.ends_with(c_path) || c_path.ends_with(&path_norm)
+                            }) {
                                 current_touches = true;
                                 break;
                             }
@@ -939,10 +1077,14 @@ fn run_v2_analysis_safe(
             }
             if touches {
                 if infeasible_sinks.contains(&(flow.sink_node_id, flow.sink_var.clone())) {
-                    let line_no = program.instructions.get(&ir::InstructionId(flow.sink_node_id))
+                    let line_no = program
+                        .instructions
+                        .get(&ir::InstructionId(flow.sink_node_id))
                         .map(|i| i.file_line)
                         .unwrap_or(0);
-                    let reason = infeasible_reasons.get(&(flow.sink_node_id, flow.sink_var.clone())).unwrap();
+                    let reason = infeasible_reasons
+                        .get(&(flow.sink_node_id, flow.sink_var.clone()))
+                        .unwrap();
                     println!(
                         "[V2_REFINER_SUPPRESSION] File: {}, Line: {}, Reason: {}, Constraint: {}",
                         filename, line_no, reason, "x > 0 && x < 0"
@@ -953,9 +1095,10 @@ fn run_v2_analysis_safe(
             }
         }
 
-
         let has_matching_flow = if let Some(target_cwe) = target_cwe_opt {
-            flows_touching_target.iter().any(|flow| flow.cwe == target_cwe)
+            flows_touching_target
+                .iter()
+                .any(|flow| flow.cwe == target_cwe)
         } else {
             !flows_touching_target.is_empty()
         };
@@ -990,18 +1133,30 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
 
         writeln!(out, "=== Types in Symbol Table ===").unwrap();
         for (type_id, type_info) in &gst.program_index.types {
-            writeln!(out, "  TypeId({:?}) | FQN: {} | Name: {} | Kind: {:?}", type_id, type_info.fqn, type_info.name, type_info.kind).unwrap();
+            writeln!(
+                out,
+                "  TypeId({:?}) | FQN: {} | Name: {} | Kind: {:?}",
+                type_id, type_info.fqn, type_info.name, type_info.kind
+            )
+            .unwrap();
         }
         writeln!(out, "\n=== Methods in Symbol Table ===").unwrap();
         for (method_id, method_info) in &gst.program_index.methods {
-            writeln!(out, "  MethodId({:?}) | FQN: {} | Return: {:?}", method_id, method_info.fqn, method_info.return_type).unwrap();
+            writeln!(
+                out,
+                "  MethodId({:?}) | FQN: {} | Return: {:?}",
+                method_id, method_info.fqn, method_info.return_type
+            )
+            .unwrap();
         }
         writeln!(out, "\n=== All Instructions in Program ===").unwrap();
         let mut keys: Vec<&ir::InstructionId> = program.instructions.keys().collect();
         keys.sort_by_key(|id| id.0);
         for id in keys {
             let inst = program.instructions.get(id).unwrap();
-            let node_ids: Vec<u32> = icfg.nodes.iter()
+            let node_ids: Vec<u32> = icfg
+                .nodes
+                .iter()
                 .filter(|(_, n)| n.instruction_id == Some(*id))
                 .map(|(&node_id, _)| node_id)
                 .collect();
@@ -1013,8 +1168,12 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
             let from_node = icfg.nodes.get(&edge.from).unwrap();
             let to_node = icfg.nodes.get(&edge.to).unwrap();
             if true {
-                writeln!(out, "  node {} (inst={:?}) -> node {} (inst={:?}) kind={:?}", 
-                    edge.from, from_node.instruction_id, edge.to, to_node.instruction_id, edge.kind).unwrap();
+                writeln!(
+                    out,
+                    "  node {} (inst={:?}) -> node {} (inst={:?}) kind={:?}",
+                    edge.from, from_node.instruction_id, edge.to, to_node.instruction_id, edge.kind
+                )
+                .unwrap();
             }
         }
 
@@ -1028,17 +1187,32 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
 
         writeln!(out, "\n=== Tainted Facts after run ===").unwrap();
         for fact in &engine.tainted_facts {
-            let method_name = icfg.nodes.get(&fact.node_id)
+            let method_name = icfg
+                .nodes
+                .get(&fact.node_id)
                 .and_then(|n| program.methods.get(&n.method_id))
                 .map(|m| m.name.as_str())
                 .unwrap_or("?");
-            writeln!(out, "  node={} method='{}' var='{}'", fact.node_id, method_name, fact.var).unwrap();
+            writeln!(
+                out,
+                "  node={} method='{}' var='{}'",
+                fact.node_id, method_name, fact.var
+            )
+            .unwrap();
         }
 
         writeln!(out, "\n  Flows detected: {}", engine.flows.len()).unwrap();
         for flow in &engine.flows {
-            writeln!(out, "  Flow: sink_node={} sink_var='{}'", flow.sink_node_id, flow.sink_var).unwrap();
-            let matching_facts = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
+            writeln!(
+                out,
+                "  Flow: sink_node={} sink_var='{}'",
+                flow.sink_node_id, flow.sink_var
+            )
+            .unwrap();
+            let matching_facts = engine
+                .tainted_facts
+                .iter()
+                .filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
             let mut best_path = Vec::new();
             for fact in matching_facts {
                 let mut curr = fact;
@@ -1057,9 +1231,19 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
                 for (step_idx, step) in best_path.iter().enumerate() {
                     let step_node = icfg.nodes.get(&step.node_id).unwrap();
                     let step_method = program.methods.get(&step_node.method_id).unwrap();
-                    let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
-                    writeln!(out, "      [{}] node={} method='{}' var='{}' inst={:?}", 
-                        step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)).unwrap();
+                    let step_inst = step_node
+                        .instruction_id
+                        .and_then(|id| program.instructions.get(&id));
+                    writeln!(
+                        out,
+                        "      [{}] node={} method='{}' var='{}' inst={:?}",
+                        step_idx,
+                        step.node_id,
+                        step_method.name,
+                        step.var,
+                        step_inst.map(|i| &i.kind)
+                    )
+                    .unwrap();
                 }
             }
         }
@@ -1070,8 +1254,6 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
     let _ = std::fs::create_dir_all("../scratch");
     std::fs::write(filepath, out).unwrap();
 }
-
-
 
 fn repo_name_to_local_folder(repo: &str) -> &str {
     // Map known repository slugs to local folder names under D:\RepositoryCache.
@@ -1396,22 +1578,28 @@ fn main() {
         }
     }
 
-
     // Run scans
     let mut all_fns = Vec::new();
     let mut all_fps = Vec::new();
     let mut all_suppressed = Vec::new();
 
-    let mut run_dataset = |name: &str, samples: &[Sample]| -> (Metrics, SplitMetrics, Vec<taint::interproc::SuppressedFlowDiagnostic>) {
+    let mut run_dataset = |name: &str,
+                           samples: &[Sample]|
+     -> (
+        Metrics,
+        SplitMetrics,
+        Vec<taint::interproc::SuppressedFlowDiagnostic>,
+    ) {
         let sample_ids_env = std::env::var("SAMPLE_IDS").ok();
         let repo_filter_env = std::env::var("REPO_FILTER").ok();
 
-        let sample_ids_filter: Option<std::collections::HashSet<usize>> = sample_ids_env.as_ref().map(|s| {
-            s.split(',')
-                .map(|token| token.trim())
-                .filter_map(|token| token.parse::<usize>().ok())
-                .collect()
-        });
+        let sample_ids_filter: Option<std::collections::HashSet<usize>> =
+            sample_ids_env.as_ref().map(|s| {
+                s.split(',')
+                    .map(|token| token.trim())
+                    .filter_map(|token| token.parse::<usize>().ok())
+                    .collect()
+            });
 
         let repo_filter: Option<String> = repo_filter_env.as_ref().map(|s| s.trim().to_string());
 
@@ -1445,12 +1633,17 @@ fn main() {
             let o_idx = original_idx;
             original_idx += 1;
 
-            let skipped_by_standard = (std::env::var("SKIP_PGADMIN").is_ok() && sample.repo.contains("pgadmin"))
+            let skipped_by_standard = (std::env::var("SKIP_PGADMIN").is_ok()
+                && sample.repo.contains("pgadmin"))
                 || (std::env::var("SKIP_DATACHAIN").is_ok() && sample.repo.contains("datachain"))
                 || (std::env::var("SKIP_RAY").is_ok() && sample.repo.contains("ray"))
-                || (std::env::var("ONLY_PADDLE").is_ok() && !sample.repo.to_lowercase().contains("paddle"))
+                || (std::env::var("ONLY_PADDLE").is_ok()
+                    && !sample.repo.to_lowercase().contains("paddle"))
                 || (if let Ok(only_repo) = std::env::var("ONLY_REPO") {
-                    !sample.repo.to_lowercase().contains(&only_repo.to_lowercase())
+                    !sample
+                        .repo
+                        .to_lowercase()
+                        .contains(&only_repo.to_lowercase())
                 } else {
                     false
                 });
@@ -1467,7 +1660,8 @@ fn main() {
             raw_index += 1;
 
             let matches_repo = if let Some(ref filter) = repo_filter {
-                let sample_repo_clean = sample.repo
+                let sample_repo_clean = sample
+                    .repo
                     .strip_prefix("https://github.com/")
                     .or_else(|| sample.repo.strip_prefix("http://github.com/"))
                     .unwrap_or(&sample.repo);
@@ -1530,12 +1724,20 @@ fn main() {
             if has_targeted_filter {
                 let _ = writeln!(stdout, "GitHub samples loaded:\n{}", samples.len());
                 let _ = writeln!(stdout, "\nSamples selected:\n{}", active_samples.len());
-                let _ = writeln!(stdout, "\nRepository filter:\n{}", repo_filter.as_deref().unwrap_or("None"));
-                
+                let _ = writeln!(
+                    stdout,
+                    "\nRepository filter:\n{}",
+                    repo_filter.as_deref().unwrap_or("None")
+                );
+
                 let sample_filter_str = if let Some(ref ids) = sample_ids_filter {
                     let mut sorted_ids: Vec<usize> = ids.iter().cloned().collect();
                     sorted_ids.sort();
-                    sorted_ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(",")
+                    sorted_ids
+                        .iter()
+                        .map(|id| id.to_string())
+                        .collect::<Vec<String>>()
+                        .join(",")
                 } else {
                     "None".to_string()
                 };
@@ -1559,11 +1761,8 @@ fn main() {
         }
 
         // Pair each active sample with its original index, then sort by complexity (code length) descending.
-        let mut tasks: Vec<(usize, (usize, &Sample))> = active_samples
-            .iter()
-            .cloned()
-            .enumerate()
-            .collect();
+        let mut tasks: Vec<(usize, (usize, &Sample))> =
+            active_samples.iter().cloned().enumerate().collect();
         tasks.sort_by_key(|&(_, (_, sample))| std::cmp::Reverse(sample.code.len()));
 
         let mut sorted_results: Vec<(usize, WorkerResult)> = tasks.par_iter().map(|&(original_pos, (count, sample))| {
@@ -1986,10 +2185,8 @@ fn main() {
 
         // Restore original deterministic ordering of the results
         sorted_results.sort_by_key(|&(original_pos, _)| original_pos);
-        let worker_results: Vec<WorkerResult> = sorted_results
-            .into_iter()
-            .map(|(_, res)| res)
-            .collect();
+        let worker_results: Vec<WorkerResult> =
+            sorted_results.into_iter().map(|(_, res)| res).collect();
 
         let mut suppressed_acc = Vec::new();
         let mut m = Metrics::default();
@@ -2006,7 +2203,12 @@ fn main() {
             let sample = active_samples[i].1;
             if (i + 1) % 100 == 0 || i == active_samples.len() - 1 {
                 use std::io::Write;
-                let _ = writeln!(std::io::stdout(), "  Progress: {}/{}", i + 1, active_samples.len());
+                let _ = writeln!(
+                    std::io::stdout(),
+                    "  Progress: {}/{}",
+                    i + 1,
+                    active_samples.len()
+                );
             }
 
             if res.pred {
@@ -2019,7 +2221,14 @@ fn main() {
 
             if name == "GitHub" {
                 use std::io::Write;
-                let _ = writeln!(std::io::stdout(), "[DIAGNOSTIC] GitHub Sample {}: cwe={} vulnerable={} pred={}", res.count, sample.cwe, sample.vulnerable, res.pred);
+                let _ = writeln!(
+                    std::io::stdout(),
+                    "[DIAGNOSTIC] GitHub Sample {}: cwe={} vulnerable={} pred={}",
+                    res.count,
+                    sample.cwe,
+                    sample.vulnerable,
+                    res.pred
+                );
             }
 
             suppressed_acc.extend(res.suppressed);
@@ -2053,7 +2262,6 @@ fn main() {
 
         (m, split, suppressed_acc)
     };
-
 
     let only_github = std::env::var("ONLY_GITHUB").is_ok();
 
@@ -2178,31 +2386,50 @@ fn main() {
     for sample in &juliet_samples {
         if sample.code.contains("connect_tcp_addHeaderServlet_15") && sample.vulnerable {
             println!("=== DIAGNOSTIC FOR connect_tcp_addHeaderServlet_15 ===");
-            run_diagnostic("connect_tcp_addHeaderServlet_15", &sample.code, &sample.language, Some("bad"));
+            run_diagnostic(
+                "connect_tcp_addHeaderServlet_15",
+                &sample.code,
+                &sample.language,
+                Some("bad"),
+            );
         }
     }
 
     for sample in &juliet_samples {
         if sample.code.contains("connect_tcp_addCookieServlet_81a") && sample.vulnerable {
             println!("=== DIAGNOSTIC FOR connect_tcp_addCookieServlet_81a ===");
-            run_diagnostic("connect_tcp_addCookieServlet_81a", &sample.code, &sample.language, Some("bad"));
+            run_diagnostic(
+                "connect_tcp_addCookieServlet_81a",
+                &sample.code,
+                &sample.language,
+                Some("bad"),
+            );
         }
     }
 
     for sample in &juliet_samples {
         if sample.code.contains("connect_tcp_addCookieServlet_22") && sample.vulnerable {
             println!("=== DIAGNOSTIC FOR connect_tcp_addCookieServlet_22 ===");
-            run_diagnostic("connect_tcp_addCookieServlet_22", &sample.code, &sample.language, Some("bad"));
+            run_diagnostic(
+                "connect_tcp_addCookieServlet_22",
+                &sample.code,
+                &sample.language,
+                Some("bad"),
+            );
         }
     }
 
     for sample in &juliet_samples {
         if sample.code.contains("connect_tcp_addCookieServlet_42") && sample.vulnerable {
             println!("=== DIAGNOSTIC FOR connect_tcp_addCookieServlet_42 ===");
-            run_diagnostic("connect_tcp_addCookieServlet_42", &sample.code, &sample.language, Some("bad"));
+            run_diagnostic(
+                "connect_tcp_addCookieServlet_42",
+                &sample.code,
+                &sample.language,
+                Some("bad"),
+            );
         }
     }
-
 
     for sample in &owasp_samples {
         if sample.code.contains("BenchmarkTest00273") && sample.vulnerable {
@@ -2245,5 +2472,9 @@ fn main() {
 
     println!("Total suppressed flows: {}", all_suppressed.len());
     let json_data_suppressed = serde_json::to_string_pretty(&all_suppressed).unwrap();
-    std::fs::write("../scratch/suppressed_diagnostics.json", json_data_suppressed).unwrap();
+    std::fs::write(
+        "../scratch/suppressed_diagnostics.json",
+        json_data_suppressed,
+    )
+    .unwrap();
 }

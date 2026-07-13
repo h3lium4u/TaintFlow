@@ -1,8 +1,8 @@
+use crate::evaluator::{ConstantValue, Evaluator};
 use ir::{InstructionId, InstructionKind, MethodId, Program};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use symbols::call_graph::CallGraph;
-use crate::evaluator::{ConstantValue, Evaluator};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum IcfgNodeKind {
@@ -77,7 +77,7 @@ fn parse_literal_val(src: &str) -> Option<ConstantValue> {
         return Some(ConstantValue::Bool(false));
     }
     if s.starts_with('"') && s.ends_with('"') && s.len() >= 2 {
-        return Some(ConstantValue::Str(s[1..s.len()-1].to_string()));
+        return Some(ConstantValue::Str(s[1..s.len() - 1].to_string()));
     }
     if s.starts_with('\'') && s.ends_with('\'') && s.len() == 3 {
         return Some(ConstantValue::Char(s.chars().nth(1).unwrap()));
@@ -105,14 +105,20 @@ fn walk_instructions(
                         conditional_vars.insert(clean_dest);
                     }
                 }
-                InstructionKind::Call { dest: Some(dest), .. } => {
+                InstructionKind::Call {
+                    dest: Some(dest), ..
+                } => {
                     let clean_dest = clean_var(dest);
                     *assign_counts.entry(clean_dest.clone()).or_insert(0) += 1;
                     if in_conditional {
                         conditional_vars.insert(clean_dest);
                     }
                 }
-                InstructionKind::Branch { then_block, else_block, .. } => {
+                InstructionKind::Branch {
+                    then_block,
+                    else_block,
+                    ..
+                } => {
                     walk_instructions(then_block, program, true, assign_counts, conditional_vars);
                     if let Some(else_b) = else_block {
                         walk_instructions(else_b, program, true, assign_counts, conditional_vars);
@@ -121,12 +127,25 @@ fn walk_instructions(
                 InstructionKind::Loop { body, .. } => {
                     walk_instructions(body, program, true, assign_counts, conditional_vars);
                 }
-                InstructionKind::Try { body, catches, finally } => {
+                InstructionKind::Try {
+                    body,
+                    catches,
+                    finally,
+                } => {
                     walk_instructions(body, program, true, assign_counts, conditional_vars);
                     for catch in catches {
                         if let Some(catch_inst) = program.instructions.get(catch) {
-                            if let InstructionKind::Catch { body: catch_body, .. } = &catch_inst.kind {
-                                walk_instructions(catch_body, program, true, assign_counts, conditional_vars);
+                            if let InstructionKind::Catch {
+                                body: catch_body, ..
+                            } = &catch_inst.kind
+                            {
+                                walk_instructions(
+                                    catch_body,
+                                    program,
+                                    true,
+                                    assign_counts,
+                                    conditional_vars,
+                                );
                             }
                         }
                     }
@@ -140,10 +159,19 @@ fn walk_instructions(
     }
 }
 
-fn analyze_local_constants(program: &Program, body: &[InstructionId]) -> HashMap<String, ConstantValue> {
+fn analyze_local_constants(
+    program: &Program,
+    body: &[InstructionId],
+) -> HashMap<String, ConstantValue> {
     let mut assign_counts = HashMap::new();
     let mut conditional_vars = HashSet::new();
-    walk_instructions(body, program, false, &mut assign_counts, &mut conditional_vars);
+    walk_instructions(
+        body,
+        program,
+        false,
+        &mut assign_counts,
+        &mut conditional_vars,
+    );
 
     let mut constants = HashMap::new();
     for &inst_id in body {
@@ -151,7 +179,9 @@ fn analyze_local_constants(program: &Program, body: &[InstructionId]) -> HashMap
             match &inst.kind {
                 InstructionKind::Assign { dest, src } => {
                     let clean_dest = clean_var(dest);
-                    if assign_counts.get(&clean_dest).cloned().unwrap_or(0) > 1 || conditional_vars.contains(&clean_dest) {
+                    if assign_counts.get(&clean_dest).cloned().unwrap_or(0) > 1
+                        || conditional_vars.contains(&clean_dest)
+                    {
                         continue;
                     }
                     let clean_src = src.trim();
@@ -164,17 +194,27 @@ fn analyze_local_constants(program: &Program, body: &[InstructionId]) -> HashMap
                         }
                     }
                 }
-                InstructionKind::Call { dest: Some(dest), callee, args } => {
+                InstructionKind::Call {
+                    dest: Some(dest),
+                    callee,
+                    args,
+                } => {
                     let clean_dest = clean_var(dest);
-                    if assign_counts.get(&clean_dest).cloned().unwrap_or(0) > 1 || conditional_vars.contains(&clean_dest) {
+                    if assign_counts.get(&clean_dest).cloned().unwrap_or(0) > 1
+                        || conditional_vars.contains(&clean_dest)
+                    {
                         continue;
                     }
-                    if (callee.contains(".charAt") || callee.ends_with(".charAt")) && args.len() == 1 {
+                    if (callee.contains(".charAt") || callee.ends_with(".charAt"))
+                        && args.len() == 1
+                    {
                         if let Some(dot_idx) = callee.find('.') {
                             let receiver = clean_var(&callee[..dot_idx]);
                             if let Some(ConstantValue::Str(s)) = constants.get(&receiver) {
                                 let arg_clean = clean_var(&args[0]);
-                                let idx_opt = if let Some(ConstantValue::Int(idx)) = constants.get(&arg_clean) {
+                                let idx_opt = if let Some(ConstantValue::Int(idx)) =
+                                    constants.get(&arg_clean)
+                                {
                                     Some(*idx as usize)
                                 } else if let Ok(idx) = arg_clean.parse::<usize>() {
                                     Some(idx)
@@ -588,7 +628,8 @@ public class BenchmarkTest00323 extends HttpServlet {
 }
         "#;
 
-        gst.load_file(&mut program, code, "Test.java", "java").unwrap();
+        gst.load_file(&mut program, code, "Test.java", "java")
+            .unwrap();
         gst.resolve_inheritance_hierarchy();
         let cg = symbols::call_graph::CallGraph::build(&program, &gst);
         let icfg = InterproceduralCFG::build(&program, &cg);

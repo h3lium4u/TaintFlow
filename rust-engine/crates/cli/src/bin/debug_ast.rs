@@ -6,15 +6,17 @@ fn main() {
     let holdout_path = Path::new("d:/V2 approach/datasets/processed/external_holdout.jsonl");
     let file = File::open(&holdout_path).unwrap();
     let reader = BufReader::new(file);
-    let entry: serde_json::Value = reader.lines()
+    let entry: serde_json::Value = reader
+        .lines()
         .map(|l| serde_json::from_str(&l.unwrap()).unwrap())
         .nth(13)
         .unwrap();
-    
+
     let code = entry.get("before").unwrap().as_str().unwrap();
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, code, "test.py", "python")
+        .unwrap();
 
     for (id, method) in &program.methods {
         if method.name == "open_session" {

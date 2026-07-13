@@ -1,7 +1,7 @@
-use ir::Program;
-use symbols::GlobalSymbolTable;
-use symbols::call_graph::CallGraph;
 use cfg::icfg::InterproceduralCFG;
+use ir::Program;
+use symbols::call_graph::CallGraph;
+use symbols::GlobalSymbolTable;
 use taint::interproc::InterproceduralTaintEngine;
 use v2_export_adapter::Exporter;
 
@@ -11,7 +11,6 @@ fn test_exporter_does_not_modify_engine() {
     let gst = GlobalSymbolTable::new();
     let cg = CallGraph::build(&program, &gst);
     let icfg = InterproceduralCFG::build(&program, &cg);
-
 
     let engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
 

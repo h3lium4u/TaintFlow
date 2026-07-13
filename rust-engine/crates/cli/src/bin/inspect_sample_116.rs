@@ -289,8 +289,16 @@ fn load_mock_helpers(
                             {
                                 if let Some(files) = mock.get("files").and_then(|v| v.as_array()) {
                                     for file in files {
-                                        if let (Some(path), Some(code)) = (file.get("path").and_then(|v| v.as_str()), file.get("code").and_then(|v| v.as_str())) {
-                                            let _ = gst.load_file(program, code, &path.to_string(), language);
+                                        if let (Some(path), Some(code)) = (
+                                            file.get("path").and_then(|v| v.as_str()),
+                                            file.get("code").and_then(|v| v.as_str()),
+                                        ) {
+                                            let _ = gst.load_file(
+                                                program,
+                                                code,
+                                                &path.to_string(),
+                                                language,
+                                            );
                                         }
                                     }
                                 }
@@ -378,18 +386,23 @@ fn main() {
 
     let mut cohort_codes = vec![sample.code.clone()];
     for other in &github_samples {
-        if other.repo == sample.repo 
-            && other.commit == sample.commit 
-            && other.vulnerable == sample.vulnerable 
-            && other.code != sample.code 
+        if other.repo == sample.repo
+            && other.commit == sample.commit
+            && other.vulnerable == sample.vulnerable
+            && other.code != sample.code
         {
             cohort_codes.push(other.code.clone());
         }
     }
 
-    let repo_name = sample.repo.split('/').last().unwrap_or("").trim_end_matches(".git");
+    let repo_name = sample
+        .repo
+        .split('/')
+        .last()
+        .unwrap_or("")
+        .trim_end_matches(".git");
     let repo_normalized = repo_name.replace('-', "_").to_lowercase();
-    
+
     let mut import_roots = std::collections::HashSet::new();
     for code in &cohort_codes {
         for (from_part, _) in extract_imported_symbols(code) {
@@ -424,7 +437,9 @@ fn main() {
     if local_root.exists() {
         if let Some(modified_files) = get_modified_files_from_git(&local_root, &sample.commit) {
             for (i, code) in cohort_codes.iter().enumerate() {
-                if let Some(path) = match_cohort_code_to_path(&sample.repo, &sample.commit, code, &modified_files) {
+                if let Some(path) =
+                    match_cohort_code_to_path(&sample.repo, &sample.commit, code, &modified_files)
+                {
                     resolved_paths.insert(i, path);
                 }
             }
@@ -438,7 +453,9 @@ fn main() {
         resolved_paths.clear();
         for (i, code) in cohort_codes.iter().enumerate() {
             for (j, other_code) in cohort_codes.iter().enumerate() {
-                if i == j { continue; }
+                if i == j {
+                    continue;
+                }
                 for (from_part, symbol) in extract_imported_symbols(other_code) {
                     if !from_part.starts_with('.') && from_part.starts_with(&package_root) {
                         if code_defines_symbol(code, &symbol) {
@@ -447,7 +464,9 @@ fn main() {
                         }
                     }
                 }
-                if resolved_paths.contains_key(&i) { break; }
+                if resolved_paths.contains_key(&i) {
+                    break;
+                }
             }
         }
     }
@@ -462,7 +481,7 @@ fn main() {
                 }
             }
         }
-        
+
         let mut path = package_root.clone();
         for depth in 1..max_dots {
             path = format!("{}/sub{}", path, depth);
@@ -475,7 +494,9 @@ fn main() {
     while resolved_any {
         resolved_any = false;
         for i in 1..cohort_codes.len() {
-            if resolved_paths.contains_key(&i) { continue; }
+            if resolved_paths.contains_key(&i) {
+                continue;
+            }
             let code = &cohort_codes[i];
             let mut resolved_path = None;
 
@@ -491,7 +512,9 @@ fn main() {
                         break;
                     }
                 }
-                if resolved_path.is_some() { break; }
+                if resolved_path.is_some() {
+                    break;
+                }
             }
 
             if resolved_path.is_none() {
@@ -502,7 +525,8 @@ fn main() {
                             if from_part.starts_with('.') {
                                 let num_dots = from_part.chars().take_while(|&c| c == '.').count();
                                 let normalized = path_j.replace('\\', "/");
-                                let parts: Vec<&str> = normalized.split('/').filter(|s| !s.is_empty()).collect();
+                                let parts: Vec<&str> =
+                                    normalized.split('/').filter(|s| !s.is_empty()).collect();
                                 if parts.len() > 1 {
                                     let parent_parts = &parts[..parts.len() - 1];
                                     let pop_count = num_dots.saturating_sub(1);
@@ -515,7 +539,8 @@ fn main() {
                                     if base_dir.is_empty() {
                                         resolved_path = Some(format!("sibling_{}.py", i));
                                     } else {
-                                        resolved_path = Some(format!("{}/sibling_{}.py", base_dir, i));
+                                        resolved_path =
+                                            Some(format!("{}/sibling_{}.py", base_dir, i));
                                     }
                                 }
                             } else {
@@ -524,7 +549,9 @@ fn main() {
                             break;
                         }
                     }
-                    if resolved_path.is_some() { break; }
+                    if resolved_path.is_some() {
+                        break;
+                    }
                 }
             }
 
@@ -578,10 +605,15 @@ fn main() {
                         break;
                     }
                 }
-                if already_resolved { continue; }
+                if already_resolved {
+                    continue;
+                }
                 for p in possible_paths {
-                    if analyzed_paths.contains(&p) { break; }
-                    if let Some(content) = fetch_file_from_github(&sample.repo, &sample.commit, &p) {
+                    if analyzed_paths.contains(&p) {
+                        break;
+                    }
+                    if let Some(content) = fetch_file_from_github(&sample.repo, &sample.commit, &p)
+                    {
                         analyzed_paths.insert(p.clone());
                         pending_files.push((content.clone(), p.clone()));
                         siblings.push((content, p));
@@ -594,16 +626,32 @@ fn main() {
 
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    program.source_files.insert(target_path_str.clone(), sample.code.clone());
+    program
+        .source_files
+        .insert(target_path_str.clone(), sample.code.clone());
     for (sib_code, sib_filename) in &siblings {
-        program.source_files.insert(sib_filename.clone(), sib_code.clone());
+        program
+            .source_files
+            .insert(sib_filename.clone(), sib_code.clone());
     }
 
-    let _ = gst.load_file(&mut program, &sample.code, &target_path_str, &sample.language);
+    let _ = gst.load_file(
+        &mut program,
+        &sample.code,
+        &target_path_str,
+        &sample.language,
+    );
     for (sib_code, sib_filename) in &siblings {
         let _ = gst.load_file(&mut program, sib_code, sib_filename, &sample.language);
     }
-    load_mock_helpers(&mut program, &mut gst, &sample.repo, &sample.commit, &sample.language, base_dir);
+    load_mock_helpers(
+        &mut program,
+        &mut gst,
+        &sample.repo,
+        &sample.commit,
+        &sample.language,
+        base_dir,
+    );
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -614,7 +662,10 @@ fn main() {
         if let Some(caller_method) = program.methods.get(&edge.caller) {
             if caller_method.name == "test_pub_ret_traversal" {
                 if let Some(callee_method) = program.methods.get(&edge.callee) {
-                    println!("  Caller: '{}' -> Callee: '{}'", caller_method.name, callee_method.name);
+                    println!(
+                        "  Caller: '{}' -> Callee: '{}'",
+                        caller_method.name, callee_method.name
+                    );
                     found_edge = true;
                 }
             }
@@ -636,12 +687,21 @@ fn main() {
     engine_with_guard.seed_sources(None);
     engine_with_guard.run();
 
-    println!("Detected flows (Final Fix): {}", engine_with_guard.flows.len());
+    println!(
+        "Detected flows (Final Fix): {}",
+        engine_with_guard.flows.len()
+    );
     #[cfg(feature = "solver_diagnostics")]
     {
         for flow in &engine_with_guard.flows {
-            println!("  Flow: CWE={:?}, sink_node={}, sink_var={}", flow.cwe, flow.sink_node_id, flow.sink_var);
-            let matching_facts = engine_with_guard.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
+            println!(
+                "  Flow: CWE={:?}, sink_node={}, sink_var={}",
+                flow.cwe, flow.sink_node_id, flow.sink_var
+            );
+            let matching_facts = engine_with_guard
+                .tainted_facts
+                .iter()
+                .filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
             for fact in matching_facts {
                 let mut curr = fact;
                 let mut path = vec![curr];
@@ -654,9 +714,18 @@ fn main() {
                 for (step_idx, step) in path.iter().enumerate() {
                     let step_node = icfg.nodes.get(&step.node_id).unwrap();
                     let step_method = program.methods.get(&step_node.method_id).unwrap();
-                    let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
-                    println!("    [{}] node={} context={} method='{}' var='{}' inst={:?}", 
-                        step_idx, step.node_id, step.context, step_method.name, step.var, step_inst.map(|i| &i.kind));
+                    let step_inst = step_node
+                        .instruction_id
+                        .and_then(|id| program.instructions.get(&id));
+                    println!(
+                        "    [{}] node={} context={} method='{}' var='{}' inst={:?}",
+                        step_idx,
+                        step.node_id,
+                        step.context,
+                        step_method.name,
+                        step.var,
+                        step_inst.map(|i| &i.kind)
+                    );
                 }
             }
         }
@@ -666,6 +735,9 @@ fn main() {
     for fact in &engine_with_guard.tainted_facts {
         let step_node = icfg.nodes.get(&fact.node_id).unwrap();
         let step_method = program.methods.get(&step_node.method_id).unwrap();
-        println!("  node={} context={} method='{}' var='{}'", fact.node_id, fact.context, step_method.name, fact.var);
+        println!(
+            "  node={} context={} method='{}' var='{}'",
+            fact.node_id, fact.context, step_method.name, fact.var
+        );
     }
 }

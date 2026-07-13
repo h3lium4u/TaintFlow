@@ -48,7 +48,10 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
     println!("Methods:");
     for (id, m) in &program.methods {
-        println!("  ID: {:?}, Name: {}, Params: {:?}", id, m.name, m.parameters);
+        println!(
+            "  ID: {:?}, Name: {}, Params: {:?}",
+            id, m.name, m.parameters
+        );
     }
 
     println!("Instructions:");
@@ -58,17 +61,26 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
     println!("CallGraph edges:");
     for edge in &cg.edges {
-        println!("  Caller: {:?}, Callee: {:?}, Inst: {:?}", edge.caller, edge.callee, edge.instruction_id);
+        println!(
+            "  Caller: {:?}, Callee: {:?}, Inst: {:?}",
+            edge.caller, edge.callee, edge.instruction_id
+        );
     }
 
     println!("ICFG Nodes of interest:");
     for (id, node) in &icfg.nodes {
         if let Some(inst_id) = node.instruction_id {
             if inst_id.0 == 11 || inst_id.0 == 13 || inst_id.0 == 12 {
-                println!("  Node ID: {}, Inst: {:?}, Kind: {:?}", id, inst_id, node.kind);
+                println!(
+                    "  Node ID: {}, Inst: {:?}, Kind: {:?}",
+                    id, inst_id, node.kind
+                );
                 for edge in &icfg.edges {
                     if edge.to == *id {
-                        println!("    Predecessor: From = {}, Kind = {:?}", edge.from, edge.kind);
+                        println!(
+                            "    Predecessor: From = {}, Kind = {:?}",
+                            edge.from, edge.kind
+                        );
                     }
                     if edge.from == *id {
                         println!("    Successor: To = {}, Kind = {:?}", edge.to, edge.kind);
@@ -84,14 +96,20 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
     println!("Tainted facts after seeding:");
     for fact in &engine.tainted_facts {
-        println!("  Node: {:?}, Var: {}, Domain: {:?}", fact.node_id, fact.var, fact.source_domain);
+        println!(
+            "  Node: {:?}, Var: {}, Domain: {:?}",
+            fact.node_id, fact.var, fact.source_domain
+        );
     }
 
     engine.run();
 
     println!("Flows detected:");
     for flow in &engine.flows {
-        println!("  Sink Node: {:?}, Var: {}, CWE: {:?}", flow.sink_node_id, flow.sink_var, flow.cwe);
+        println!(
+            "  Sink Node: {:?}, Var: {}, CWE: {:?}",
+            flow.sink_node_id, flow.sink_var, flow.cwe
+        );
     }
 
     /*
@@ -103,6 +121,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
     println!("Suppressed flows:");
     for sup in &engine.suppressed_flows {
-        println!("  Sink Node: {:?}, Var: {}, Sink Domain: {:?}, Reason: {}", sup.sink_node_id, sup.sink_var, sup.sink_domain, sup.reason);
+        println!(
+            "  Sink Node: {:?}, Var: {}, Sink Domain: {:?}, Reason: {}",
+            sup.sink_node_id, sup.sink_var, sup.sink_domain, sup.reason
+        );
     }
 }

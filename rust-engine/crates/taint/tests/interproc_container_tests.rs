@@ -27,7 +27,8 @@ fn test_interproc_map_key_sensitivity_repro() {
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "Test.java", "java").unwrap();
+    gst.load_file(&mut program, code, "Test.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = CallGraph::build(&program, &gst);
@@ -35,12 +36,13 @@ fn test_interproc_map_key_sensitivity_repro() {
 
     let mut engine = InterproceduralTaintEngine::new(&program, &gst, &cg, &icfg);
     engine.seed_sources(None);
-    
-
 
     engine.run();
 
-    assert!(engine.flows.is_empty(), "Should have no flows because bar was reassigned to a safe key");
+    assert!(
+        engine.flows.is_empty(),
+        "Should have no flows because bar was reassigned to a safe key"
+    );
 }
 
 #[test]
@@ -73,8 +75,10 @@ fn test_interproc_map_method_get_repro() {
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code_main, "Test.java", "java").unwrap();
-    gst.load_file(&mut program, code_helper, "Helper.java", "java").unwrap();
+    gst.load_file(&mut program, code_main, "Test.java", "java")
+        .unwrap();
+    gst.load_file(&mut program, code_helper, "Helper.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = CallGraph::build(&program, &gst);
@@ -84,7 +88,10 @@ fn test_interproc_map_method_get_repro() {
     engine.seed_sources(None);
     engine.run();
 
-    assert!(!engine.flows.is_empty(), "Should have found taint flow through map.get inside helper method");
+    assert!(
+        !engine.flows.is_empty(),
+        "Should have found taint flow through map.get inside helper method"
+    );
 }
 
 #[test]
@@ -114,7 +121,8 @@ fn test_interproc_arraylist_precision() {
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "Test.java", "java").unwrap();
+    gst.load_file(&mut program, code, "Test.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     println!("=== INSTRUCTIONS ===");
@@ -129,7 +137,10 @@ fn test_interproc_arraylist_precision() {
     engine.seed_sources(None);
     engine.run();
 
-    assert!(engine.flows.is_empty(), "Should have no flows because bar was retrieved from a safe index");
+    assert!(
+        engine.flows.is_empty(),
+        "Should have no flows because bar was retrieved from a safe index"
+    );
 }
 
 #[test]
@@ -146,7 +157,8 @@ def init(app):
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, code, "test.py", "python")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = CallGraph::build(&program, &gst);
@@ -156,7 +168,10 @@ def init(app):
     engine.seed_sources(None);
     engine.run();
 
-    assert!(!engine.flows.is_empty(), "Taint should flow from values[0] through wildcard matching");
+    assert!(
+        !engine.flows.is_empty(),
+        "Taint should flow from values[0] through wildcard matching"
+    );
 }
 
 #[test]
@@ -175,7 +190,8 @@ def init(app):
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, code, "test.py", "python")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = CallGraph::build(&program, &gst);
@@ -185,7 +201,10 @@ def init(app):
     engine.seed_sources(None);
     engine.run();
 
-    assert!(!engine.flows.is_empty(), "Taint should flow through quote-normalized dict lookup");
+    assert!(
+        !engine.flows.is_empty(),
+        "Taint should flow through quote-normalized dict lookup"
+    );
 }
 
 #[test]
@@ -204,7 +223,8 @@ def init(app):
 
     let mut program = Program::new();
     let mut gst = GlobalSymbolTable::new();
-    gst.load_file(&mut program, code, "test.py", "python").unwrap();
+    gst.load_file(&mut program, code, "test.py", "python")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = CallGraph::build(&program, &gst);
@@ -214,5 +234,8 @@ def init(app):
     engine.seed_sources(None);
     engine.run();
 
-    assert!(engine.flows.is_empty(), "Taint should not flow when reading a different key");
+    assert!(
+        engine.flows.is_empty(),
+        "Taint should not flow when reading a different key"
+    );
 }

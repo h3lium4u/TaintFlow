@@ -128,10 +128,16 @@ fn test_java_list_remove_shifting() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_some() && x_state.unwrap().tainted, "x should be tainted");
+    assert!(
+        x_state.is_some() && x_state.unwrap().tainted,
+        "x should be tainted"
+    );
 
     let y_state = engine.get_taint("y");
-    assert!(y_state.is_none() || !y_state.unwrap().tainted, "y should be clean");
+    assert!(
+        y_state.is_none() || !y_state.unwrap().tainted,
+        "y should be clean"
+    );
 }
 
 #[test]
@@ -154,10 +160,16 @@ fn test_java_map_remove() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_none() || !x_state.unwrap().tainted, "x should be clean");
+    assert!(
+        x_state.is_none() || !x_state.unwrap().tainted,
+        "x should be clean"
+    );
 
     let y_state = engine.get_taint("y");
-    assert!(y_state.is_none() || !y_state.unwrap().tainted, "y should be clean");
+    assert!(
+        y_state.is_none() || !y_state.unwrap().tainted,
+        "y should be clean"
+    );
 }
 
 #[test]
@@ -176,7 +188,10 @@ fn test_java_list_clear() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_none() || !x_state.unwrap().tainted, "x should be clean after clear");
+    assert!(
+        x_state.is_none() || !x_state.unwrap().tainted,
+        "x should be clean after clear"
+    );
 }
 
 #[test]
@@ -200,10 +215,16 @@ fn test_java_map_putall() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_some() && x_state.unwrap().tainted, "x should be tainted after putAll");
+    assert!(
+        x_state.is_some() && x_state.unwrap().tainted,
+        "x should be tainted after putAll"
+    );
 
     let y_state = engine.get_taint("y");
-    assert!(y_state.is_none() || !y_state.unwrap().tainted, "y should be clean after putAll");
+    assert!(
+        y_state.is_none() || !y_state.unwrap().tainted,
+        "y should be clean after putAll"
+    );
 }
 
 #[test]
@@ -229,13 +250,22 @@ fn test_java_list_addall() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_none() || !x_state.unwrap().tainted, "x should be clean");
+    assert!(
+        x_state.is_none() || !x_state.unwrap().tainted,
+        "x should be clean"
+    );
 
     let y_state = engine.get_taint("y");
-    assert!(y_state.is_none() || !y_state.unwrap().tainted, "y should be clean");
+    assert!(
+        y_state.is_none() || !y_state.unwrap().tainted,
+        "y should be clean"
+    );
 
     let z_state = engine.get_taint("z");
-    assert!(z_state.is_some() && z_state.unwrap().tainted, "z should be tainted");
+    assert!(
+        z_state.is_some() && z_state.unwrap().tainted,
+        "z should be tainted"
+    );
 }
 
 #[test]
@@ -255,11 +285,14 @@ fn test_python_list_extend() {
     engine.propagate_node(&normalized);
 
     let x_state = engine.get_taint("x");
-    assert!(x_state.is_none() || !x_state.unwrap().tainted, "x should be clean");
+    assert!(
+        x_state.is_none() || !x_state.unwrap().tainted,
+        "x should be clean"
+    );
 
     let y_state = engine.get_taint("y");
-    assert!(y_state.is_some() && y_state.unwrap().tainted, "y should be tainted");
+    assert!(
+        y_state.is_some() && y_state.unwrap().tainted,
+        "y should be tainted"
+    );
 }
-
-
-

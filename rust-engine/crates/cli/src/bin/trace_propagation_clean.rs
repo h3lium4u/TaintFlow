@@ -22,7 +22,8 @@ fn main() {
 
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    gst.load_file(&mut program, &before, "Test_CWE113.java", "java").unwrap();
+    gst.load_file(&mut program, &before, "Test_CWE113.java", "java")
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -45,18 +46,29 @@ fn main() {
     // Inst 3: data = readerBuffered.readLine()
 
     let insts = vec![
-        ("new InputStreamReader", Some("readerInputStream"), vec!["socket.getInputStream()", "\"UTF-8\""]),
-        ("new BufferedReader", Some("readerBuffered"), vec!["readerInputStream"]),
+        (
+            "new InputStreamReader",
+            Some("readerInputStream"),
+            vec!["socket.getInputStream()", "\"UTF-8\""],
+        ),
+        (
+            "new BufferedReader",
+            Some("readerBuffered"),
+            vec!["readerInputStream"],
+        ),
         ("readerBuffered.readLine", Some("data"), vec![]),
     ];
 
     for (callee, dest, args) in insts {
-        println!("\nEvaluating: dest={:?} | callee='{}' | args={:?}", dest, callee, args);
+        println!(
+            "\nEvaluating: dest={:?} | callee='{}' | args={:?}",
+            dest, callee, args
+        );
         println!("  Incoming facts: {:?}", tainted_vars);
 
         // Check fallback propagation logic
         let mut is_propagating = false;
-        
+
         // Match logic:
         for arg in &args {
             for t_var in &tainted_vars {

@@ -213,7 +213,9 @@ fn preprocess_python(code: &str) -> String {
             let is_comment = stripped.starts_with('#');
             let is_docstring = stripped.starts_with("\"\"\"") || stripped.starts_with("'''");
 
-            if (line_parens < 0 && open_parens == 0) || (indent >= 12 && !is_comment && !is_docstring) {
+            if (line_parens < 0 && open_parens == 0)
+                || (indent >= 12 && !is_comment && !is_docstring)
+            {
                 if !inserted_pass {
                     line_to_add = "    pass".to_string();
                     inserted_pass = true;

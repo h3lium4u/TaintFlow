@@ -170,7 +170,10 @@ impl<'a> Evaluator<'a> {
     }
 
     fn consume(&mut self) -> Result<Token, String> {
-        let tok = self.peek().cloned().ok_or_else(|| "Unexpected end of input".to_string())?;
+        let tok = self
+            .peek()
+            .cloned()
+            .ok_or_else(|| "Unexpected end of input".to_string())?;
         self.pos += 1;
         Ok(tok)
     }
@@ -398,9 +401,18 @@ mod tests {
         let mut eval = Evaluator::new(&constants);
 
         // Logical
-        assert_eq!(eval.evaluate("true && false"), Some(ConstantValue::Bool(false)));
-        assert_eq!(eval.evaluate("false || false"), Some(ConstantValue::Bool(false)));
-        assert_eq!(eval.evaluate("true || false"), Some(ConstantValue::Bool(true)));
+        assert_eq!(
+            eval.evaluate("true && false"),
+            Some(ConstantValue::Bool(false))
+        );
+        assert_eq!(
+            eval.evaluate("false || false"),
+            Some(ConstantValue::Bool(false))
+        );
+        assert_eq!(
+            eval.evaluate("true || false"),
+            Some(ConstantValue::Bool(true))
+        );
 
         // Unary
         assert_eq!(eval.evaluate("!true"), Some(ConstantValue::Bool(false)));
@@ -411,7 +423,10 @@ mod tests {
         assert_eq!(eval.evaluate("1 == 2"), Some(ConstantValue::Bool(false)));
         assert_eq!(eval.evaluate("3 > 2"), Some(ConstantValue::Bool(true)));
         assert_eq!(eval.evaluate("5 < 1"), Some(ConstantValue::Bool(false)));
-        assert_eq!(eval.evaluate("'a' == 'b'"), Some(ConstantValue::Bool(false)));
+        assert_eq!(
+            eval.evaluate("'a' == 'b'"),
+            Some(ConstantValue::Bool(false))
+        );
         assert_eq!(eval.evaluate("'a' == 'a'"), Some(ConstantValue::Bool(true)));
 
         // Arithmetic
@@ -420,7 +435,10 @@ mod tests {
         assert_eq!(eval.evaluate("2 * 8"), Some(ConstantValue::Int(16)));
 
         // Nested
-        assert_eq!(eval.evaluate("(7 * 42) - 86 > 200"), Some(ConstantValue::Bool(true)));
+        assert_eq!(
+            eval.evaluate("(7 * 42) - 86 > 200"),
+            Some(ConstantValue::Bool(true))
+        );
     }
 
     #[test]
@@ -430,8 +448,14 @@ mod tests {
         constants.insert("num".to_string(), ConstantValue::Int(86));
 
         let mut eval = Evaluator::new(&constants);
-        assert_eq!(eval.evaluate("mode == \"safe\""), Some(ConstantValue::Bool(true)));
-        assert_eq!(eval.evaluate("mode == \"unsafe\""), Some(ConstantValue::Bool(false)));
+        assert_eq!(
+            eval.evaluate("mode == \"safe\""),
+            Some(ConstantValue::Bool(true))
+        );
+        assert_eq!(
+            eval.evaluate("mode == \"unsafe\""),
+            Some(ConstantValue::Bool(false))
+        );
         assert_eq!(eval.evaluate("num > 50"), Some(ConstantValue::Bool(true)));
     }
 }

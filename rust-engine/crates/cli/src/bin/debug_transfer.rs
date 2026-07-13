@@ -1,5 +1,5 @@
-use std::fs;
 use ir::InstructionKind;
+use std::fs;
 
 #[derive(Debug, Clone, PartialEq)]
 enum Token {
@@ -94,7 +94,9 @@ fn tokenize(expr: &str) -> Option<Vec<Token>> {
             }
             continue;
         }
-        let op_chars = ['+', '-', '*', '/', '>', '<', '=', '!', '&', '|', '%', '?', ':'];
+        let op_chars = [
+            '+', '-', '*', '/', '>', '<', '=', '!', '&', '|', '%', '?', ':',
+        ];
         if op_chars.contains(&c) {
             let mut op_str = String::new();
             while i < chars.len() && op_chars.contains(&chars[i]) {
@@ -213,7 +215,14 @@ impl Parser {
         let left = self.arith_expr()?;
         if let Some(t) = self.peek() {
             match t {
-                Token::Op(op) if op == "==" || op == "!=" || op == ">" || op == "<" || op == ">=" || op == "<=" => {
+                Token::Op(op)
+                    if op == "=="
+                        || op == "!="
+                        || op == ">"
+                        || op == "<"
+                        || op == ">="
+                        || op == "<=" =>
+                {
                     let op = match self.next()? {
                         Token::Op(o) => o,
                         _ => unreachable!(),
@@ -221,17 +230,28 @@ impl Parser {
                     let right = self.arith_expr()?;
                     match (left, right) {
                         (Val::Num(l), Val::Num(r)) => {
-                            if op == "==" { Some(Val::Bool(l == r)) }
-                            else if op == "!=" { Some(Val::Bool(l != r)) }
-                            else if op == ">" { Some(Val::Bool(l > r)) }
-                            else if op == "<" { Some(Val::Bool(l < r)) }
-                            else if op == ">=" { Some(Val::Bool(l >= r)) }
-                            else { Some(Val::Bool(l <= r)) }
+                            if op == "==" {
+                                Some(Val::Bool(l == r))
+                            } else if op == "!=" {
+                                Some(Val::Bool(l != r))
+                            } else if op == ">" {
+                                Some(Val::Bool(l > r))
+                            } else if op == "<" {
+                                Some(Val::Bool(l < r))
+                            } else if op == ">=" {
+                                Some(Val::Bool(l >= r))
+                            } else {
+                                Some(Val::Bool(l <= r))
+                            }
                         }
                         (Val::Str(l), Val::Str(r)) => {
-                            if op == "==" { Some(Val::Bool(l == r)) }
-                            else if op == "!=" { Some(Val::Bool(l != r)) }
-                            else { None }
+                            if op == "==" {
+                                Some(Val::Bool(l == r))
+                            } else if op == "!=" {
+                                Some(Val::Bool(l != r))
+                            } else {
+                                None
+                            }
                         }
                         _ => None,
                     }
@@ -305,7 +325,11 @@ impl Parser {
                         let else_val = self.expr()?;
                         return match first {
                             Val::Bool(b) => {
-                                if b { Some(then_val) } else { Some(else_val) }
+                                if b {
+                                    Some(then_val)
+                                } else {
+                                    Some(else_val)
+                                }
                             }
                             _ => None,
                         };
@@ -384,10 +408,15 @@ fn resolve_constant(
         return None;
     }
     visited.insert(var.to_string());
-    
+
     for (dest, src) in assignments {
         if dest == var {
-            let is_const = src.starts_with('"') || src.parse::<f64>().is_ok() || src == "true" || src == "false" || src == "None" || src == "null";
+            let is_const = src.starts_with('"')
+                || src.parse::<f64>().is_ok()
+                || src == "true"
+                || src == "false"
+                || src == "None"
+                || src == "null";
             if is_const {
                 visited.remove(var);
                 return Some(src.clone());
@@ -405,12 +434,20 @@ fn resolve_constant(
     None
 }
 
-fn collect_instructions(block: &[ir::InstructionId], program: &ir::Program, out: &mut Vec<ir::InstructionId>) {
+fn collect_instructions(
+    block: &[ir::InstructionId],
+    program: &ir::Program,
+    out: &mut Vec<ir::InstructionId>,
+) {
     for &id in block {
         out.push(id);
         if let Some(inst) = program.instructions.get(&id) {
             match &inst.kind {
-                InstructionKind::Branch { then_block, else_block, .. } => {
+                InstructionKind::Branch {
+                    then_block,
+                    else_block,
+                    ..
+                } => {
                     collect_instructions(then_block, program, out);
                     if let Some(eb) = else_block {
                         collect_instructions(eb, program, out);
@@ -419,7 +456,12 @@ fn collect_instructions(block: &[ir::InstructionId], program: &ir::Program, out:
                 InstructionKind::Loop { body, .. } => {
                     collect_instructions(body, program, out);
                 }
-                InstructionKind::Try { body, catches, finally, .. } => {
+                InstructionKind::Try {
+                    body,
+                    catches,
+                    finally,
+                    ..
+                } => {
                     collect_instructions(body, program, out);
                     collect_instructions(catches, program, out);
                     if let Some(fb) = finally {
@@ -432,14 +474,22 @@ fn collect_instructions(block: &[ir::InstructionId], program: &ir::Program, out:
     }
 }
 
-fn is_in_block(target: ir::InstructionId, block: &[ir::InstructionId], program: &ir::Program) -> bool {
+fn is_in_block(
+    target: ir::InstructionId,
+    block: &[ir::InstructionId],
+    program: &ir::Program,
+) -> bool {
     for &id in block {
         if id == target {
             return true;
         }
         if let Some(inst) = program.instructions.get(&id) {
             match &inst.kind {
-                InstructionKind::Branch { then_block, else_block, .. } => {
+                InstructionKind::Branch {
+                    then_block,
+                    else_block,
+                    ..
+                } => {
                     if is_in_block(target, then_block, program) {
                         return true;
                     }
@@ -454,7 +504,12 @@ fn is_in_block(target: ir::InstructionId, block: &[ir::InstructionId], program: 
                         return true;
                     }
                 }
-                InstructionKind::Try { body, catches, finally, .. } => {
+                InstructionKind::Try {
+                    body,
+                    catches,
+                    finally,
+                    ..
+                } => {
                     if is_in_block(target, body, program) {
                         return true;
                     }
@@ -503,25 +558,46 @@ fn find_ssa_paths_trace(
     depth: usize,
 ) {
     let indent = "  ".repeat(depth);
-    println!("{}-> find_ssa_paths(curr='{}', target='{}', target_is_any={})", indent, curr, target, target_is_any);
-    println!("{}   current_path={:?}, visited={:?}", indent, current_path, visited);
+    println!(
+        "{}-> find_ssa_paths(curr='{}', target='{}', target_is_any={})",
+        indent, curr, target, target_is_any
+    );
+    println!(
+        "{}   current_path={:?}, visited={:?}",
+        indent, current_path, visited
+    );
 
     if !target_is_any && curr == target {
-        println!("{}   [MATCH] curr == target -> Path inserted into all_paths!", indent);
+        println!(
+            "{}   [MATCH] curr == target -> Path inserted into all_paths!",
+            indent
+        );
         all_paths.push(current_path.clone());
         return;
     }
-    
+
     if target_is_any {
-        let is_constant = curr.starts_with('"') || curr.parse::<f64>().is_ok() || curr == "true" || curr == "false" || curr == "None" || curr == "null";
+        let is_constant = curr.starts_with('"')
+            || curr.parse::<f64>().is_ok()
+            || curr == "true"
+            || curr == "false"
+            || curr == "None"
+            || curr == "null";
         let is_sentinel = curr.starts_with("unknown") || curr.contains("unknown");
         if is_constant || is_sentinel {
-            println!("{}   [DISCARD] Constant/Sentinel: is_constant={}, is_sentinel={}", indent, is_constant, is_sentinel);
+            println!(
+                "{}   [DISCARD] Constant/Sentinel: is_constant={}, is_sentinel={}",
+                indent, is_constant, is_sentinel
+            );
             return;
         }
-        let has_def = assignments.iter().any(|(dest, _)| dest == curr) || collection_lookups.contains_key(curr);
+        let has_def = assignments.iter().any(|(dest, _)| dest == curr)
+            || collection_lookups.contains_key(curr);
         if !has_def {
-            println!("{}   [MATCH] Wildcard leaf node (no def) -> Path inserted into all_paths!", indent);
+            println!(
+                "{}   [MATCH] Wildcard leaf node (no def) -> Path inserted into all_paths!",
+                indent
+            );
             all_paths.push(current_path.clone());
             return;
         }
@@ -532,12 +608,27 @@ fn find_ssa_paths_trace(
         return;
     }
     visited.insert(curr.to_string());
-    
+
     if let Some(src_vars) = collection_lookups.get(curr) {
-        println!("{}   [RECURSE] Collection lookups for '{}': {:?}", indent, curr, src_vars);
+        println!(
+            "{}   [RECURSE] Collection lookups for '{}': {:?}",
+            indent, curr, src_vars
+        );
         for src_var in src_vars {
             current_path.push(curr.to_string());
-            find_ssa_paths_trace(src_var, target, target_is_any, assignments, collection_lookups, program, method, visited, current_path, all_paths, depth + 1);
+            find_ssa_paths_trace(
+                src_var,
+                target,
+                target_is_any,
+                assignments,
+                collection_lookups,
+                program,
+                method,
+                visited,
+                current_path,
+                all_paths,
+                depth + 1,
+            );
             current_path.pop();
         }
     } else {
@@ -552,7 +643,7 @@ fn find_ssa_paths_trace(
                     current_path.pop();
                     continue;
                 }
-                
+
                 // Extract variables from src expression
                 let mut src_vars = Vec::new();
                 let chars: Vec<char> = src.chars().collect();
@@ -572,7 +663,9 @@ fn find_ssa_paths_trace(
                     }
                     if c.is_alphabetic() || c == '_' {
                         let mut word = String::new();
-                        while idx < chars.len() && (chars[idx].is_alphanumeric() || chars[idx] == '_') {
+                        while idx < chars.len()
+                            && (chars[idx].is_alphanumeric() || chars[idx] == '_')
+                        {
                             word.push(chars[idx]);
                             idx += 1;
                         }
@@ -583,14 +676,32 @@ fn find_ssa_paths_trace(
                 }
 
                 if target_is_any && src_vars.is_empty() {
-                    println!("{}   [DISCARD] src is constant/sentinel with no variables", indent);
+                    println!(
+                        "{}   [DISCARD] src is constant/sentinel with no variables",
+                        indent
+                    );
                     continue;
                 }
 
-                println!("{}   [RECURSE] Definition {} = {}, recursing on: {:?}", indent, dest, src, src_vars);
+                println!(
+                    "{}   [RECURSE] Definition {} = {}, recursing on: {:?}",
+                    indent, dest, src, src_vars
+                );
                 for src_var in src_vars {
                     current_path.push(dest.clone());
-                    find_ssa_paths_trace(&src_var, target, target_is_any, assignments, collection_lookups, program, method, visited, current_path, all_paths, depth + 1);
+                    find_ssa_paths_trace(
+                        &src_var,
+                        target,
+                        target_is_any,
+                        assignments,
+                        collection_lookups,
+                        program,
+                        method,
+                        visited,
+                        current_path,
+                        all_paths,
+                        depth + 1,
+                    );
                     current_path.pop();
                 }
             }
@@ -605,9 +716,24 @@ fn find_ssa_paths_trace(
 
 fn main() {
     let targets = vec![
-        ("BenchmarkTest00030", "Test_CWE_79.java", "java", "d:/V2 Backup/benchmarks/benchmark_java.jsonl"),
-        ("BenchmarkTest00031", "Test_CWE_501.java", "java", "d:/V2 Backup/benchmarks/benchmark_java.jsonl"),
-        ("BenchmarkTest00475", "Test_CWE_79.java", "java", "d:/V2 Backup/benchmarks/benchmark_java.jsonl"),
+        (
+            "BenchmarkTest00030",
+            "Test_CWE_79.java",
+            "java",
+            "d:/V2 Backup/benchmarks/benchmark_java.jsonl",
+        ),
+        (
+            "BenchmarkTest00031",
+            "Test_CWE_501.java",
+            "java",
+            "d:/V2 Backup/benchmarks/benchmark_java.jsonl",
+        ),
+        (
+            "BenchmarkTest00475",
+            "Test_CWE_79.java",
+            "java",
+            "d:/V2 Backup/benchmarks/benchmark_java.jsonl",
+        ),
     ];
 
     for (target_name, filename, lang, dataset_path) in targets {
@@ -628,8 +754,13 @@ fn main() {
         let mut program = ir::Program::new();
         let mut gst = symbols::global::GlobalSymbolTable::new();
 
-        program.source_files.insert(filename.to_string(), code.clone());
-        if gst.load_file(&mut program, &code, filename, &lang.to_string()).is_ok() {
+        program
+            .source_files
+            .insert(filename.to_string(), code.clone());
+        if gst
+            .load_file(&mut program, &code, filename, &lang.to_string())
+            .is_ok()
+        {
             gst.resolve_inheritance_hierarchy();
             let cg = symbols::call_graph::CallGraph::build(&program, &gst);
             let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -642,13 +773,24 @@ fn main() {
 
             for (flow_idx, flow) in facts.taint_flows.iter().enumerate() {
                 println!("\n--- FLOW INDEX {} ---", flow_idx);
-                let sink_id = facts.icfg_to_inst.get(&flow.sink_node_id).copied().unwrap_or(ir::InstructionId(flow.sink_node_id));
-                let method = program.methods.values().find(|m| m.name == "doPost").unwrap();
+                let sink_id = facts
+                    .icfg_to_inst
+                    .get(&flow.sink_node_id)
+                    .copied()
+                    .unwrap_or(ir::InstructionId(flow.sink_node_id));
+                let method = program
+                    .methods
+                    .values()
+                    .find(|m| m.name == "doPost")
+                    .unwrap();
                 let cfg = v2_refiner_domain::CfgBuilder::build(&program, method);
                 let ssa = v2_refiner_domain::SsaBuilder::new(&program, method, &cfg).build();
 
                 let sink_var_map = ssa.instruction_incoming_versions.get(&sink_id);
-                let sink_var_defs = sink_var_map.and_then(|m| m.get(&flow.sink_var)).cloned().unwrap_or_default();
+                let sink_var_defs = sink_var_map
+                    .and_then(|m| m.get(&flow.sink_var))
+                    .cloned()
+                    .unwrap_or_default();
                 let sink_var_ssa = get_renamed_var(&flow.sink_var, &sink_var_defs);
 
                 let mut source_defs = std::collections::HashSet::new();
@@ -659,7 +801,11 @@ fn main() {
                 if is_param || flow.source_node_id == 0 {
                     source_defs.insert(0);
                 } else {
-                    let source_inst_id = facts.icfg_to_inst.get(&flow.source_node_id).map(|id| id.0 as usize).unwrap_or(flow.source_node_id as usize);
+                    let source_inst_id = facts
+                        .icfg_to_inst
+                        .get(&flow.source_node_id)
+                        .map(|id| id.0 as usize)
+                        .unwrap_or(flow.source_node_id as usize);
                     source_defs.insert(source_inst_id);
                 }
                 let source_var_ssa = get_renamed_var(&flow.source_var, &source_defs);
@@ -667,7 +813,10 @@ fn main() {
 
                 // CollectionState Reconstruction Simulation (Mimics logic in v2-refiner-domain)
                 let mut collection_lookups = std::collections::HashMap::new();
-                let mut collection_states: std::collections::HashMap<String, Vec<(String, String)>> = std::collections::HashMap::new();
+                let mut collection_states: std::collections::HashMap<
+                    String,
+                    Vec<(String, String)>,
+                > = std::collections::HashMap::new();
 
                 let mut insts_sorted = program.instructions.keys().cloned().collect::<Vec<_>>();
                 insts_sorted.sort_by_key(|id| id.0);
@@ -677,14 +826,18 @@ fn main() {
                             if callee.contains(".get") || callee.contains(".getitem") {
                                 if !args.is_empty() {
                                     if let Some(dest_var) = dest {
-                                        let renamed_dest = get_renamed_var(dest_var, &std::collections::HashSet::from([inst_id.0 as usize]));
-                                        let receiver = callee.split('.').next().unwrap().to_string();
-                                        
+                                        let renamed_dest = get_renamed_var(
+                                            dest_var,
+                                            &std::collections::HashSet::from([inst_id.0 as usize]),
+                                        );
+                                        let receiver =
+                                            callee.split('.').next().unwrap().to_string();
+
                                         // Simulation of collection lookup population:
                                         let mut lookups = std::collections::HashSet::new();
                                         let key_arg = &args[0];
                                         let key_stripped = key_arg.trim_matches('"');
-                                        
+
                                         // Check if key is index or string
                                         let key = if let Ok(idx) = key_stripped.parse::<usize>() {
                                             Some(idx.to_string())
@@ -719,7 +872,7 @@ fn main() {
                 let mut visited = std::collections::HashSet::new();
                 let mut current_path = Vec::new();
                 let mut all_paths = Vec::new();
-                
+
                 find_ssa_paths_trace(
                     &sink_var_ssa,
                     &source_var_ssa,
@@ -741,16 +894,26 @@ fn main() {
                     for var in path {
                         if let Some(inst_id) = find_instruction_for_ssa_var(var) {
                             println!("    Evaluating var: {} (inst_{})", var, inst_id.0);
-                            
+
                             let mut all_body_insts = Vec::new();
                             collect_instructions(&method.body, &program, &mut all_body_insts);
                             for other_id in &all_body_insts {
                                 if let Some(other_inst) = program.instructions.get(other_id) {
-                                    if let InstructionKind::Branch { cond, then_block, else_block } = &other_inst.kind {
-                                        if let Some(var_map) = ssa.instruction_incoming_versions.get(other_id) {
+                                    if let InstructionKind::Branch {
+                                        cond,
+                                        then_block,
+                                        else_block,
+                                    } = &other_inst.kind
+                                    {
+                                        if let Some(var_map) =
+                                            ssa.instruction_incoming_versions.get(other_id)
+                                        {
                                             let substituted = rename_expression(cond, var_map);
-                                            println!("      Branch inst_{} cond: {}, substituted: {}", other_id.0, cond, substituted);
-                                            
+                                            println!(
+                                                "      Branch inst_{} cond: {}, substituted: {}",
+                                                other_id.0, cond, substituted
+                                            );
+
                                             // Solve substitutions
                                             let chars: Vec<char> = substituted.chars().collect();
                                             let mut resolved_expr = String::new();
@@ -759,12 +922,19 @@ fn main() {
                                                 let c = chars[i];
                                                 if c.is_alphabetic() || c == '_' {
                                                     let mut word = String::new();
-                                                    while i < chars.len() && (chars[i].is_alphanumeric() || chars[i] == '_') {
+                                                    while i < chars.len()
+                                                        && (chars[i].is_alphanumeric()
+                                                            || chars[i] == '_')
+                                                    {
                                                         word.push(chars[i]);
                                                         i += 1;
                                                     }
                                                     let mut vis = std::collections::HashSet::new();
-                                                    if let Some(val) = resolve_constant(&word, &ssa.ssa_assignments, &mut vis) {
+                                                    if let Some(val) = resolve_constant(
+                                                        &word,
+                                                        &ssa.ssa_assignments,
+                                                        &mut vis,
+                                                    ) {
                                                         resolved_expr.push_str(&val);
                                                     } else {
                                                         resolved_expr.push_str(&word);
@@ -774,16 +944,28 @@ fn main() {
                                                     i += 1;
                                                 }
                                             }
-                                            println!("        constant substitutions resolved_expr: {}", resolved_expr);
-                                            
+                                            println!(
+                                                "        constant substitutions resolved_expr: {}",
+                                                resolved_expr
+                                            );
+
                                             if let Some(tokens) = tokenize(&resolved_expr) {
                                                 let mut parser = Parser { tokens, pos: 0 };
                                                 if let Some(Val::Bool(cond_val)) = parser.expr() {
-                                                    println!("        parser result: Val::Bool({})", cond_val);
-                                                    let in_then = is_in_block(inst_id, then_block, &program);
-                                                    let in_else = else_block.as_ref().map(|eb| is_in_block(inst_id, eb, &program)).unwrap_or(false);
+                                                    println!(
+                                                        "        parser result: Val::Bool({})",
+                                                        cond_val
+                                                    );
+                                                    let in_then =
+                                                        is_in_block(inst_id, then_block, &program);
+                                                    let in_else = else_block
+                                                        .as_ref()
+                                                        .map(|eb| {
+                                                            is_in_block(inst_id, eb, &program)
+                                                        })
+                                                        .unwrap_or(false);
                                                     println!("        is_in_then_block: {}, is_in_else_block: {}", in_then, in_else);
-                                                    
+
                                                     if cond_val {
                                                         if in_else {
                                                             println!("        [DEAD] Instruction is inside dead ELSE block!");

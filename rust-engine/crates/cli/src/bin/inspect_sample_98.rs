@@ -27,10 +27,11 @@ fn main() {
     println!("=== INSPECTING SAMPLE 144 (CWE-113) BEFORE CODE ===");
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    
+
     let filename = "Test_CWE113.java".to_string();
 
-    gst.load_file(&mut program, &before, &filename, &language).unwrap();
+    gst.load_file(&mut program, &before, &filename, &language)
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
@@ -43,12 +44,15 @@ fn main() {
     for id in keys {
         let inst = program.instructions.get(id).unwrap();
         if let ir::InstructionKind::Call { dest, callee, args } = &inst.kind {
-            println!("  InstructionId({:?}) | dest: {:?} | callee: '{}' | args: {:?}", id, dest, callee, args);
-            
+            println!(
+                "  InstructionId({:?}) | dest: {:?} | callee: '{}' | args: {:?}",
+                id, dest, callee, args
+            );
+
             // Resolve callee info using engine
             let resolved = engine.resolve_callee_info(ir::MethodId(0), callee);
             println!("    -> Resolved FQN/Method: {:?}", resolved);
-            
+
             // Show get_receiver_name_safe result
             let receiver = get_receiver_name_safe(callee);
             println!("    -> Receiver: {:?}", receiver);

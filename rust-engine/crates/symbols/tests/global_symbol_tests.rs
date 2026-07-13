@@ -396,15 +396,26 @@ def main_flow():
 "#;
 
     // Load files with their package path layout
-    let m_utils = gst.load_file(&mut program, utils_code, "pkg/utils.py", "python").unwrap();
-    let m_init = gst.load_file(&mut program, init_code, "pkg/subpkg/__init__.py", "python").unwrap();
-    let m_module = gst.load_file(&mut program, module_code, "pkg/subpkg/module.py", "python").unwrap();
-    let m_app = gst.load_file(&mut program, app_code, "app.py", "python").unwrap();
+    let m_utils = gst
+        .load_file(&mut program, utils_code, "pkg/utils.py", "python")
+        .unwrap();
+    let m_init = gst
+        .load_file(&mut program, init_code, "pkg/subpkg/__init__.py", "python")
+        .unwrap();
+    let m_module = gst
+        .load_file(&mut program, module_code, "pkg/subpkg/module.py", "python")
+        .unwrap();
+    let m_app = gst
+        .load_file(&mut program, app_code, "app.py", "python")
+        .unwrap();
 
     // Verify module names are dot-separated packages
     assert_eq!(program.modules.get(&m_utils).unwrap().name, "pkg.utils");
     assert_eq!(program.modules.get(&m_init).unwrap().name, "pkg.subpkg");
-    assert_eq!(program.modules.get(&m_module).unwrap().name, "pkg.subpkg.module");
+    assert_eq!(
+        program.modules.get(&m_module).unwrap().name,
+        "pkg.subpkg.module"
+    );
     assert_eq!(program.modules.get(&m_app).unwrap().name, "app");
 
     // Verify relative import resolution in pkg/subpkg/module.py
@@ -425,9 +436,24 @@ def main_flow():
     gst.resolve_inheritance_hierarchy();
     let cg = CallGraph::build(&program, &gst);
 
-    let main_flow_id = gst.method_index.fqn_to_id.get("app.main_flow").copied().unwrap();
-    let my_func_id = gst.method_index.fqn_to_id.get("pkg.subpkg.module.my_func").copied().unwrap();
-    let helper_id = gst.method_index.fqn_to_id.get("pkg.utils.helper").copied().unwrap();
+    let main_flow_id = gst
+        .method_index
+        .fqn_to_id
+        .get("app.main_flow")
+        .copied()
+        .unwrap();
+    let my_func_id = gst
+        .method_index
+        .fqn_to_id
+        .get("pkg.subpkg.module.my_func")
+        .copied()
+        .unwrap();
+    let helper_id = gst
+        .method_index
+        .fqn_to_id
+        .get("pkg.utils.helper")
+        .copied()
+        .unwrap();
 
     // app.main_flow should call pkg.subpkg.module.my_func
     let app_edges = cg.caller_to_edges.get(&main_flow_id).unwrap();
@@ -453,7 +479,9 @@ def process():
     det.run()
 "#;
 
-    let m_app = gst.load_file(&mut program, app_code, "app.py", "python").unwrap();
+    let m_app = gst
+        .load_file(&mut program, app_code, "app.py", "python")
+        .unwrap();
 
     // Verify app module is registered
     assert_eq!(program.modules.get(&m_app).unwrap().name, "app");
@@ -463,17 +491,32 @@ def process():
 
     // We should have synthesized:
     // 1. pkg.client.Client.get_project method
-    assert!(gst.method_index.fqn_to_id.contains_key("pkg.client.Client.get_project"));
-    
+    assert!(gst
+        .method_index
+        .fqn_to_id
+        .contains_key("pkg.client.Client.get_project"));
+
     // 2. pkg.client.Client.get_project_Ret type
-    assert!(gst.type_index.fqn_to_id.contains_key("pkg.client.Client.get_project_Ret"));
+    assert!(gst
+        .type_index
+        .fqn_to_id
+        .contains_key("pkg.client.Client.get_project_Ret"));
 
     // 3. pkg.client.Client.get_project_Ret.get_details method
-    assert!(gst.method_index.fqn_to_id.contains_key("pkg.client.Client.get_project_Ret.get_details"));
+    assert!(gst
+        .method_index
+        .fqn_to_id
+        .contains_key("pkg.client.Client.get_project_Ret.get_details"));
 
     // 4. pkg.client.Client.get_project_Ret.get_details_Ret type
-    assert!(gst.type_index.fqn_to_id.contains_key("pkg.client.Client.get_project_Ret.get_details_Ret"));
+    assert!(gst
+        .type_index
+        .fqn_to_id
+        .contains_key("pkg.client.Client.get_project_Ret.get_details_Ret"));
 
     // 5. pkg.client.Client.get_project_Ret.get_details_Ret.run method
-    assert!(gst.method_index.fqn_to_id.contains_key("pkg.client.Client.get_project_Ret.get_details_Ret.run"));
+    assert!(gst
+        .method_index
+        .fqn_to_id
+        .contains_key("pkg.client.Client.get_project_Ret.get_details_Ret.run"));
 }

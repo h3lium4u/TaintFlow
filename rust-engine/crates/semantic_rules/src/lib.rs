@@ -19,10 +19,12 @@ pub fn scan_semantic_violations(program: &Program, language: &str) -> Vec<String
     for inst in program.instructions.values() {
         if let ir::InstructionKind::Call { callee, args, .. } = &inst.kind {
             let lang_lower = language.to_lowercase();
-            
+
             if lang_lower == "java" {
                 // Java CWE-327 / CWE-328 (Broken Cryptographic Algorithms)
-                if callee.contains("Cipher.getInstance") || callee.contains("MessageDigest.getInstance") {
+                if callee.contains("Cipher.getInstance")
+                    || callee.contains("MessageDigest.getInstance")
+                {
                     if let Some(arg0) = args.first() {
                         let clean_arg = arg0.replace('"', "").replace('\'', "").to_uppercase();
                         let mut is_weak = false;
@@ -38,17 +40,28 @@ pub fn scan_semantic_violations(program: &Program, language: &str) -> Vec<String
                         } else {
                             // Resolve variable locally using getProperty definitions
                             for inst2 in program.instructions.values() {
-                                if let ir::InstructionKind::Call { dest: Some(dest_var), callee: callee2, args: args2, .. } = &inst2.kind {
+                                if let ir::InstructionKind::Call {
+                                    dest: Some(dest_var),
+                                    callee: callee2,
+                                    args: args2,
+                                    ..
+                                } = &inst2.kind
+                                {
                                     if dest_var == arg0 && callee2.contains("getProperty") {
                                         if let Some(key_arg) = args2.first() {
-                                            let clean_key = key_arg.replace('"', "").replace('\'', "");
-                                            if clean_key == "cryptoAlg1" || clean_key == "hashAlg1" {
+                                            let clean_key =
+                                                key_arg.replace('"', "").replace('\'', "");
+                                            if clean_key == "cryptoAlg1" || clean_key == "hashAlg1"
+                                            {
                                                 is_weak = true;
                                                 break;
                                             }
                                         }
                                         if let Some(default_arg) = args2.get(1) {
-                                            let clean_default = default_arg.replace('"', "").replace('\'', "").to_uppercase();
+                                            let clean_default = default_arg
+                                                .replace('"', "")
+                                                .replace('\'', "")
+                                                .to_uppercase();
                                             if clean_default.contains("DES")
                                                 || clean_default.contains("RC2")
                                                 || clean_default.contains("RC4")
@@ -74,9 +87,9 @@ pub fn scan_semantic_violations(program: &Program, language: &str) -> Vec<String
                 }
 
                 // Java java.util.Random (CWE-338 / CWE-330)
-                if callee.contains("new java.util.Random") 
-                    || (callee.contains("new Random") && !callee.contains("SecureRandom")) 
-                    || callee.contains("Math.random") 
+                if callee.contains("new java.util.Random")
+                    || (callee.contains("new Random") && !callee.contains("SecureRandom"))
+                    || callee.contains("Math.random")
                 {
                     detected_cwes.push("CWE-338".to_string());
                     detected_cwes.push("CWE-330".to_string());
@@ -104,13 +117,13 @@ pub fn scan_semantic_violations(program: &Program, language: &str) -> Vec<String
                 }
 
                 // Python cryptodome weak ciphers (CWE-327)
-                if callee.contains("ARC4") 
-                    || callee.contains("Blowfish") 
-                    || callee.contains("DES") 
-                    || callee.contains("MD5") 
-                    || callee.contains("SHA1") 
-                    || callee.contains("sha1") 
-                    || callee.contains("md5") 
+                if callee.contains("ARC4")
+                    || callee.contains("Blowfish")
+                    || callee.contains("DES")
+                    || callee.contains("MD5")
+                    || callee.contains("SHA1")
+                    || callee.contains("sha1")
+                    || callee.contains("md5")
                 {
                     detected_cwes.push("CWE-327".to_string());
                 }

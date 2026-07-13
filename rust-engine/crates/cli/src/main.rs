@@ -2,7 +2,7 @@ use cfg::CfgBuilder;
 use features::FeatureExtractor;
 use normalizer::{NormalizedKind, NormalizedNode, Normalizer};
 use parser::UnifiedParser;
-use rules::{Finding, RuleEngine, SuppressionInfo, PathEntry};
+use rules::{Finding, PathEntry, RuleEngine, SuppressionInfo};
 use serde::Serialize;
 use std::collections::HashSet;
 use std::fs;
@@ -170,22 +170,28 @@ fn check_suppression(lines: &[&str], line_num: usize, cwe: &str) -> Option<Strin
     if line_num == 0 || line_num > lines.len() {
         return None;
     }
-    
+
     let normalized_cwe = cwe.to_uppercase().replace('-', "").replace(' ', "");
-    
+
     // Check same line and preceding line (line_num is 1-indexed)
     let lines_to_check = if line_num > 1 {
-        vec![(line_num, lines[line_num - 1]), (line_num - 1, lines[line_num - 2])]
+        vec![
+            (line_num, lines[line_num - 1]),
+            (line_num - 1, lines[line_num - 2]),
+        ]
     } else {
         vec![(line_num, lines[line_num - 1])]
     };
-    
+
     for (_, line) in lines_to_check {
         let trimmed = line.trim();
         if let Some(comment_idx) = trimmed.find("//").or_else(|| trimmed.find('#')) {
             let comment_text = &trimmed[comment_idx..];
             if comment_text.contains("taintflow-ignore") {
-                let comment_upper = comment_text.to_uppercase().replace('-', "").replace(' ', "");
+                let comment_upper = comment_text
+                    .to_uppercase()
+                    .replace('-', "")
+                    .replace(' ', "");
                 // If comment doesn't contain "CWE" at all, ignore globally
                 if !comment_upper.contains("CWE") {
                     return Some(comment_text.trim().to_string());
@@ -203,9 +209,23 @@ fn check_suppression(lines: &[&str], line_num: usize, cwe: &str) -> Option<Strin
 fn is_source_expression(node: &NormalizedNode) -> bool {
     let raw_lower = node.raw.to_lowercase();
     let sources = [
-        "getparameter", "getheader", "getcookies", "getquerystring", "getinputstream", "getreader",
-        "readline", "nextline", "request.args", "request.form", "request.json", "request.cookies",
-        "request.headers", "request.files", "request.data", "request.values", "input("
+        "getparameter",
+        "getheader",
+        "getcookies",
+        "getquerystring",
+        "getinputstream",
+        "getreader",
+        "readline",
+        "nextline",
+        "request.args",
+        "request.form",
+        "request.json",
+        "request.cookies",
+        "request.headers",
+        "request.files",
+        "request.data",
+        "request.values",
+        "input(",
     ];
     sources.iter().any(|&s| raw_lower.contains(s))
 }
@@ -228,7 +248,9 @@ fn collect_identifiers(node: &NormalizedNode, vars: &mut Vec<String>) {
             collect_identifiers(lhs, vars);
             collect_identifiers(rhs, vars);
         }
-        NormalizedKind::Call { callee, arguments, .. } => {
+        NormalizedKind::Call {
+            callee, arguments, ..
+        } => {
             if let Some(base) = callee.split('.').next() {
                 if !vars.contains(&base.to_string()) {
                     vars.push(base.to_string());
@@ -238,7 +260,11 @@ fn collect_identifiers(node: &NormalizedNode, vars: &mut Vec<String>) {
                 collect_identifiers(arg, vars);
             }
         }
-        NormalizedKind::If { condition, consequent, alternate } => {
+        NormalizedKind::If {
+            condition,
+            consequent,
+            alternate,
+        } => {
             collect_identifiers(condition, vars);
             collect_identifiers(consequent, vars);
             if let Some(alt) = alternate {
@@ -248,10 +274,21 @@ fn collect_identifiers(node: &NormalizedNode, vars: &mut Vec<String>) {
         NormalizedKind::Return(expr) => {
             collect_identifiers(expr, vars);
         }
-        NormalizedKind::For { init, condition, update, body } => {
-            if let Some(i) = init { collect_identifiers(i, vars); }
-            if let Some(c) = condition { collect_identifiers(c, vars); }
-            if let Some(u) = update { collect_identifiers(u, vars); }
+        NormalizedKind::For {
+            init,
+            condition,
+            update,
+            body,
+        } => {
+            if let Some(i) = init {
+                collect_identifiers(i, vars);
+            }
+            if let Some(c) = condition {
+                collect_identifiers(c, vars);
+            }
+            if let Some(u) = update {
+                collect_identifiers(u, vars);
+            }
             collect_identifiers(body, vars);
         }
         NormalizedKind::While { condition, body } => {
@@ -262,10 +299,18 @@ fn collect_identifiers(node: &NormalizedNode, vars: &mut Vec<String>) {
             collect_identifiers(body, vars);
             collect_identifiers(condition, vars);
         }
-        NormalizedKind::Try { body, catch_clauses, finally_clause } => {
+        NormalizedKind::Try {
+            body,
+            catch_clauses,
+            finally_clause,
+        } => {
             collect_identifiers(body, vars);
-            for catch in catch_clauses { collect_identifiers(catch, vars); }
-            if let Some(finally) = finally_clause { collect_identifiers(finally, vars); }
+            for catch in catch_clauses {
+                collect_identifiers(catch, vars);
+            }
+            if let Some(finally) = finally_clause {
+                collect_identifiers(finally, vars);
+            }
         }
         _ => {}
     }
@@ -280,7 +325,7 @@ fn collect_assignments_before<'a>(
     if node.span.start_line >= before_line {
         return;
     }
-    
+
     match &node.kind {
         NormalizedKind::Assignment { lhs, .. } => {
             let lhs_name = match &lhs.kind {
@@ -298,17 +343,32 @@ fn collect_assignments_before<'a>(
                 collect_assignments_before(child, target_var, before_line, assignments);
             }
         }
-        NormalizedKind::If { condition, consequent, alternate } => {
+        NormalizedKind::If {
+            condition,
+            consequent,
+            alternate,
+        } => {
             collect_assignments_before(condition, target_var, before_line, assignments);
             collect_assignments_before(consequent, target_var, before_line, assignments);
             if let Some(alt) = alternate {
                 collect_assignments_before(alt, target_var, before_line, assignments);
             }
         }
-        NormalizedKind::For { init, condition, update, body } => {
-            if let Some(i) = init { collect_assignments_before(i, target_var, before_line, assignments); }
-            if let Some(c) = condition { collect_assignments_before(c, target_var, before_line, assignments); }
-            if let Some(u) = update { collect_assignments_before(u, target_var, before_line, assignments); }
+        NormalizedKind::For {
+            init,
+            condition,
+            update,
+            body,
+        } => {
+            if let Some(i) = init {
+                collect_assignments_before(i, target_var, before_line, assignments);
+            }
+            if let Some(c) = condition {
+                collect_assignments_before(c, target_var, before_line, assignments);
+            }
+            if let Some(u) = update {
+                collect_assignments_before(u, target_var, before_line, assignments);
+            }
             collect_assignments_before(body, target_var, before_line, assignments);
         }
         NormalizedKind::While { condition, body } => {
@@ -319,7 +379,11 @@ fn collect_assignments_before<'a>(
             collect_assignments_before(body, target_var, before_line, assignments);
             collect_assignments_before(condition, target_var, before_line, assignments);
         }
-        NormalizedKind::Try { body, catch_clauses, finally_clause } => {
+        NormalizedKind::Try {
+            body,
+            catch_clauses,
+            finally_clause,
+        } => {
             collect_assignments_before(body, target_var, before_line, assignments);
             for catch in catch_clauses {
                 collect_assignments_before(catch, target_var, before_line, assignments);
@@ -342,13 +406,18 @@ fn collect_function_params<'a>(
         return;
     }
     match &node.kind {
-        NormalizedKind::FunctionDefinition { params: param_names, .. } => {
-            if param_names.iter().any(|p| p == target_var || p.to_lowercase().contains(target_var)) {
+        NormalizedKind::FunctionDefinition {
+            params: param_names,
+            ..
+        } => {
+            if param_names
+                .iter()
+                .any(|p| p == target_var || p.to_lowercase().contains(target_var))
+            {
                 params.push(node);
             }
         }
-        NormalizedKind::Block(children)
-        | NormalizedKind::Concat { parts: children } => {
+        NormalizedKind::Block(children) | NormalizedKind::Concat { parts: children } => {
             for child in children {
                 collect_function_params(child, target_var, before_line, params);
             }
@@ -385,10 +454,10 @@ fn trace_backwards(
                 ));
                 return true;
             }
-            
+
             let mut rhs_vars = Vec::new();
             collect_identifiers(rhs, &mut rhs_vars);
-            
+
             for var in rhs_vars {
                 let mut sub_path = Vec::new();
                 if trace_backwards(node, &var, line, visited, &mut sub_path, file_path) {
@@ -403,14 +472,17 @@ fn trace_backwards(
             }
         }
     }
-    
+
     let mut params = Vec::new();
     collect_function_params(node, target_var, before_line, &mut params);
     if let Some(param_node) = params.first() {
         path.push((
             file_path.to_string(),
             param_node.span.start_line,
-            format!("Source: Taint enters via function parameter '{}'", target_var),
+            format!(
+                "Source: Taint enters via function parameter '{}'",
+                target_var
+            ),
         ));
         return true;
     }
@@ -442,29 +514,46 @@ fn analyse_code(code: &str, file_path: &str, language: &str) -> Vec<Finding> {
                 let mut target_var = String::new();
                 if let Some(start_quote) = f.description.find('\'') {
                     if let Some(end_quote) = f.description[start_quote + 1..].find('\'') {
-                        target_var = f.description[start_quote + 1..start_quote + 1 + end_quote].to_string();
+                        target_var =
+                            f.description[start_quote + 1..start_quote + 1 + end_quote].to_string();
                     }
                 }
 
                 let mut path = Vec::new();
                 let mut visited = HashSet::new();
-                if !target_var.is_empty() && trace_backwards(&normalized, &target_var, f.line_number, &mut visited, &mut path, file_path) {
+                if !target_var.is_empty()
+                    && trace_backwards(
+                        &normalized,
+                        &target_var,
+                        f.line_number,
+                        &mut visited,
+                        &mut path,
+                        file_path,
+                    )
+                {
                     path.push((
                         file_path.to_string(),
                         f.line_number,
                         format!("Sink: Tainted value reaches sink: {}", f.description),
                     ));
-                    f.code_flow_path = Some(path.into_iter().map(|(fp, ln, msg)| PathEntry {
-                        file_path: fp,
-                        line_number: ln,
-                        message: msg,
-                    }).collect());
+                    f.code_flow_path = Some(
+                        path.into_iter()
+                            .map(|(fp, ln, msg)| PathEntry {
+                                file_path: fp,
+                                line_number: ln,
+                                message: msg,
+                            })
+                            .collect(),
+                    );
                 } else {
                     // Fallback to simple path: source = line 1 or first source line, sink = f.line_number
                     let mut src_line = 1;
                     for (idx, line) in lines.iter().enumerate() {
                         let l_low = line.to_lowercase();
-                        if l_low.contains("request") || l_low.contains("getparameter") || l_low.contains("input") {
+                        if l_low.contains("request")
+                            || l_low.contains("getparameter")
+                            || l_low.contains("input")
+                        {
                             src_line = idx + 1;
                             break;
                         }
@@ -479,7 +568,7 @@ fn analyse_code(code: &str, file_path: &str, language: &str) -> Vec<Finding> {
                             file_path: file_path.to_string(),
                             line_number: f.line_number,
                             message: format!("Sink: Tainted value reaches sink: {}", f.description),
-                        }
+                        },
                     ]);
                 }
 
@@ -793,17 +882,20 @@ fn print_text_report(findings: &[Finding], scanned: usize) {
     println!("║              TaintFlow V1.0 Scan Report               ║");
     println!("╚═══════════════════════════════════════════════════════╝");
     println!();
-    
-    let active_findings: Vec<&Finding> = findings.iter().filter(|f| f.suppression.is_none()).collect();
+
+    let active_findings: Vec<&Finding> = findings
+        .iter()
+        .filter(|f| f.suppression.is_none())
+        .collect();
     let suppressed_count = findings.len() - active_findings.len();
-    
+
     println!("  Files scanned : {}", scanned);
     println!("  Active findings: {}", active_findings.len());
     if suppressed_count > 0 {
         println!("  Suppressed findings (ignored): {}", suppressed_count);
     }
     println!();
-    
+
     if active_findings.is_empty() {
         println!("  ✅  No active findings detected.");
         return;
@@ -825,12 +917,18 @@ fn print_text_report(findings: &[Finding], scanned: usize) {
             f.line_number
         );
         println!("         {}", f.description);
-        
+
         // Print the code flow path if present
         if let Some(path) = &f.code_flow_path {
             println!("         Trace Path:");
             for (step, entry) in path.iter().enumerate() {
-                println!("           {:>2}. {}:{} - {}", step + 1, entry.file_path, entry.line_number, entry.message);
+                println!(
+                    "           {:>2}. {}:{} - {}",
+                    step + 1,
+                    entry.file_path,
+                    entry.line_number,
+                    entry.message
+                );
             }
         }
         println!();
@@ -859,7 +957,7 @@ fn build_sarif(findings: &[Finding]) -> SarifReport {
             "MEDIUM" => "warning",
             _ => "note",
         };
-        
+
         let mut suppressions = None;
         if let Some(supp) = &f.suppression {
             suppressions = Some(vec![SarifSuppression {

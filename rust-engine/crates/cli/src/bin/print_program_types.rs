@@ -11,13 +11,14 @@ fn main() {
             break;
         }
     }
-    
+
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
     let filename = "test.py".to_string();
     program.source_files.insert(filename.clone(), code.clone());
-    gst.load_file(&mut program, &code, &filename, &"java".to_string()).unwrap();
-    
+    gst.load_file(&mut program, &code, &filename, &"java".to_string())
+        .unwrap();
+
     println!("Types in program:");
     for (id, t) in &program.types {
         println!("  TypeId {}: {}", id.0, t.name);

@@ -11,31 +11,36 @@ fn main() {
             break;
         }
     }
-    
+
     if code.is_empty() {
         println!("BenchmarkTest00011 not found!");
         return;
     }
-    
+
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    
+
     // Simulate the validation filename "test.py"
     let filename = "CWE22_Test.java".to_string();
     program.source_files.insert(filename.clone(), code.clone());
-    
-    gst.load_file(&mut program, &code, &filename, &"java".to_string()).unwrap();
+
+    gst.load_file(&mut program, &code, &filename, &"java".to_string())
+        .unwrap();
     gst.resolve_inheritance_hierarchy();
-    
+
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
-    
-    println!("ICFG nodes count: {}, edges: {}", icfg.nodes.len(), icfg.edges.len());
-    
+
+    println!(
+        "ICFG nodes count: {}, edges: {}",
+        icfg.nodes.len(),
+        icfg.edges.len()
+    );
+
     for (id, inst) in &program.instructions {
         println!("  Inst {}: {:?}", id.0, inst.kind);
     }
-    
+
     println!("ICFG Edges:");
     for edge in &icfg.edges {
         println!("  node {} -> node {} {:?}", edge.from, edge.to, edge.kind);
@@ -45,7 +50,7 @@ fn main() {
     engine.target_file = Some(filename.clone());
     engine.seed_sources(None);
     engine.run();
-    
+
     println!("Tainted Facts:");
     for fact in &engine.tainted_facts {
         println!("  node={}, var={}", fact.node_id, fact.var);
@@ -53,11 +58,17 @@ fn main() {
 
     println!("Suppressed Flows:");
     for f in &engine.suppressed_flows {
-        println!("  node={}, var={}, reason={}", f.sink_node_id, f.sink_var, f.reason);
+        println!(
+            "  node={}, var={}, reason={}",
+            f.sink_node_id, f.sink_var, f.reason
+        );
     }
 
     println!("Flows detected: {}", engine.flows.len());
     for flow in &engine.flows {
-        println!("  Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var);
+        println!(
+            "  Flow CWE: {:?}, sink_node: {}, sink_var: {}",
+            flow.cwe, flow.sink_node_id, flow.sink_var
+        );
     }
 }

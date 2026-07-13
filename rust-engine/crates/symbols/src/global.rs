@@ -143,7 +143,9 @@ impl GlobalSymbolTable {
         file_path: &str,
         language: &str,
     ) -> Result<ModuleId, String> {
-        program.source_files.insert(file_path.to_string(), code.to_string());
+        program
+            .source_files
+            .insert(file_path.to_string(), code.to_string());
         let root = parser::UnifiedParser::parse(code, language)?;
         let module_name = if language.to_lowercase() == "python" {
             let path_without_ext = if file_path.ends_with(".py") {
@@ -160,19 +162,21 @@ impl GlobalSymbolTable {
             } else {
                 &parts[..]
             };
-            
+
             // Generic package-root discovery using __init__.py traversal in program.source_files
             let mut package_start_idx = 0;
             for i in 1..=parts_init.len() {
                 let parent_dir = parts_init[..i].join("/");
                 let init_py = format!("{}/__init__.py", parent_dir);
                 let init_pyc = format!("{}/__init__.pyc", parent_dir);
-                if program.source_files.contains_key(&init_py) || program.source_files.contains_key(&init_pyc) {
+                if program.source_files.contains_key(&init_py)
+                    || program.source_files.contains_key(&init_pyc)
+                {
                     package_start_idx = i.saturating_sub(1);
                     break;
                 }
             }
-            
+
             let final_parts = &parts_init[package_start_idx..];
             if final_parts.is_empty() {
                 "module".to_string()
@@ -187,7 +191,8 @@ impl GlobalSymbolTable {
                 .to_string()
         };
 
-        let module_id = if let Some(&existing_mid) = self.module_index.name_to_id.get(&module_name) {
+        let module_id = if let Some(&existing_mid) = self.module_index.name_to_id.get(&module_name)
+        {
             if let Some(m) = program.modules.get_mut(&existing_mid) {
                 m.file_path = file_path.to_string();
             }
@@ -742,7 +747,8 @@ impl GlobalSymbolTable {
                 if parts.len() > 1 {
                     let symbol = parts.last().unwrap();
                     let module_part = parts[..parts.len() - 1].join(".");
-                    let mut next_module_id_opt = self.module_index.name_to_id.get(&module_part).copied();
+                    let mut next_module_id_opt =
+                        self.module_index.name_to_id.get(&module_part).copied();
                     if next_module_id_opt.is_none() {
                         let dot_suffix = format!(".{}", module_part);
                         for (m_name, &m_id) in &self.module_index.name_to_id {
@@ -753,7 +759,9 @@ impl GlobalSymbolTable {
                         }
                     }
                     if let Some(next_module_id) = next_module_id_opt {
-                        if let Some(resolved_fqn) = self.resolve_import_recursive(next_module_id, symbol, visited) {
+                        if let Some(resolved_fqn) =
+                            self.resolve_import_recursive(next_module_id, symbol, visited)
+                        {
                             return Some(resolved_fqn);
                         }
                     }
@@ -881,8 +889,12 @@ impl GlobalSymbolTable {
                 file_path: format!("{}.py", module_name.replace('.', "/")),
                 package_name: None,
             };
-            self.program_index.modules.insert(new_module_id, module_info);
-            self.module_index.name_to_id.insert(module_name.to_string(), new_module_id);
+            self.program_index
+                .modules
+                .insert(new_module_id, module_info);
+            self.module_index
+                .name_to_id
+                .insert(module_name.to_string(), new_module_id);
             self.module_index.file_path_to_id.insert(
                 format!("{}.py", module_name.replace('.', "/")),
                 new_module_id,
@@ -892,7 +904,12 @@ impl GlobalSymbolTable {
     }
 
     /// Helper to get or create a stub type for a FQN.
-    fn get_or_create_stub_type(&mut self, program: &mut Program, type_fqn: &str, module_id: ModuleId) -> TypeId {
+    fn get_or_create_stub_type(
+        &mut self,
+        program: &mut Program,
+        type_fqn: &str,
+        module_id: ModuleId,
+    ) -> TypeId {
         if let Some(&class_id) = self.type_index.fqn_to_id.get(type_fqn) {
             class_id
         } else {
@@ -916,7 +933,9 @@ impl GlobalSymbolTable {
                 annotations: Vec::new(),
             };
             self.program_index.types.insert(class_id, type_info);
-            self.type_index.fqn_to_id.insert(type_fqn.to_string(), class_id);
+            self.type_index
+                .fqn_to_id
+                .insert(type_fqn.to_string(), class_id);
             class_id
         }
     }
@@ -986,8 +1005,12 @@ impl GlobalSymbolTable {
                 is_static: true,
                 annotations: Vec::new(),
             };
-            self.program_index.methods.insert(stub_method_id, method_info);
-            self.method_index.fqn_to_id.insert(method_fqn.to_string(), stub_method_id);
+            self.program_index
+                .methods
+                .insert(stub_method_id, method_info);
+            self.method_index
+                .fqn_to_id
+                .insert(method_fqn.to_string(), stub_method_id);
             stub_method_id
         }
     }
@@ -1071,7 +1094,9 @@ impl GlobalSymbolTable {
             let local_fqn = format!("{}.{}", module_name, short_name);
             if let Some(&stub_method_id) = self.method_index.fqn_to_id.get(import_fqn) {
                 if !self.method_index.fqn_to_id.contains_key(&local_fqn) {
-                    self.method_index.fqn_to_id.insert(local_fqn, stub_method_id);
+                    self.method_index
+                        .fqn_to_id
+                        .insert(local_fqn, stub_method_id);
                 }
             }
         }
@@ -1139,16 +1164,25 @@ impl GlobalSymbolTable {
                                         }
 
                                         let method_fqn = format!("{}.{}", type_fqn, method_name);
-                                        let return_fqn = if method_fqn.starts_with("base64.b64decode") || method_fqn.starts_with("base64.urlsafe_b64decode") {
+                                        let return_fqn = if method_fqn
+                                            .starts_with("base64.b64decode")
+                                            || method_fqn.starts_with("base64.urlsafe_b64decode")
+                                        {
                                             "bytes".to_string()
-                                        } else if method_fqn.starts_with("global.open_Ret.read") || method_fqn.starts_with("builtins.open_Ret.read") {
+                                        } else if method_fqn.starts_with("global.open_Ret.read")
+                                            || method_fqn.starts_with("builtins.open_Ret.read")
+                                        {
                                             "bytes".to_string()
                                         } else {
                                             format!("{}_Ret", method_fqn)
                                         };
 
                                         // Synthesize return class type
-                                        self.get_or_create_stub_type(program, &return_fqn, module_id);
+                                        self.get_or_create_stub_type(
+                                            program,
+                                            &return_fqn,
+                                            module_id,
+                                        );
 
                                         // Synthesize member method on current_type
                                         self.get_or_create_stub_method(
@@ -1179,12 +1213,18 @@ impl GlobalSymbolTable {
                                         // Constructor returns the type itself
                                         inferred_ret_type = Some(fqn);
                                     } else {
-                                        let func_ret_fqn = if fqn.starts_with("base64.b64decode") || fqn.starts_with("base64.urlsafe_b64decode") {
+                                        let func_ret_fqn = if fqn.starts_with("base64.b64decode")
+                                            || fqn.starts_with("base64.urlsafe_b64decode")
+                                        {
                                             "bytes".to_string()
                                         } else {
                                             format!("{}_Ret", fqn)
                                         };
-                                        self.get_or_create_stub_type(program, &func_ret_fqn, module_id);
+                                        self.get_or_create_stub_type(
+                                            program,
+                                            &func_ret_fqn,
+                                            module_id,
+                                        );
                                         self.get_or_create_stub_method(
                                             program,
                                             &fqn,
@@ -1435,23 +1475,27 @@ fn extract_java_imports_and_package(
     (package_name, imports, wildcards)
 }
 
-fn resolve_relative_module(current_module_fqn: &str, file_path: &str, relative_path: &str) -> String {
+fn resolve_relative_module(
+    current_module_fqn: &str,
+    file_path: &str,
+    relative_path: &str,
+) -> String {
     let num_dots = relative_path.chars().take_while(|&c| c == '.').count();
     if num_dots == 0 {
         return relative_path.to_string();
     }
-    
+
     let remainder = &relative_path[num_dots..];
     let parts: Vec<&str> = current_module_fqn.split('.').collect();
-    
+
     let is_init = file_path.ends_with("__init__.py") || file_path.ends_with("__init__.pyc");
-    
+
     let pop_count = if is_init {
         num_dots.saturating_sub(1)
     } else {
         num_dots
     };
-    
+
     if pop_count >= parts.len() {
         if !parts.is_empty() {
             let root_prefix = parts[0];
@@ -1524,7 +1568,7 @@ fn extract_python_imports(
                     if import_part.starts_with('(') && import_part.ends_with(')') {
                         import_part = import_part[1..import_part.len() - 1].trim();
                     }
-                    
+
                     let absolute_from = if from_part.starts_with('.') {
                         resolve_relative_module(current_module_fqn, file_path, from_part)
                     } else {
@@ -1556,7 +1600,13 @@ fn extract_python_imports(
         }
     }
 
-    walk_imports(root, current_module_fqn, file_path, &mut imports, &mut wildcards);
+    walk_imports(
+        root,
+        current_module_fqn,
+        file_path,
+        &mut imports,
+        &mut wildcards,
+    );
     (imports, wildcards)
 }
 

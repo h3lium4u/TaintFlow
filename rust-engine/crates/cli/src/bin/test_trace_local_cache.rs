@@ -1,8 +1,8 @@
-use std::fs;
-use symbols::global::GlobalSymbolTable;
+use cfg::icfg::InterproceduralCFG;
 use ir::Program;
 use serde::Deserialize;
-use cfg::icfg::InterproceduralCFG;
+use std::fs;
+use symbols::global::GlobalSymbolTable;
 
 #[derive(Deserialize)]
 struct HoldoutEntry {
@@ -21,7 +21,8 @@ fn main() {
     let mut gst = GlobalSymbolTable::new();
     let mut program = Program::new();
     let filename = "salt/returners/local_cache.py";
-    gst.load_file(&mut program, &entry.before, filename, &entry.language).unwrap();
+    gst.load_file(&mut program, &entry.before, filename, &entry.language)
+        .unwrap();
 
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = InterproceduralCFG::build(&program, &cg);
@@ -39,7 +40,10 @@ fn main() {
     println!("Running taint propagation...");
     engine.run();
 
-    println!("Tainted facts after execution: {}", engine.tainted_facts.len());
+    println!(
+        "Tainted facts after execution: {}",
+        engine.tainted_facts.len()
+    );
     for fact in &engine.tainted_facts {
         if fact.var.contains("path") || fact.var.contains("jid") || fact.var.contains("minions") {
             println!("  Tainted: node={}, var={}", fact.node_id, fact.var);

@@ -143,7 +143,6 @@ fn is_ir_sanitizer(method_lower: &str) -> bool {
     )
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Instruction {
     pub id: InstructionId,
@@ -515,7 +514,7 @@ impl Program {
 
                 if let Some(rhs) = rhs_node {
                     let is_augmented = node.raw.contains("+=");
-                    
+
                     if is_augmented {
                         let temp_var = format!("_aug_tmp_{}", self.instructions.len());
                         if rhs.kind == NodeKind::CallExpression {
@@ -744,9 +743,7 @@ impl Program {
                         self.collect_statements(&call_node, insts);
                     }
                 }
-                let cond = cond_node
-                    .map(|c| c.raw.clone())
-                    .unwrap_or_default();
+                let cond = cond_node.map(|c| c.raw.clone()).unwrap_or_default();
                 let mut then_insts = Vec::new();
                 if node.children.len() >= 2 {
                     self.collect_statements(&node.children[1], &mut then_insts);
@@ -773,10 +770,18 @@ impl Program {
             NodeKind::ForStatement => {
                 let (loop_var, iterator_expr, body_node) = if node.children.len() == 3 {
                     // Python: loop_var is child 0, iterator is child 1, body is child 2
-                    (Some(node.children[0].raw.clone()), Some(node.children[1].raw.clone()), Some(&node.children[2]))
+                    (
+                        Some(node.children[0].raw.clone()),
+                        Some(node.children[1].raw.clone()),
+                        Some(&node.children[2]),
+                    )
                 } else if node.children.len() == 4 && node.raw.contains(':') {
                     // Java enhanced: loop_var is child 1, iterator is child 2, body is child 3
-                    (Some(node.children[1].raw.clone()), Some(node.children[2].raw.clone()), Some(&node.children[3]))
+                    (
+                        Some(node.children[1].raw.clone()),
+                        Some(node.children[2].raw.clone()),
+                        Some(&node.children[3]),
+                    )
                 } else {
                     // Standard C-style:
                     (None, None, node.children.last())
@@ -793,7 +798,7 @@ impl Program {
                 // Generate implicit assignment/call for enhanced loops to trace taint flow
                 if let (Some(var_name), Some(iter_expr)) = (loop_var, iterator_expr) {
                     let clean_var = clean_var_name(&var_name);
-                    
+
                     // Check if iterator expression is a CallExpression
                     let iter_node = if node.children.len() == 3 {
                         &node.children[1]
@@ -855,9 +860,7 @@ impl Program {
                         self.collect_statements(&call_node, insts);
                     }
                 }
-                let cond = cond_node
-                    .map(|c| c.raw.clone())
-                    .unwrap_or_default();
+                let cond = cond_node.map(|c| c.raw.clone()).unwrap_or_default();
                 let mut body_insts = Vec::new();
                 if let Some(body_node) = node.children.last() {
                     self.collect_statements(body_node, &mut body_insts);
@@ -991,7 +994,7 @@ impl Program {
                     let expr_raw = if let Some(expr_node) = node.children.first() {
                         let r = expr_node.raw.trim();
                         if r.starts_with('(') && r.ends_with(')') {
-                            r[1..r.len()-1].trim().to_string()
+                            r[1..r.len() - 1].trim().to_string()
                         } else {
                             r.to_string()
                         }
@@ -999,11 +1002,9 @@ impl Program {
                         "switch_expr".to_string()
                     };
 
-                    let switch_block = node.children.iter().find(|c| {
-                        match &c.kind {
-                            NodeKind::Unknown(t) => t == "switch_block",
-                            _ => false,
-                        }
+                    let switch_block = node.children.iter().find(|c| match &c.kind {
+                        NodeKind::Unknown(t) => t == "switch_block",
+                        _ => false,
                     });
 
                     let mut groups = Vec::new();
@@ -1144,17 +1145,34 @@ impl Program {
 fn group_has_terminator(node: &AstNode) -> bool {
     match &node.kind {
         NodeKind::ReturnStatement => return true,
-        NodeKind::Unknown(t) if t == "break_statement" || t == "return_statement" || t == "throw_statement" => return true,
+        NodeKind::Unknown(t)
+            if t == "break_statement" || t == "return_statement" || t == "throw_statement" =>
+        {
+            return true
+        }
         _ => {}
     }
     let raw = node.raw.trim();
-    if raw.starts_with("break;") || raw.ends_with("break;") || raw.contains(" break;") || raw.contains("\nbreak;") || raw.contains("\rbreak;") {
+    if raw.starts_with("break;")
+        || raw.ends_with("break;")
+        || raw.contains(" break;")
+        || raw.contains("\nbreak;")
+        || raw.contains("\rbreak;")
+    {
         return true;
     }
-    if raw.starts_with("return") || raw.contains(" return") || raw.contains("\nreturn") || raw.contains("\rreturn") {
+    if raw.starts_with("return")
+        || raw.contains(" return")
+        || raw.contains("\nreturn")
+        || raw.contains("\rreturn")
+    {
         return true;
     }
-    if raw.starts_with("throw") || raw.contains(" throw") || raw.contains("\nthrow") || raw.contains("\rthrow") {
+    if raw.starts_with("throw")
+        || raw.contains(" throw")
+        || raw.contains("\nthrow")
+        || raw.contains("\rthrow")
+    {
         return true;
     }
     for child in &node.children {
@@ -1172,10 +1190,10 @@ fn clean_var_name(var: &str) -> String {
     } else {
         var
     };
-    
+
     // 2. Extract the last word
     let last = base.split_whitespace().last().unwrap_or(base);
-    
+
     // 3. Clean up
     last.replace("[]", "")
         .trim_matches(|c: char| !c.is_alphanumeric() && c != '_')
@@ -1309,11 +1327,17 @@ mod tests {
     #[test]
     fn test_python_for_loop_lowering() {
         let code = "def init(app):\n\n\t@app.route('/benchmark/pathtraver-00/BenchmarkTest00610', methods=['GET'])\n\tdef BenchmarkTest00610_get():\n\t\treturn BenchmarkTest00610_post()\n\n\t@app.route('/benchmark/pathtraver-00/BenchmarkTest00610', methods=['POST'])\n\tdef BenchmarkTest00610_post():\n\t\tRESPONSE = \"\"\n\n\t\timport helpers.utils\n\t\tparam = \"\"\n\t\t\n\t\tfor name in request.headers.keys():\n\t\t\tif name.lower() in helpers.utils.commonHeaderNames:\n\t\t\t\tcontinue\n\t\t\n\t\t\tif request.headers.get_all(name):\n\t\t\t\tparam = name\n\t\t\t\tbreak\n\n\t\tbar = \"This should never happen\"\n\t\tif 'should' in bar:\n\t\t\tbar = param\n\n\t\timport codecs\n\t\timport helpers.utils\n\n\t\ttry:\n\t\t\tfileTarget = codecs.open(f'{helpers.utils.TESTFILES_DIR}/{bar}','r','utf-8')\n\t\texcept:\n\t\t\tpass";
-        
+
         let root = parser::UnifiedParser::parse(code, "python").unwrap();
         fn print_ast(node: &parser::AstNode, depth: usize) {
             let indent = "  ".repeat(depth);
-            println!("{}{:?} (raw: '{}', children: {})", indent, node.kind, node.raw.replace("\n", "\\n").replace("\t", "\\t"), node.children.len());
+            println!(
+                "{}{:?} (raw: '{}', children: {})",
+                indent,
+                node.kind,
+                node.raw.replace("\n", "\\n").replace("\t", "\\t"),
+                node.children.len()
+            );
             for child in &node.children {
                 print_ast(child, depth + 1);
             }
@@ -1327,5 +1351,3 @@ mod tests {
         }
     }
 }
-
-
