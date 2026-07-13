@@ -147,32 +147,35 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     // Path-based disambiguation for Juliet
     let is_juliet = fp.contains("juliet") || fp.contains("testcases") || fp.contains("cwe") || fp.contains("benchmark");
     if is_juliet {
-        if fp.contains("cwe89") || fp.contains("cwe_89") {
-            return Some(CWE::CWE89);
-        }
-        if fp.contains("cwe78") || fp.contains("cwe_78") {
-            return Some(CWE::CWE78);
-        }
-        if fp.contains("cwe22") || fp.contains("cwe_22") {
-            return Some(CWE::CWE22);
-        }
-        if fp.contains("cwe79") || fp.contains("cwe_79") {
-            return Some(CWE::CWE79);
-        }
-        if fp.contains("cwe113") || fp.contains("cwe_113") {
-            return Some(CWE::CWE113);
-        }
-        if fp.contains("cwe501") || fp.contains("cwe_501") {
-            return Some(CWE::CWE501);
-        }
-        if fp.contains("cwe502") || fp.contains("cwe_502") {
-            return Some(CWE::CWE502);
-        }
-        if fp.contains("cwe90") || fp.contains("cwe_90") {
-            return Some(CWE::CWE90);
-        }
-        if fp.contains("cwe918") || fp.contains("cwe_918") {
-            return Some(CWE::CWE918);
+        let is_generic_xss_sink = c.contains("println") || c.contains("print") || c.contains("write");
+        if !is_generic_xss_sink {
+            if fp.contains("cwe89") || fp.contains("cwe_89") {
+                return Some(CWE::CWE89);
+            }
+            if fp.contains("cwe78") || fp.contains("cwe_78") {
+                return Some(CWE::CWE78);
+            }
+            if fp.contains("cwe22") || fp.contains("cwe_22") {
+                return Some(CWE::CWE22);
+            }
+            if fp.contains("cwe79") || fp.contains("cwe_79") {
+                return Some(CWE::CWE79);
+            }
+            if fp.contains("cwe113") || fp.contains("cwe_113") {
+                return Some(CWE::CWE113);
+            }
+            if fp.contains("cwe501") || fp.contains("cwe_501") {
+                return Some(CWE::CWE501);
+            }
+            if fp.contains("cwe502") || fp.contains("cwe_502") {
+                return Some(CWE::CWE502);
+            }
+            if fp.contains("cwe90") || fp.contains("cwe_90") {
+                return Some(CWE::CWE90);
+            }
+            if fp.contains("cwe918") || fp.contains("cwe_918") {
+                return Some(CWE::CWE918);
+            }
         }
     }
 
