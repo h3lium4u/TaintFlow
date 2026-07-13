@@ -1197,20 +1197,47 @@ fn get_variables_in_expression(expr: &str) -> Vec<String> {
     let mut vars = Vec::new();
     let chars: Vec<char> = expr.chars().collect();
     let mut i = 0;
+    
+    let mut in_double_quote = false;
+    let mut in_single_quote = false;
+    
     while i < chars.len() {
         let c = chars[i];
-        if c.is_alphabetic() || c == '_' {
-            let mut word = String::new();
-            while i < chars.len() && (chars[i].is_alphanumeric() || chars[i] == '_') {
-                word.push(chars[i]);
-                i += 1;
-            }
-            if word.contains('_') || word.chars().all(|c| c.is_alphabetic()) {
-                vars.push(word);
-            }
-        } else {
-            i += 1;
+        
+        // Handle escaped characters
+        if c == '\\' {
+            i += 2;
+            continue;
         }
+        
+        // Handle quotes
+        if c == '"' && !in_single_quote {
+            in_double_quote = !in_double_quote;
+            i += 1;
+            continue;
+        }
+        if c == '\'' && !in_double_quote {
+            in_single_quote = !in_single_quote;
+            i += 1;
+            continue;
+        }
+        
+        // If outside quotes, look for identifiers
+        if !in_double_quote && !in_single_quote {
+            if c.is_alphabetic() || c == '_' {
+                let mut word = String::new();
+                while i < chars.len() && (chars[i].is_alphanumeric() || chars[i] == '_') {
+                    word.push(chars[i]);
+                    i += 1;
+                }
+                if word.contains('_') || word.chars().all(|c| c.is_alphabetic()) {
+                    vars.push(word);
+                }
+                continue;
+            }
+        }
+        
+        i += 1;
     }
     vars
 }
@@ -3994,6 +4021,53 @@ mod tests {
         find_ssa_paths("bar_phi_11_12", "_0", true, &assignments, &collection_lookups, &program, &method, &mut visited, &mut current_path, &mut all_paths);
         assert_eq!(all_paths.len(), 1);
         assert_eq!(all_paths[0], vec!["bar_phi_11_12", "bar_11", "param_phi_4_7", "param_7"]);
+    }
+
+    #[test]
+    fn test_quote_aware_variable_extraction() {
+        // LDAP
+        let vars_ldap = get_variables_in_expression("\"(&(objectclass=person))(|(uid=\" + bar + \")(street={0}))\"");
+        assert_eq!(vars_ldap, vec!["bar".to_string()]);
+
+        // SQL
+        let vars_sql = get_variables_in_expression("\"SELECT * FROM users WHERE username='\" + bar + \"'\"");
+        assert_eq!(vars_sql, vec!["bar".to_string()]);
+
+        // XSS
+        let vars_xss = get_variables_in_expression("\"Item \" + bar + \" not found\"");
+        assert_eq!(vars_xss, vec!["bar".to_string()]);
+
+        // Command
+        let vars_cmd = get_variables_in_expression("\"cmd.exe /c dir \" + bar");
+        assert_eq!(vars_cmd, vec!["bar".to_string()]);
+
+        // XPath
+        let vars_xpath = get_variables_in_expression("\"/users/user[text()='\" + bar + \"']\"");
+        assert_eq!(vars_xpath, vec!["bar".to_string()]);
+
+        // Escaped quotes inside quotes
+        let vars_esc = get_variables_in_expression("\"escaped \\\" quote \\\" bar\" + payload");
+        assert_eq!(vars_esc, vec!["payload".to_string()]);
+
+        // Nested quotes
+        let vars_nest = get_variables_in_expression("\"single 'quote' inside double\" + nested_var");
+        assert_eq!(vars_nest, vec!["nested_var".to_string()]);
+
+        // Identifiers outside quotes
+        let vars_out = get_variables_in_expression("foo + bar");
+        assert_eq!(vars_out, vec!["foo".to_string(), "bar".to_string()]);
+
+        // Pure variables
+        let vars_pure = get_variables_in_expression("valuesList_3");
+        assert_eq!(vars_pure, vec!["valuesList_3".to_string()]);
+
+        // Empty strings
+        let vars_empty = get_variables_in_expression("");
+        assert!(vars_empty.is_empty());
+
+        // Strings without variables
+        let vars_novar = get_variables_in_expression("\"no_variables_here\"");
+        assert!(vars_novar.is_empty());
     }
 }
 
