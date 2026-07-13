@@ -1,0 +1,780 @@
+=== FP BLOCK 0 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: f7c28ffbf18dbf693a15b1ba9493918de3e88cf3
+  [FP_DIAGNOSTIC] Flows detected: 8
+    Flow CWE: CWE78, sink_node: 11561, sink_var: kwargs
+      [0] node=1648 method='serve_file' var='load' inst=None
+      [1] node=1682 method='serve_file' var='load' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='load' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='load' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='load' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='load' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='load' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='load' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=9998 method='get' var='self' inst=None
+      [11] node=10006 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [12] node=25432 method='get' var='this' inst=None
+      [13] node=25445 method='get' var='this' inst=Some(Try { body: [InstructionId(5471), InstructionId(5472)], catches: [InstructionId(5473)], finally: None })
+      [14] node=25447 method='get' var='this' inst=Some(Assign { dest: "self.cache[pattern][0]", src: "1" })
+      [15] node=25446 method='get' var='this' inst=Some(Return { val: Some("self.cache[pattern][1]") })
+      [16] node=25433 method='get' var='this' inst=None
+      [17] node=10005 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [18] node=10004 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [19] node=10003 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [20] node=10001 method='get' var='self' inst=Some(Branch { cond: "as_list and not isinstance(ret, list)", then_block: [InstructionId(5579)], else_block: None })
+      [21] node=10000 method='get' var='self' inst=Some(Return { val: Some("ret") })
+      [22] node=9999 method='get' var='self' inst=None
+      [23] node=11593 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "kwargs.get", args: ["\"shell\"", "False"] })
+      [24] node=11564 method='__init__' var='kwargs' inst=Some(Branch { cond: "not kwargs.get(\"shell\", False)", then_block: [InstructionId(8293), InstructionId(8294), InstructionId(8295), InstructionId(8300), InstructionId(8301), InstructionId(8307), InstructionId(8308)], else_block: Some([InstructionId(8309), InstructionId(8311)]) })
+      [25] node=11592 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "isinstance", args: ["args", "(list, tuple, str)"] })
+      [26] node=11591 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "isinstance", args: ["args", "(list, tuple, str)"] })
+      [27] node=11588 method='__init__' var='kwargs' inst=Some(Branch { cond: "not isinstance(args, (list, tuple, str))", then_block: [], else_block: Some([InstructionId(8310)]) })
+      [28] node=11563 method='__init__' var='kwargs' inst=Some(Call { dest: Some("args"), callee: "salt.utils.data.decode", args: ["args"] })
+      [29] node=11562 method='__init__' var='kwargs' inst=Some(Call { dest: Some("args"), callee: "salt.utils.data.decode", args: ["args"] })
+      [30] node=11561 method='__init__' var='kwargs' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+    Flow CWE: CWE22, sink_node: 1660, sink_var: fpath
+      [0] node=1648 method='serve_file' var='fnd' inst=None
+      [1] node=1682 method='serve_file' var='fnd' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='fnd' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='fnd' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='fnd' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=1669 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [11] node=1668 method='serve_file' var='fnd' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [12] node=1667 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [13] node=1666 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+      [14] node=1665 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+      [15] node=1664 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "fp_.seek", args: ["load[\"loc\"]"] })
+      [16] node=1663 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "fp_.seek", args: ["load[\"loc\"]"] })
+      [17] node=1662 method='serve_file' var='fpath' inst=Some(Call { dest: Some("data"), callee: "fp_.read", args: ["self.opts[\"file_buffer_size\"]"] })
+      [18] node=1661 method='serve_file' var='fpath' inst=Some(Call { dest: Some("data"), callee: "fp_.read", args: ["self.opts[\"file_buffer_size\"]"] })
+      [19] node=1660 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "salt.utils.files.is_binary", args: ["fpath"] })
+    Flow CWE: CWE22, sink_node: 1665, sink_var: fpath
+      [0] node=1648 method='serve_file' var='fnd' inst=None
+      [1] node=1682 method='serve_file' var='fnd' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='fnd' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='fnd' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='fnd' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=1669 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [11] node=1668 method='serve_file' var='fnd' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [12] node=1667 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [13] node=1666 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+      [14] node=1665 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+    Flow CWE: CWE22, sink_node: 1666, sink_var: fpath
+      [0] node=1648 method='serve_file' var='fnd' inst=None
+      [1] node=1682 method='serve_file' var='fnd' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='fnd' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='fnd' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='fnd' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=1669 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [11] node=1668 method='serve_file' var='fnd' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [12] node=1667 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [13] node=1666 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+    Flow CWE: CWE22, sink_node: 1659, sink_var: fpath
+      [0] node=1648 method='serve_file' var='fnd' inst=None
+      [1] node=1682 method='serve_file' var='fnd' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='fnd' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='fnd' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='fnd' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='fnd' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='fnd' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=1669 method='serve_file' var='fnd' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [11] node=1668 method='serve_file' var='fnd' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [12] node=1667 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fpath"), callee: "os.path.normpath", args: ["fnd[\"path\"]"] })
+      [13] node=1666 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+      [14] node=1665 method='serve_file' var='fpath' inst=Some(Call { dest: Some("fp_"), callee: "salt.utils.files.fopen", args: ["fpath", "\"rb\""] })
+      [15] node=1664 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "fp_.seek", args: ["load[\"loc\"]"] })
+      [16] node=1663 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "fp_.seek", args: ["load[\"loc\"]"] })
+      [17] node=1662 method='serve_file' var='fpath' inst=Some(Call { dest: Some("data"), callee: "fp_.read", args: ["self.opts[\"file_buffer_size\"]"] })
+      [18] node=1661 method='serve_file' var='fpath' inst=Some(Call { dest: Some("data"), callee: "fp_.read", args: ["self.opts[\"file_buffer_size\"]"] })
+      [19] node=1660 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "salt.utils.files.is_binary", args: ["fpath"] })
+      [20] node=1659 method='serve_file' var='fpath' inst=Some(Call { dest: None, callee: "salt.utils.files.is_binary", args: ["fpath"] })
+    Flow CWE: CWE78, sink_node: 11557, sink_var: args
+      [0] node=1648 method='serve_file' var='load' inst=None
+      [1] node=1682 method='serve_file' var='load' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='load' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='load' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='load' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='load' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='load' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='load' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=9998 method='get' var='self' inst=None
+      [11] node=10006 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [12] node=25432 method='get' var='this' inst=None
+      [13] node=25445 method='get' var='this' inst=Some(Try { body: [InstructionId(5471), InstructionId(5472)], catches: [InstructionId(5473)], finally: None })
+      [14] node=25447 method='get' var='this' inst=Some(Assign { dest: "self.cache[pattern][0]", src: "1" })
+      [15] node=25446 method='get' var='this' inst=Some(Return { val: Some("self.cache[pattern][1]") })
+      [16] node=25433 method='get' var='this' inst=None
+      [17] node=10005 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [18] node=10004 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [19] node=10003 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [20] node=10001 method='get' var='self' inst=Some(Branch { cond: "as_list and not isinstance(ret, list)", then_block: [InstructionId(5579)], else_block: None })
+      [21] node=10000 method='get' var='self' inst=Some(Return { val: Some("ret") })
+      [22] node=9999 method='get' var='self' inst=None
+      [23] node=11598 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "kwargs.get", args: ["\"shell\"", "False"] })
+      [24] node=11595 method='__init__' var='kwargs' inst=Some(Branch { cond: "kwargs.get(\"shell\", False)", then_block: [InstructionId(8289)], else_block: None })
+      [25] node=11556 method='__init__' var='kwargs' inst=Some(Try { body: [InstructionId(8291)], catches: [InstructionId(8315)], finally: None })
+      [26] node=11558 method='__init__' var='kwargs' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+      [27] node=1642 method='Popen' var='value' inst=None
+      [28] node=1644 method='Popen' var='value' inst=Some(Return { val: Some("value") })
+      [29] node=1643 method='Popen' var='value' inst=None
+      [30] node=11557 method='__init__' var='args' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+    Flow CWE: CWE78, sink_node: 11558, sink_var: kwargs
+      [0] node=1648 method='serve_file' var='load' inst=None
+      [1] node=1682 method='serve_file' var='load' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='load' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='load' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='load' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='load' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='load' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='load' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=9998 method='get' var='self' inst=None
+      [11] node=10006 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [12] node=25432 method='get' var='this' inst=None
+      [13] node=25445 method='get' var='this' inst=Some(Try { body: [InstructionId(5471), InstructionId(5472)], catches: [InstructionId(5473)], finally: None })
+      [14] node=25447 method='get' var='this' inst=Some(Assign { dest: "self.cache[pattern][0]", src: "1" })
+      [15] node=25446 method='get' var='this' inst=Some(Return { val: Some("self.cache[pattern][1]") })
+      [16] node=25433 method='get' var='this' inst=None
+      [17] node=10005 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [18] node=10004 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [19] node=10003 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [20] node=10001 method='get' var='self' inst=Some(Branch { cond: "as_list and not isinstance(ret, list)", then_block: [InstructionId(5579)], else_block: None })
+      [21] node=10000 method='get' var='self' inst=Some(Return { val: Some("ret") })
+      [22] node=9999 method='get' var='self' inst=None
+      [23] node=11598 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "kwargs.get", args: ["\"shell\"", "False"] })
+      [24] node=11595 method='__init__' var='kwargs' inst=Some(Branch { cond: "kwargs.get(\"shell\", False)", then_block: [InstructionId(8289)], else_block: None })
+      [25] node=11556 method='__init__' var='kwargs' inst=Some(Try { body: [InstructionId(8291)], catches: [InstructionId(8315)], finally: None })
+      [26] node=11558 method='__init__' var='kwargs' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+    Flow CWE: CWE78, sink_node: 11557, sink_var: kwargs
+      [0] node=1648 method='serve_file' var='load' inst=None
+      [1] node=1682 method='serve_file' var='load' inst=Some(Branch { cond: "\"env\" in load", then_block: [], else_block: Some([InstructionId(226)]) })
+      [2] node=1681 method='serve_file' var='load' inst=Some(Assign { dest: "ret", src: "{\"data\": \"\", \"dest\": \"\"}" })
+      [3] node=1680 method='serve_file' var='load' inst=Some(Assign { dest: "required_load_keys", src: "{\"path\", \"loc\", \"saltenv\"}" })
+      [4] node=1679 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [5] node=1678 method='serve_file' var='load' inst=Some(Call { dest: None, callee: "all", args: [] })
+      [6] node=1674 method='serve_file' var='load' inst=Some(Branch { cond: "not all(x in load for x in required_load_keys)", then_block: [InstructionId(231), InstructionId(232)], else_block: None })
+      [7] node=1672 method='serve_file' var='load' inst=Some(Branch { cond: "not fnd[\"path\"]", then_block: [InstructionId(234)], else_block: None })
+      [8] node=1671 method='serve_file' var='load' inst=Some(Assign { dest: "ret[\"dest\"]", src: "fnd[\"rel\"]" })
+      [9] node=1670 method='serve_file' var='load' inst=Some(Call { dest: Some("gzip"), callee: "load.get", args: ["\"gzip\"", "None"] })
+      [10] node=9998 method='get' var='self' inst=None
+      [11] node=10006 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [12] node=25432 method='get' var='this' inst=None
+      [13] node=25445 method='get' var='this' inst=Some(Try { body: [InstructionId(5471), InstructionId(5472)], catches: [InstructionId(5473)], finally: None })
+      [14] node=25447 method='get' var='this' inst=Some(Assign { dest: "self.cache[pattern][0]", src: "1" })
+      [15] node=25446 method='get' var='this' inst=Some(Return { val: Some("self.cache[pattern][1]") })
+      [16] node=25433 method='get' var='this' inst=None
+      [17] node=10005 method='get' var='self' inst=Some(Call { dest: Some("ret"), callee: "super().get", args: ["section", "option"] })
+      [18] node=10004 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [19] node=10003 method='get' var='self' inst=Some(Call { dest: None, callee: "isinstance", args: ["ret", "list"] })
+      [20] node=10001 method='get' var='self' inst=Some(Branch { cond: "as_list and not isinstance(ret, list)", then_block: [InstructionId(5579)], else_block: None })
+      [21] node=10000 method='get' var='self' inst=Some(Return { val: Some("ret") })
+      [22] node=9999 method='get' var='self' inst=None
+      [23] node=11598 method='__init__' var='kwargs' inst=Some(Call { dest: None, callee: "kwargs.get", args: ["\"shell\"", "False"] })
+      [24] node=11595 method='__init__' var='kwargs' inst=Some(Branch { cond: "kwargs.get(\"shell\", False)", then_block: [InstructionId(8289)], else_block: None })
+      [25] node=11556 method='__init__' var='kwargs' inst=Some(Try { body: [InstructionId(8291)], catches: [InstructionId(8315)], finally: None })
+      [26] node=11558 method='__init__' var='kwargs' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+      [27] node=11557 method='__init__' var='kwargs' inst=Some(Call { dest: Some("self.process"), callee: "subprocess.Popen", args: ["args", "**kwargs"] })
+
+==================================================
+
+=== FP BLOCK 1 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: 4b30218edf1a979855ea191d72b30c89f4a5a582
+  [FP_DIAGNOSTIC] Flows detected: 8
+    Flow CWE: CWE79, sink_node: 16945, sink_var: os
+      [0] node=16908 method='get_jid' var='jid' inst=None
+      [1] node=16952 method='get_jid' var='jid' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [2] node=18995 method='jid_dir' var='value' inst=None
+      [3] node=18997 method='jid_dir' var='value' inst=Some(Return { val: Some("value") })
+      [4] node=18996 method='jid_dir' var='value' inst=None
+      [5] node=16951 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [6] node=16950 method='get_jid' var='jid_dir' inst=Some(Assign { dest: "ret", src: "{}" })
+      [7] node=16949 method='get_jid' var='os.path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [8] node=16948 method='get_jid' var='os.path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [9] node=16946 method='get_jid' var='os.path' inst=Some(Branch { cond: "not os.path.isdir(jid_dir)", then_block: [InstructionId(313)], else_block: None })
+      [10] node=16911 method='get_jid' var='os.path' inst=Some(Loop { cond: "fn_", body: [InstructionId(315), InstructionId(316), InstructionId(317), InstructionId(336)] })
+      [11] node=16945 method='get_jid' var='os' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+    Flow CWE: CWE79, sink_node: 16944, sink_var: os
+      [0] node=16908 method='get_jid' var='jid' inst=None
+      [1] node=16952 method='get_jid' var='jid' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [2] node=18995 method='jid_dir' var='value' inst=None
+      [3] node=18997 method='jid_dir' var='value' inst=Some(Return { val: Some("value") })
+      [4] node=18996 method='jid_dir' var='value' inst=None
+      [5] node=16951 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [6] node=16950 method='get_jid' var='jid_dir' inst=Some(Assign { dest: "ret", src: "{}" })
+      [7] node=16949 method='get_jid' var='os.path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [8] node=16948 method='get_jid' var='os.path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [9] node=16946 method='get_jid' var='os.path' inst=Some(Branch { cond: "not os.path.isdir(jid_dir)", then_block: [InstructionId(313)], else_block: None })
+      [10] node=16911 method='get_jid' var='os.path' inst=Some(Loop { cond: "fn_", body: [InstructionId(315), InstructionId(316), InstructionId(317), InstructionId(336)] })
+      [11] node=16945 method='get_jid' var='os' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+      [12] node=16944 method='get_jid' var='os' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+    Flow CWE: CWE918, sink_node: 27626, sink_var: load["events"].log["*"]
+      [0] node=38181 method='get_diff' var='fp_.readlines()' inst=Some(Call { dest: None, callee: "args.append", args: ["fp_.readlines()"] })
+      [1] node=40724 method='append' var='self' inst=None
+      [2] node=40728 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [3] node=50209 method='log_add' var='self' inst=None
+      [4] node=50230 method='log_add' var='self' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30967)], else_block: None })
+      [5] node=50229 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [6] node=40724 method='append' var='self.log["*"]' inst=None
+      [7] node=40728 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [8] node=40727 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [9] node=40726 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [10] node=40725 method='append' var='self.log["*"]' inst=None
+      [11] node=27634 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [12] node=27633 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(2923), InstructionId(2924), InstructionId(2925), InstructionId(2926)] })
+      [13] node=27632 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [14] node=27631 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [15] node=27625 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(2929)], catches: [InstructionId(2931)], finally: None })
+      [16] node=27627 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [17] node=27626 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 27627, sink_var: load["events"].log["*"]
+      [0] node=38181 method='get_diff' var='fp_.readlines()' inst=Some(Call { dest: None, callee: "args.append", args: ["fp_.readlines()"] })
+      [1] node=40724 method='append' var='self' inst=None
+      [2] node=40728 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [3] node=50209 method='log_add' var='self' inst=None
+      [4] node=50230 method='log_add' var='self' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30967)], else_block: None })
+      [5] node=50229 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [6] node=40724 method='append' var='self.log["*"]' inst=None
+      [7] node=40728 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [8] node=40727 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [9] node=40726 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [10] node=40725 method='append' var='self.log["*"]' inst=None
+      [11] node=27634 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [12] node=27633 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(2923), InstructionId(2924), InstructionId(2925), InstructionId(2926)] })
+      [13] node=27632 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [14] node=27631 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [15] node=27625 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(2929)], catches: [InstructionId(2931)], finally: None })
+      [16] node=27627 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE79, sink_node: 16945, sink_var: jid_dir
+      [0] node=16908 method='get_jid' var='jid' inst=None
+      [1] node=16952 method='get_jid' var='jid' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [2] node=18995 method='jid_dir' var='value' inst=None
+      [3] node=18997 method='jid_dir' var='value' inst=Some(Return { val: Some("value") })
+      [4] node=18996 method='jid_dir' var='value' inst=None
+      [5] node=16951 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [6] node=16950 method='get_jid' var='jid_dir' inst=Some(Assign { dest: "ret", src: "{}" })
+      [7] node=16949 method='get_jid' var='jid_dir' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [8] node=16948 method='get_jid' var='jid_dir' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [9] node=16946 method='get_jid' var='jid_dir' inst=Some(Branch { cond: "not os.path.isdir(jid_dir)", then_block: [InstructionId(313)], else_block: None })
+      [10] node=16911 method='get_jid' var='jid_dir' inst=Some(Loop { cond: "fn_", body: [InstructionId(315), InstructionId(316), InstructionId(317), InstructionId(336)] })
+      [11] node=16945 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+    Flow CWE: CWE79, sink_node: 16944, sink_var: jid_dir
+      [0] node=16908 method='get_jid' var='jid' inst=None
+      [1] node=16952 method='get_jid' var='jid' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [2] node=18995 method='jid_dir' var='value' inst=None
+      [3] node=18997 method='jid_dir' var='value' inst=Some(Return { val: Some("value") })
+      [4] node=18996 method='jid_dir' var='value' inst=None
+      [5] node=16951 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("jid_dir"), callee: "salt.utils.jid.jid_dir", args: ["jid", "_job_dir()", "__opts__[\"hash_type\"]"] })
+      [6] node=16950 method='get_jid' var='jid_dir' inst=Some(Assign { dest: "ret", src: "{}" })
+      [7] node=16949 method='get_jid' var='jid_dir' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [8] node=16948 method='get_jid' var='jid_dir' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["jid_dir"] })
+      [9] node=16946 method='get_jid' var='jid_dir' inst=Some(Branch { cond: "not os.path.isdir(jid_dir)", then_block: [InstructionId(313)], else_block: None })
+      [10] node=16911 method='get_jid' var='jid_dir' inst=Some(Loop { cond: "fn_", body: [InstructionId(315), InstructionId(316), InstructionId(317), InstructionId(336)] })
+      [11] node=16945 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+      [12] node=16944 method='get_jid' var='jid_dir' inst=Some(Call { dest: Some("fn_"), callee: "os.listdir", args: ["jid_dir"] })
+    Flow CWE: CWE918, sink_node: 27626, sink_var: load["events"]
+      [0] node=38181 method='get_diff' var='fp_.readlines()' inst=Some(Call { dest: None, callee: "args.append", args: ["fp_.readlines()"] })
+      [1] node=40724 method='append' var='self' inst=None
+      [2] node=40728 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [3] node=50209 method='log_add' var='cls' inst=None
+      [4] node=50230 method='log_add' var='cls' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30967)], else_block: None })
+      [5] node=50231 method='log_add' var='cls' inst=Some(Throw { val: "NotLeader()" })
+      [6] node=50210 method='log_add' var='cls' inst=None
+      [7] node=40727 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [8] node=40726 method='append' var='self' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [9] node=40725 method='append' var='self' inst=None
+      [10] node=27634 method='fire_running' var='load["events"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [11] node=27633 method='fire_running' var='load["events"]' inst=Some(Loop { cond: "stag", body: [InstructionId(2923), InstructionId(2924), InstructionId(2925), InstructionId(2926)] })
+      [12] node=27632 method='fire_running' var='load["events"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [13] node=27631 method='fire_running' var='load["events"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [14] node=27625 method='fire_running' var='load["events"]' inst=Some(Try { body: [InstructionId(2929)], catches: [InstructionId(2931)], finally: None })
+      [15] node=27627 method='fire_running' var='load["events"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [16] node=27626 method='fire_running' var='load["events"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 27627, sink_var: load["events"]
+      [0] node=38181 method='get_diff' var='fp_.readlines()' inst=Some(Call { dest: None, callee: "args.append", args: ["fp_.readlines()"] })
+      [1] node=40724 method='append' var='self' inst=None
+      [2] node=40728 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [3] node=50209 method='log_add' var='cls' inst=None
+      [4] node=50230 method='log_add' var='cls' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30967)], else_block: None })
+      [5] node=50231 method='log_add' var='cls' inst=Some(Throw { val: "NotLeader()" })
+      [6] node=50210 method='log_add' var='cls' inst=None
+      [7] node=40727 method='append' var='self' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [8] node=40726 method='append' var='self' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [9] node=40725 method='append' var='self' inst=None
+      [10] node=27634 method='fire_running' var='load["events"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [11] node=27633 method='fire_running' var='load["events"]' inst=Some(Loop { cond: "stag", body: [InstructionId(2923), InstructionId(2924), InstructionId(2925), InstructionId(2926)] })
+      [12] node=27632 method='fire_running' var='load["events"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [13] node=27631 method='fire_running' var='load["events"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [14] node=27625 method='fire_running' var='load["events"]' inst=Some(Try { body: [InstructionId(2929)], catches: [InstructionId(2931)], finally: None })
+      [15] node=27627 method='fire_running' var='load["events"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+
+==================================================
+
+=== FP BLOCK 2 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: 9445f496fed61b15dc4364818007e5b765b0746f
+  [FP_DIAGNOSTIC] Flows detected: 6
+    Flow CWE: CWE22, sink_node: 862, sink_var: files["*"]
+      [0] node=12222 method='verify_log' var='opts' inst=None
+      [1] node=12228 method='verify_log' var='opts' inst=Some(Call { dest: Some("level"), callee: "LOG_LEVELS.get", args: ["str(opts.get(\"log_level\")).lower()", "logging.NOTSET"] })
+      [2] node=38393 method='get' var='self' inst=None
+      [3] node=38397 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [4] node=29229 method='get_entry' var='this' inst=None
+      [5] node=29238 method='get_entry' var='this' inst=Some(Branch { cond: "index <= self.last_included_index", then_block: [InstructionId(32376)], else_block: None })
+      [6] node=29239 method='get_entry' var='this' inst=Some(Return { val: Some("None") })
+      [7] node=29230 method='get_entry' var='this' inst=None
+      [8] node=38396 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [9] node=38395 method='get' var='self' inst=Some(Return { val: Some("self.get_entry(index)") })
+      [10] node=38394 method='get' var='self' inst=None
+      [11] node=863 method='file_list' var='repo_path' inst=Some(Call { dest: Some("repo_path"), callee: "blobs.get", args: ["\"files\"", "[]"] })
+      [12] node=862 method='file_list' var='files["*"]' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+    Flow CWE: CWE22, sink_node: 862, sink_var: repo_path
+      [0] node=12222 method='verify_log' var='opts' inst=None
+      [1] node=12228 method='verify_log' var='opts' inst=Some(Call { dest: Some("level"), callee: "LOG_LEVELS.get", args: ["str(opts.get(\"log_level\")).lower()", "logging.NOTSET"] })
+      [2] node=38393 method='get' var='self' inst=None
+      [3] node=38397 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [4] node=29229 method='get_entry' var='this' inst=None
+      [5] node=29238 method='get_entry' var='this' inst=Some(Branch { cond: "index <= self.last_included_index", then_block: [InstructionId(32376)], else_block: None })
+      [6] node=29239 method='get_entry' var='this' inst=Some(Return { val: Some("None") })
+      [7] node=29230 method='get_entry' var='this' inst=None
+      [8] node=38396 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [9] node=38395 method='get' var='self' inst=Some(Return { val: Some("self.get_entry(index)") })
+      [10] node=38394 method='get' var='self' inst=None
+      [11] node=863 method='file_list' var='repo_path' inst=Some(Call { dest: Some("repo_path"), callee: "blobs.get", args: ["\"files\"", "[]"] })
+      [12] node=862 method='file_list' var='repo_path' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+    Flow CWE: CWE22, sink_node: 861, sink_var: files["*"]
+      [0] node=4191 method='check_max_open_files' var='opts' inst=None
+      [1] node=4218 method='check_max_open_files' var='opts' inst=Some(Call { dest: Some("mof_c"), callee: "opts.get", args: ["\"max_open_files\"", "100000"] })
+      [2] node=38393 method='get' var='self' inst=None
+      [3] node=38397 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [4] node=29229 method='get_entry' var='this' inst=None
+      [5] node=29238 method='get_entry' var='this' inst=Some(Branch { cond: "index <= self.last_included_index", then_block: [InstructionId(32376)], else_block: None })
+      [6] node=29239 method='get_entry' var='this' inst=Some(Return { val: Some("None") })
+      [7] node=29230 method='get_entry' var='this' inst=None
+      [8] node=38396 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [9] node=38395 method='get' var='self' inst=Some(Return { val: Some("self.get_entry(index)") })
+      [10] node=38394 method='get' var='self' inst=None
+      [11] node=863 method='file_list' var='repo_path' inst=Some(Call { dest: Some("repo_path"), callee: "blobs.get", args: ["\"files\"", "[]"] })
+      [12] node=862 method='file_list' var='files["*"]' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+      [13] node=861 method='file_list' var='files["*"]' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+    Flow CWE: CWE22, sink_node: 861, sink_var: repo_path
+      [0] node=12222 method='verify_log' var='opts' inst=None
+      [1] node=12228 method='verify_log' var='opts' inst=Some(Call { dest: Some("level"), callee: "LOG_LEVELS.get", args: ["str(opts.get(\"log_level\")).lower()", "logging.NOTSET"] })
+      [2] node=38393 method='get' var='self' inst=None
+      [3] node=38397 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [4] node=29229 method='get_entry' var='this' inst=None
+      [5] node=29238 method='get_entry' var='this' inst=Some(Branch { cond: "index <= self.last_included_index", then_block: [InstructionId(32376)], else_block: None })
+      [6] node=29239 method='get_entry' var='this' inst=Some(Return { val: Some("None") })
+      [7] node=29230 method='get_entry' var='this' inst=None
+      [8] node=38396 method='get' var='self' inst=Some(Call { dest: None, callee: "self.get_entry", args: ["index"] })
+      [9] node=38395 method='get' var='self' inst=Some(Return { val: Some("self.get_entry(index)") })
+      [10] node=38394 method='get' var='self' inst=None
+      [11] node=863 method='file_list' var='repo_path' inst=Some(Call { dest: Some("repo_path"), callee: "blobs.get", args: ["\"files\"", "[]"] })
+      [12] node=862 method='file_list' var='repo_path' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+      [13] node=861 method='file_list' var='repo_path' inst=Some(Call { dest: None, callee: "files.add", args: ["add_mountpoint(relpath(repo_path))"] })
+    Flow CWE: CWE22, sink_node: 35455, sink_var: filename
+      [0] node=35444 method='verify_logs_filter' var='files' inst=None
+      [1] node=35459 method='verify_logs_filter' var='files' inst=Some(Assign { dest: "to_verify", src: "[]" })
+      [2] node=35447 method='verify_logs_filter' var='files' inst=Some(Loop { cond: "filename", body: [InstructionId(162), InstructionId(163), InstructionId(168), InstructionId(170)] })
+      [3] node=35458 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "filename", src: "files" })
+      [4] node=35457 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "verify_file", src: "True" })
+      [5] node=35451 method='verify_logs_filter' var='filename' inst=Some(Loop { cond: "scheme", body: [InstructionId(164), InstructionId(165), InstructionId(167)] })
+      [6] node=35456 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "scheme", src: "DEFAULT_SCHEMES" })
+      [7] node=35455 method='verify_logs_filter' var='filename' inst=Some(Call { dest: None, callee: "filename.startswith", args: ["scheme"] })
+    Flow CWE: CWE22, sink_node: 35454, sink_var: filename
+      [0] node=35444 method='verify_logs_filter' var='files' inst=None
+      [1] node=35459 method='verify_logs_filter' var='files' inst=Some(Assign { dest: "to_verify", src: "[]" })
+      [2] node=35447 method='verify_logs_filter' var='files' inst=Some(Loop { cond: "filename", body: [InstructionId(162), InstructionId(163), InstructionId(168), InstructionId(170)] })
+      [3] node=35458 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "filename", src: "files" })
+      [4] node=35457 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "verify_file", src: "True" })
+      [5] node=35451 method='verify_logs_filter' var='filename' inst=Some(Loop { cond: "scheme", body: [InstructionId(164), InstructionId(165), InstructionId(167)] })
+      [6] node=35456 method='verify_logs_filter' var='filename' inst=Some(Assign { dest: "scheme", src: "DEFAULT_SCHEMES" })
+      [7] node=35455 method='verify_logs_filter' var='filename' inst=Some(Call { dest: None, callee: "filename.startswith", args: ["scheme"] })
+      [8] node=35454 method='verify_logs_filter' var='filename' inst=Some(Call { dest: None, callee: "filename.startswith", args: ["scheme"] })
+
+==================================================
+
+=== FP BLOCK 3 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: 4b30218edf1a979855ea191d72b30c89f4a5a582
+  [FP_DIAGNOSTIC] Flows detected: 8
+    Flow CWE: CWE918, sink_node: 42151, sink_var: load["events"].log["*"]
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=45061 method='append' var='self["*"]' inst=None
+      [6] node=45065 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=38960 method='log_add' var='self["*"]' inst=None
+      [8] node=38981 method='log_add' var='self["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(32085)], else_block: None })
+      [9] node=38980 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [10] node=45061 method='append' var='self.log["*"]' inst=None
+      [11] node=45065 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=45064 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=45063 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [14] node=45062 method='append' var='self.log["*"]' inst=None
+      [15] node=42159 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=42158 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [17] node=42157 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42156 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=42150 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [20] node=42152 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [21] node=42151 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 42152, sink_var: load["events"].log["*"]
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=45061 method='append' var='self["*"]' inst=None
+      [6] node=45065 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=38960 method='log_add' var='self["*"]' inst=None
+      [8] node=38981 method='log_add' var='self["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(32085)], else_block: None })
+      [9] node=38980 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [10] node=45061 method='append' var='self.log["*"]' inst=None
+      [11] node=45065 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=45064 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=45063 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [14] node=45062 method='append' var='self.log["*"]' inst=None
+      [15] node=42159 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=42158 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [17] node=42157 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42156 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=42150 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [20] node=42152 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 42152, sink_var: load["events"]["*"]
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=45061 method='append' var='self["*"]' inst=None
+      [6] node=45065 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=38960 method='log_add' var='cls["*"]' inst=None
+      [8] node=38981 method='log_add' var='cls["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(32085)], else_block: None })
+      [9] node=38982 method='log_add' var='cls["*"]' inst=Some(Throw { val: "NotLeader()" })
+      [10] node=38961 method='log_add' var='cls["*"]' inst=None
+      [11] node=45064 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=45063 method='append' var='self["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [13] node=45062 method='append' var='self["*"]' inst=None
+      [14] node=42159 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [15] node=42158 method='fire_running' var='load["events"]["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [16] node=42157 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [17] node=42156 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42150 method='fire_running' var='load["events"]["*"]' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [19] node=42152 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE79, sink_node: 32789, sink_var: self["key"]
+      [0] node=7176 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("low[\"key\"]"), callee: "salt.utils.stringutils.to_unicode", args: ["fp_.readline()"] })
+      [1] node=7156 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "\"token\" not in low and \"key\" not in low and self.opts[\"eauth\"]", then_block: [], else_block: Some([InstructionId(10091), InstructionId(10092), InstructionId(10096), InstructionId(10099), InstructionId(10100), InstructionId(10101)]) })
+      [2] node=7173 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("resolver"), callee: "salt.auth.Resolver", args: ["self.opts"] })
+      [3] node=7172 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("resolver"), callee: "salt.auth.Resolver", args: ["self.opts"] })
+      [4] node=7171 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("res"), callee: "resolver.cli", args: ["self.opts[\"eauth\"]"] })
+      [5] node=7170 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("res"), callee: "resolver.cli", args: ["self.opts[\"eauth\"]"] })
+      [6] node=7164 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "self.opts[\"mktoken\"] and res", then_block: [InstructionId(10093), InstructionId(10095)], else_block: None })
+      [7] node=7160 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "not res", then_block: [InstructionId(10097), InstructionId(10098)], else_block: None })
+      [8] node=7159 method='_init_auth' var='low["key"]' inst=Some(Call { dest: None, callee: "low.update", args: ["res"] })
+      [9] node=17908 method='update' var='self["key"]' inst=None
+      [10] node=17948 method='update' var='self["key"]' inst=Some(Assign { dest: "data", src: "{\"changed\": False, \"backend\": \"gitfs\"}" })
+      [11] node=17947 method='update' var='self["key"]' inst=Some(Call { dest: Some("data[\"changed\"]"), callee: "self.clear_old_remotes", args: [] })
+      [12] node=36353 method='clear_old_remotes' var='self["key"]' inst=None
+      [13] node=36368 method='clear_old_remotes' var='self["key"]' inst=Some(Assign { dest: "change", src: "False" })
+      [14] node=36367 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: None, callee: "r.get_cache_basehash", args: [] })
+      [15] node=36366 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: None, callee: "r.get_cache_basehash", args: [] })
+      [16] node=36365 method='clear_old_remotes' var='self["key"]' inst=Some(Assign { dest: "remote_set", src: "{r.get_cache_basehash() for r in self.remotes}" })
+      [17] node=36359 method='clear_old_remotes' var='self["key"]' inst=Some(Loop { cond: "item", body: [InstructionId(18025), InstructionId(18027)] })
+      [18] node=36364 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: Some("item"), callee: "self._iter_remote_hashes", args: [] })
+      [19] node=32779 method='_iter_remote_hashes' var='self["key"]' inst=None
+      [20] node=32781 method='_iter_remote_hashes' var='self["key"]' inst=Some(Loop { cond: "item", body: [InstructionId(18016), InstructionId(18017), InstructionId(18018), InstructionId(18019), InstructionId(18020)] })
+      [21] node=32789 method='_iter_remote_hashes' var='self["key"]' inst=Some(Call { dest: Some("item"), callee: "os.listdir", args: ["self.cache_root"] })
+    Flow CWE: CWE79, sink_node: 32789, sink_var: os
+      [0] node=7176 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("low[\"key\"]"), callee: "salt.utils.stringutils.to_unicode", args: ["fp_.readline()"] })
+      [1] node=7156 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "\"token\" not in low and \"key\" not in low and self.opts[\"eauth\"]", then_block: [], else_block: Some([InstructionId(10091), InstructionId(10092), InstructionId(10096), InstructionId(10099), InstructionId(10100), InstructionId(10101)]) })
+      [2] node=7173 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("resolver"), callee: "salt.auth.Resolver", args: ["self.opts"] })
+      [3] node=7172 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("resolver"), callee: "salt.auth.Resolver", args: ["self.opts"] })
+      [4] node=7171 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("res"), callee: "resolver.cli", args: ["self.opts[\"eauth\"]"] })
+      [5] node=7170 method='_init_auth' var='low["key"]' inst=Some(Call { dest: Some("res"), callee: "resolver.cli", args: ["self.opts[\"eauth\"]"] })
+      [6] node=7164 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "self.opts[\"mktoken\"] and res", then_block: [InstructionId(10093), InstructionId(10095)], else_block: None })
+      [7] node=7160 method='_init_auth' var='low["key"]' inst=Some(Branch { cond: "not res", then_block: [InstructionId(10097), InstructionId(10098)], else_block: None })
+      [8] node=7159 method='_init_auth' var='low["key"]' inst=Some(Call { dest: None, callee: "low.update", args: ["res"] })
+      [9] node=17908 method='update' var='self["key"]' inst=None
+      [10] node=17948 method='update' var='self["key"]' inst=Some(Assign { dest: "data", src: "{\"changed\": False, \"backend\": \"gitfs\"}" })
+      [11] node=17947 method='update' var='self["key"]' inst=Some(Call { dest: Some("data[\"changed\"]"), callee: "self.clear_old_remotes", args: [] })
+      [12] node=36353 method='clear_old_remotes' var='self["key"]' inst=None
+      [13] node=36368 method='clear_old_remotes' var='self["key"]' inst=Some(Assign { dest: "change", src: "False" })
+      [14] node=36367 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: None, callee: "r.get_cache_basehash", args: [] })
+      [15] node=36366 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: None, callee: "r.get_cache_basehash", args: [] })
+      [16] node=36365 method='clear_old_remotes' var='self["key"]' inst=Some(Assign { dest: "remote_set", src: "{r.get_cache_basehash() for r in self.remotes}" })
+      [17] node=36359 method='clear_old_remotes' var='self["key"]' inst=Some(Loop { cond: "item", body: [InstructionId(18025), InstructionId(18027)] })
+      [18] node=36364 method='clear_old_remotes' var='self["key"]' inst=Some(Call { dest: Some("item"), callee: "self._iter_remote_hashes", args: [] })
+      [19] node=32779 method='_iter_remote_hashes' var='self["key"]' inst=None
+      [20] node=32781 method='_iter_remote_hashes' var='self["key"]' inst=Some(Loop { cond: "item", body: [InstructionId(18016), InstructionId(18017), InstructionId(18018), InstructionId(18019), InstructionId(18020)] })
+      [21] node=32789 method='_iter_remote_hashes' var='os' inst=Some(Call { dest: Some("item"), callee: "os.listdir", args: ["self.cache_root"] })
+    Flow CWE: CWE918, sink_node: 42151, sink_var: load["events"].term
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=53686 method='append' var='term' inst=None
+      [6] node=53690 method='append' var='term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=41004 method='add' var='term' inst=None
+      [8] node=41052 method='add' var='term' inst=Some(Branch { cond: "term > self.term", then_block: [InstructionId(31319)], else_block: None })
+      [9] node=41053 method='add' var='self.term' inst=Some(Assign { dest: "self.term", src: "term" })
+      [10] node=53686 method='append' var='self.term' inst=None
+      [11] node=53690 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=53689 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=53688 method='append' var='self.term' inst=Some(Return { val: Some("self.add(\r\n            term,\r\n            data,\r\n            index=index,\r\n            entry_type=entry_type,\r\n            client_id=client_id,\r\n            sequence_num=sequence_num,\r\n        )") })
+      [14] node=53687 method='append' var='self.term' inst=None
+      [15] node=42159 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=42158 method='fire_running' var='load["events"].term' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [17] node=42157 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42156 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=42150 method='fire_running' var='load["events"].term' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [20] node=42152 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [21] node=42151 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 42151, sink_var: load["events"]["*"]
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=45061 method='append' var='self["*"]' inst=None
+      [6] node=45065 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=38960 method='log_add' var='cls["*"]' inst=None
+      [8] node=38981 method='log_add' var='cls["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(32085)], else_block: None })
+      [9] node=38982 method='log_add' var='cls["*"]' inst=Some(Throw { val: "NotLeader()" })
+      [10] node=38961 method='log_add' var='cls["*"]' inst=None
+      [11] node=45064 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=45063 method='append' var='self["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [13] node=45062 method='append' var='self["*"]' inst=None
+      [14] node=42159 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [15] node=42158 method='fire_running' var='load["events"]["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [16] node=42157 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [17] node=42156 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42150 method='fire_running' var='load["events"]["*"]' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [19] node=42152 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [20] node=42151 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 42152, sink_var: load["events"].term
+      [0] node=36398 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=36396 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(18461), InstructionId(18462), InstructionId(18466), InstructionId(18470)] })
+      [2] node=36386 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(18477)], else_block: None })
+      [3] node=36387 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(18475)], else_block: Some([InstructionId(18476)]) })
+      [4] node=36395 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=53686 method='append' var='term' inst=None
+      [6] node=53690 method='append' var='term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=41004 method='add' var='term' inst=None
+      [8] node=41052 method='add' var='term' inst=Some(Branch { cond: "term > self.term", then_block: [InstructionId(31319)], else_block: None })
+      [9] node=41053 method='add' var='self.term' inst=Some(Assign { dest: "self.term", src: "term" })
+      [10] node=53686 method='append' var='self.term' inst=None
+      [11] node=53690 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=53689 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=53688 method='append' var='self.term' inst=Some(Return { val: Some("self.add(\r\n            term,\r\n            data,\r\n            index=index,\r\n            entry_type=entry_type,\r\n            client_id=client_id,\r\n            sequence_num=sequence_num,\r\n        )") })
+      [14] node=53687 method='append' var='self.term' inst=None
+      [15] node=42159 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=42158 method='fire_running' var='load["events"].term' inst=Some(Loop { cond: "stag", body: [InstructionId(4991), InstructionId(4992), InstructionId(4993), InstructionId(4994)] })
+      [17] node=42157 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=42156 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=42150 method='fire_running' var='load["events"].term' inst=Some(Try { body: [InstructionId(4997)], catches: [InstructionId(4999)], finally: None })
+      [20] node=42152 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+
+==================================================
+
+=== FP BLOCK 4 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: e0cdb80b55123f4a024759ffcf2b3f0e0788e7ab
+  [FP_DIAGNOSTIC] Flows detected: 6
+    Flow CWE: CWE918, sink_node: 32954, sink_var: load["events"]["*"]
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=8644 method='append' var='self["*"]' inst=None
+      [6] node=8648 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=35255 method='log_add' var='cls["*"]' inst=None
+      [8] node=35276 method='log_add' var='cls["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30939)], else_block: None })
+      [9] node=35277 method='log_add' var='cls["*"]' inst=Some(Throw { val: "NotLeader()" })
+      [10] node=35256 method='log_add' var='cls["*"]' inst=None
+      [11] node=8647 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=8646 method='append' var='self["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [13] node=8645 method='append' var='self["*"]' inst=None
+      [14] node=32961 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [15] node=32960 method='fire_running' var='load["events"]["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [16] node=32959 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [17] node=32958 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32952 method='fire_running' var='load["events"]["*"]' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [19] node=32954 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 32953, sink_var: load["events"].log["*"]
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=8644 method='append' var='self["*"]' inst=None
+      [6] node=8648 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=35255 method='log_add' var='self["*"]' inst=None
+      [8] node=35276 method='log_add' var='self["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30939)], else_block: None })
+      [9] node=35275 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [10] node=8644 method='append' var='self.log["*"]' inst=None
+      [11] node=8648 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=8647 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=8646 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [14] node=8645 method='append' var='self.log["*"]' inst=None
+      [15] node=32961 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=32960 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [17] node=32959 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32958 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=32952 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [20] node=32954 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [21] node=32953 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 32953, sink_var: load["events"].term
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=38758 method='append' var='term' inst=None
+      [6] node=38762 method='append' var='term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=14916 method='add' var='term' inst=None
+      [8] node=14964 method='add' var='term' inst=Some(Branch { cond: "term > self.term", then_block: [InstructionId(30173)], else_block: None })
+      [9] node=14965 method='add' var='self.term' inst=Some(Assign { dest: "self.term", src: "term" })
+      [10] node=38758 method='append' var='self.term' inst=None
+      [11] node=38762 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=38761 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=38760 method='append' var='self.term' inst=Some(Return { val: Some("self.add(\r\n            term,\r\n            data,\r\n            index=index,\r\n            entry_type=entry_type,\r\n            client_id=client_id,\r\n            sequence_num=sequence_num,\r\n        )") })
+      [14] node=38759 method='append' var='self.term' inst=None
+      [15] node=32961 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=32960 method='fire_running' var='load["events"].term' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [17] node=32959 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32958 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=32952 method='fire_running' var='load["events"].term' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [20] node=32954 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [21] node=32953 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 32954, sink_var: load["events"].log["*"]
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=8644 method='append' var='self["*"]' inst=None
+      [6] node=8648 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=35255 method='log_add' var='self["*"]' inst=None
+      [8] node=35276 method='log_add' var='self["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30939)], else_block: None })
+      [9] node=35275 method='log_add' var='self.log["*"]' inst=Some(Call { dest: Some("index"), callee: "self.log.append", args: ["self.term", "data", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [10] node=8644 method='append' var='self.log["*"]' inst=None
+      [11] node=8648 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=8647 method='append' var='self.log["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=8646 method='append' var='self.log["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [14] node=8645 method='append' var='self.log["*"]' inst=None
+      [15] node=32961 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=32960 method='fire_running' var='load["events"].log["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [17] node=32959 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32958 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=32952 method='fire_running' var='load["events"].log["*"]' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [20] node=32954 method='fire_running' var='load["events"].log["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 32954, sink_var: load["events"].term
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=38758 method='append' var='term' inst=None
+      [6] node=38762 method='append' var='term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=14916 method='add' var='term' inst=None
+      [8] node=14964 method='add' var='term' inst=Some(Branch { cond: "term > self.term", then_block: [InstructionId(30173)], else_block: None })
+      [9] node=14965 method='add' var='self.term' inst=Some(Assign { dest: "self.term", src: "term" })
+      [10] node=38758 method='append' var='self.term' inst=None
+      [11] node=38762 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=38761 method='append' var='self.term' inst=Some(Call { dest: None, callee: "self.add", args: ["term", "data", "index=index", "entry_type=entry_type", "client_id=client_id", "sequence_num=sequence_num"] })
+      [13] node=38760 method='append' var='self.term' inst=Some(Return { val: Some("self.add(\r\n            term,\r\n            data,\r\n            index=index,\r\n            entry_type=entry_type,\r\n            client_id=client_id,\r\n            sequence_num=sequence_num,\r\n        )") })
+      [14] node=38759 method='append' var='self.term' inst=None
+      [15] node=32961 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [16] node=32960 method='fire_running' var='load["events"].term' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [17] node=32959 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32958 method='fire_running' var='load["events"].term' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [19] node=32952 method='fire_running' var='load["events"].term' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [20] node=32954 method='fire_running' var='load["events"].term' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+    Flow CWE: CWE918, sink_node: 32953, sink_var: load["events"]["*"]
+      [0] node=7821 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Call { dest: Some("file_mach_id"), callee: "salt.utils.stringutils.to_unicode(\r\n                            fd_.readline()\r\n                        ).rstrip", args: [] })
+      [1] node=7819 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Loop { cond: "file_name", body: [InstructionId(25031), InstructionId(25032), InstructionId(25036), InstructionId(25040)] })
+      [2] node=7809 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "cur_pid == file_pid", then_block: [InstructionId(25047)], else_block: None })
+      [3] node=7810 method='gitfs_finalize_cleanup' var='file_mach_id' inst=Some(Branch { cond: "mach_id != file_mach_id", then_block: [InstructionId(25045)], else_block: Some([InstructionId(25046)]) })
+      [4] node=7818 method='gitfs_finalize_cleanup' var='file_del_list["*"]' inst=Some(Call { dest: None, callee: "file_del_list.append", args: ["(file_name, file_pid, file_mach_id)"] })
+      [5] node=8644 method='append' var='self["*"]' inst=None
+      [6] node=8648 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [7] node=35255 method='log_add' var='cls["*"]' inst=None
+      [8] node=35276 method='log_add' var='cls["*"]' inst=Some(Branch { cond: "self.state != NodeState.LEADER", then_block: [InstructionId(30939)], else_block: None })
+      [9] node=35277 method='log_add' var='cls["*"]' inst=Some(Throw { val: "NotLeader()" })
+      [10] node=35256 method='log_add' var='cls["*"]' inst=None
+      [11] node=8647 method='append' var='self["*"]' inst=Some(Call { dest: None, callee: "self.log_add", args: ["data", "client_id=client_id", "sequence_num=sequence_num"] })
+      [12] node=8646 method='append' var='self["*"]' inst=Some(Return { val: Some("self.log_add(data, client_id=client_id, sequence_num=sequence_num)") })
+      [13] node=8645 method='append' var='self["*"]' inst=None
+      [14] node=32961 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "load[\"events\"].append", args: ["{\"tag\": tag, \"data\": running[stag]}"] })
+      [15] node=32960 method='fire_running' var='load["events"]["*"]' inst=Some(Loop { cond: "stag", body: [InstructionId(1237), InstructionId(1238), InstructionId(1239), InstructionId(1240)] })
+      [16] node=32959 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [17] node=32958 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: Some("channel"), callee: "salt.channel.client.ReqChannel.factory", args: ["self.opts"] })
+      [18] node=32952 method='fire_running' var='load["events"]["*"]' inst=Some(Try { body: [InstructionId(1243)], catches: [InstructionId(1245)], finally: None })
+      [19] node=32954 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+      [20] node=32953 method='fire_running' var='load["events"]["*"]' inst=Some(Call { dest: None, callee: "channel.send", args: ["load"] })
+
+==================================================
+
+=== FP BLOCK 5 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: 9445f496fed61b15dc4364818007e5b765b0746f
+  [FP_DIAGNOSTIC] Flows detected: 0
+
+==================================================
+
+=== FP BLOCK 6 ===
+[FP_DIAGNOSTIC] Repo: https://github.com/saltstack/salt, CWE: CWE-22, Commit: f7c28ffbf18dbf693a15b1ba9493918de3e88cf3
+  [FP_DIAGNOSTIC] Flows detected: 2
+    Flow CWE: CWE22, sink_node: 11586, sink_var: path
+      [0] node=11563 method='win_verify_env' var='path' inst=None
+      [1] node=11596 method='win_verify_env' var='path' inst=Some(Call { dest: Some("system_root"), callee: "os.environ.get", args: ["\"SystemRoot\"", "r\"C:\\Windows\""] })
+      [2] node=11595 method='win_verify_env' var='path' inst=Some(Call { dest: Some("system_root"), callee: "os.environ.get", args: ["\"SystemRoot\"", "r\"C:\\Windows\""] })
+      [3] node=11594 method='win_verify_env' var='path' inst=Some(Call { dest: Some("allow_path"), callee: "\"\\\\\".join", args: ["[system_root, \"TEMP\"]"] })
+      [4] node=11593 method='win_verify_env' var='path' inst=Some(Call { dest: Some("allow_path"), callee: "\"\\\\\".join", args: ["[system_root, \"TEMP\"]"] })
+      [5] node=11592 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "salt.utils.path.safe_path", args: ["path=path", "allow_path=allow_path"] })
+      [6] node=11591 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "salt.utils.path.safe_path", args: ["path=path", "allow_path=allow_path"] })
+      [7] node=11589 method='win_verify_env' var='path' inst=Some(Branch { cond: "not salt.utils.path.safe_path(path=path, allow_path=allow_path)", then_block: [InstructionId(261)], else_block: None })
+      [8] node=11588 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["path"] })
+      [9] node=11587 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["path"] })
+      [10] node=11584 method='win_verify_env' var='path' inst=Some(Branch { cond: "not os.path.isdir(path)", then_block: [InstructionId(264)], else_block: None })
+      [11] node=11586 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.makedirs", args: ["path"] })
+    Flow CWE: CWE22, sink_node: 11585, sink_var: path
+      [0] node=11563 method='win_verify_env' var='path' inst=None
+      [1] node=11596 method='win_verify_env' var='path' inst=Some(Call { dest: Some("system_root"), callee: "os.environ.get", args: ["\"SystemRoot\"", "r\"C:\\Windows\""] })
+      [2] node=11595 method='win_verify_env' var='path' inst=Some(Call { dest: Some("system_root"), callee: "os.environ.get", args: ["\"SystemRoot\"", "r\"C:\\Windows\""] })
+      [3] node=11594 method='win_verify_env' var='path' inst=Some(Call { dest: Some("allow_path"), callee: "\"\\\\\".join", args: ["[system_root, \"TEMP\"]"] })
+      [4] node=11593 method='win_verify_env' var='path' inst=Some(Call { dest: Some("allow_path"), callee: "\"\\\\\".join", args: ["[system_root, \"TEMP\"]"] })
+      [5] node=11592 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "salt.utils.path.safe_path", args: ["path=path", "allow_path=allow_path"] })
+      [6] node=11591 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "salt.utils.path.safe_path", args: ["path=path", "allow_path=allow_path"] })
+      [7] node=11589 method='win_verify_env' var='path' inst=Some(Branch { cond: "not salt.utils.path.safe_path(path=path, allow_path=allow_path)", then_block: [InstructionId(261)], else_block: None })
+      [8] node=11588 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["path"] })
+      [9] node=11587 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.path.isdir", args: ["path"] })
+      [10] node=11584 method='win_verify_env' var='path' inst=Some(Branch { cond: "not os.path.isdir(path)", then_block: [InstructionId(264)], else_block: None })
+      [11] node=11586 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.makedirs", args: ["path"] })
+      [12] node=11585 method='win_verify_env' var='path' inst=Some(Call { dest: None, callee: "os.makedirs", args: ["path"] })
+  Progress: 20/20
+
+==================================================
+

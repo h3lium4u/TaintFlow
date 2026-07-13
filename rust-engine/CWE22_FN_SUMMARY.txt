@@ -1,0 +1,1065 @@
+﻿[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 29, edges: 31
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 16, sink_var: param
+    Flow CWE: CWE79, sink_node: 17, sink_var: param
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 25, edges: 27
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 54, edges: 57
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 13, sink_var: bar
+    Flow CWE: CWE79, sink_node: 12, sink_var: bar
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 70, edges: 75
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE78, sink_node: 6, sink_var: bar
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE78, sink_node: 7, sink_var: bar
+    Flow CWE: CWE501, sink_node: 27, sink_var: bar
+    Flow CWE: CWE501, sink_node: 28, sink_var: bar
+    Flow CWE: CWE22, sink_node: 11, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 11, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 8, sink_var: obj
+    Flow CWE: CWE79, sink_node: 7, sink_var: obj
+    Flow CWE: CWE79, sink_node: 4, sink_var: bar
+    Flow CWE: CWE79, sink_node: 3, sink_var: bar
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE79, sink_node: 9, sink_var: rs
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE79, sink_node: 8, sink_var: rs
+    Flow CWE: CWE79, sink_node: 10, sink_var: sql
+    Flow CWE: CWE79, sink_node: 11, sink_var: sql
+    Flow CWE: CWE79, sink_node: 11, sink_var: sql
+    Flow CWE: CWE79, sink_node: 10, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 62, edges: 69
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 18, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 18, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+  [FN_DIAGNOSTIC] ICFG nodes: 85, edges: 92
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+  [FN_DIAGNOSTIC] ICFG nodes: 96, edges: 103
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+    Flow CWE: CWE501, sink_node: 6, sink_var: bar
+    Flow CWE: CWE501, sink_node: 5, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 36, edges: 38
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 13, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 8, sink_var: p
+    Flow CWE: CWE79, sink_node: 9, sink_var: p
+    Flow CWE: CWE78, sink_node: 11, sink_var: bar
+    Flow CWE: CWE78, sink_node: 10, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 26, edges: 28
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE22, sink_node: 17, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 16, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 8, sink_var: obj
+    Flow CWE: CWE79, sink_node: 7, sink_var: obj
+    Flow CWE: CWE79, sink_node: 9, sink_var: length
+    Flow CWE: CWE79, sink_node: 8, sink_var: length
+    Flow CWE: CWE79, sink_node: 8, sink_var: bar
+    Flow CWE: CWE79, sink_node: 9, sink_var: bar
+    Flow CWE: CWE79, sink_node: 9, sink_var: p
+    Flow CWE: CWE79, sink_node: 9, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE79, sink_node: 8, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE78, sink_node: 10, sink_var: argsEnv
+    Flow CWE: CWE78, sink_node: 11, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 8, sink_var: p
+    Flow CWE: CWE79, sink_node: 15, sink_var: sql
+    Flow CWE: CWE79, sink_node: 14, sink_var: org.owasp.benchmark.helpers.DatabaseHelper.JDBCtemplate
+    Flow CWE: CWE79, sink_node: 14, sink_var: sql
+    Flow CWE: CWE79, sink_node: 15, sink_var: org.owasp.benchmark.helpers.DatabaseHelper.JDBCtemplate
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 51, edges: 58
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 18, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 18, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: fileURI
+    Flow CWE: CWE78, sink_node: 6, sink_var: args
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE78, sink_node: 7, sink_var: args
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 40, edges: 45
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 12, sink_var: bar
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 13, sink_var: bar
+    Flow CWE: CWE79, sink_node: 12, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 43, edges: 48
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 77
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 14, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 13, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 14, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 7, sink_var: bar
+    Flow CWE: CWE79, sink_node: 8, sink_var: bar
+    Flow CWE: CWE79, sink_node: 8, sink_var: bar
+    Flow CWE: CWE79, sink_node: 7, sink_var: bar
+    Flow CWE: CWE79, sink_node: 7, sink_var: bar
+    Flow CWE: CWE79, sink_node: 8, sink_var: bar
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE78, sink_node: 12, sink_var: argList["*"]
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE78, sink_node: 13, sink_var: argList["*"]
+    Flow CWE: CWE78, sink_node: 6, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE78, sink_node: 7, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 5, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: sql
+    Flow CWE: CWE79, sink_node: 5, sink_var: rs
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: rs
+    Flow CWE: CWE79, sink_node: 9, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: sql
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 29, edges: 32
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 44, edges: 48
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 28, edges: 31
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 28, edges: 30
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE79, sink_node: 8, sink_var: p
+    Flow CWE: CWE78, sink_node: 11, sink_var: bar
+    Flow CWE: CWE78, sink_node: 10, sink_var: bar
+    Flow CWE: CWE79, sink_node: 9, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE79, sink_node: 9, sink_var: p
+    Flow CWE: CWE79, sink_node: 8, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE501, sink_node: 6, sink_var: bar
+    Flow CWE: CWE501, sink_node: 5, sink_var: bar
+    Flow CWE: CWE89, sink_node: 7, sink_var: sql
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE89, sink_node: 6, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 10, sink_var: obj
+    Flow CWE: CWE79, sink_node: 9, sink_var: obj
+    Flow CWE: CWE79, sink_node: 3, sink_var: bar
+    Flow CWE: CWE79, sink_node: 4, sink_var: bar
+    Flow CWE: CWE78, sink_node: 11, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 8, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE79, sink_node: 9, sink_var: p
+    Flow CWE: CWE79, sink_node: 8, sink_var: p
+    Flow CWE: CWE78, sink_node: 10, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 9, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE501, sink_node: 9, sink_var: bar
+    Flow CWE: CWE501, sink_node: 10, sink_var: bar
+    Flow CWE: CWE79, sink_node: 13, sink_var: sql
+    Flow CWE: CWE79, sink_node: 12, sink_var: sql
+  [FN_DIAGNOSTIC] ICFG nodes: 59, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 56, edges: 59
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 13, sink_var: bar
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 12, sink_var: bar
+    Flow CWE: CWE79, sink_node: 12, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 80, edges: 86
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 46, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 46, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 45, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 45, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 43, sink_var: p
+    Flow CWE: CWE79, sink_node: 44, sink_var: p
+    Flow CWE: CWE78, sink_node: 45, sink_var: argsEnv
+    Flow CWE: CWE78, sink_node: 46, sink_var: argsEnv
+    Flow CWE: CWE501, sink_node: 45, sink_var: bar
+    Flow CWE: CWE501, sink_node: 44, sink_var: bar
+    Flow CWE: CWE79, sink_node: 24, sink_var: sql
+    Flow CWE: CWE79, sink_node: 23, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: sql
+    Flow CWE: CWE79, sink_node: 5, sink_var: sql
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE79, sink_node: 5, sink_var: statement
+    Flow CWE: CWE89, sink_node: 7, sink_var: sql
+    Flow CWE: CWE79, sink_node: 4, sink_var: statement
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 53, edges: 61
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 22, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 21, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 22, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 21, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 3, sink_var: bar
+    Flow CWE: CWE79, sink_node: 4, sink_var: bar
+    Flow CWE: CWE79, sink_node: 25, sink_var: p
+    Flow CWE: CWE79, sink_node: 26, sink_var: p
+    Flow CWE: CWE78, sink_node: 28, sink_var: argsEnv
+    Flow CWE: CWE78, sink_node: 27, sink_var: argsEnv
+    Flow CWE: CWE501, sink_node: 6, sink_var: bar
+    Flow CWE: CWE501, sink_node: 5, sink_var: bar
+    Flow CWE: CWE89, sink_node: 27, sink_var: sql
+    Flow CWE: CWE89, sink_node: 28, sink_var: sql
+    Flow CWE: CWE89, sink_node: 10, sink_var: sql
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE89, sink_node: 11, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+  [FN_DIAGNOSTIC] ICFG nodes: 80, edges: 88
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+  [FN_DIAGNOSTIC] ICFG nodes: 90, edges: 98
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE501, sink_node: 27, sink_var: bar
+    Flow CWE: CWE501, sink_node: 26, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 48, edges: 52
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 64, edges: 70
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 32, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 33, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 33, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 32, sink_var: fileURI
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 59, edges: 65
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 18, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 18, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 17, sink_var: fileURI
+    Flow CWE: CWE22, sink_node: 22, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 21, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 22, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 21, sink_var: fileName
+  [FN_DIAGNOSTIC] ICFG nodes: 73, edges: 79
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE79, sink_node: 26, sink_var: p
+    Flow CWE: CWE78, sink_node: 34, sink_var: argList["*"]
+    Flow CWE: CWE78, sink_node: 33, sink_var: argList["*"]
+    Flow CWE: CWE79, sink_node: 25, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE79, sink_node: 26, sink_var: org.owasp.benchmark.helpers.Utils
+    Flow CWE: CWE79, sink_node: 25, sink_var: p
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE79, sink_node: 26, sink_var: statement
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: org.owasp.benchmark.helpers.DatabaseHelper
+    Flow CWE: CWE79, sink_node: 26, sink_var: counts
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: counts
+    Flow CWE: CWE79, sink_node: 25, sink_var: org.owasp.benchmark.helpers.DatabaseHelper
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 58, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 13, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 14, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 14, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 50, edges: 58
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 29, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 28, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 28, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 29, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 30, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 29, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 29, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 30, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE78, sink_node: 7, sink_var: bar
+    Flow CWE: CWE78, sink_node: 6, sink_var: bar
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE501, sink_node: 6, sink_var: bar
+    Flow CWE: CWE501, sink_node: 5, sink_var: bar
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: sql
+    Flow CWE: CWE79, sink_node: 5, sink_var: statement
+    Flow CWE: CWE79, sink_node: 5, sink_var: sql
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE79, sink_node: 9, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: sql
+    Flow CWE: CWE79, sink_node: 8, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+  [FN_DIAGNOSTIC] ICFG nodes: 84, edges: 91
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 15, sink_var: input
+    Flow CWE: CWE327, sink_node: 14, sink_var: input
+    Flow CWE: CWE327, sink_node: 14, sink_var: c
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 66, edges: 74
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 14, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 14, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 13, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 13, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 20, sink_var: bar
+    Flow CWE: CWE79, sink_node: 21, sink_var: bar
+    Flow CWE: CWE79, sink_node: 21, sink_var: bar
+    Flow CWE: CWE79, sink_node: 20, sink_var: bar
+    Flow CWE: CWE501, sink_node: 22, sink_var: bar
+    Flow CWE: CWE501, sink_node: 23, sink_var: bar
+    Flow CWE: CWE79, sink_node: 28, sink_var: sql
+    Flow CWE: CWE79, sink_node: 27, sink_var: sql
+    Flow CWE: CWE78, sink_node: 23, sink_var: argsEnv
+    Flow CWE: CWE79, sink_node: 22, sink_var: p
+    Flow CWE: CWE79, sink_node: 21, sink_var: p
+    Flow CWE: CWE78, sink_node: 24, sink_var: argsEnv
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: sql
+    Flow CWE: CWE79, sink_node: 5, sink_var: rs
+    Flow CWE: CWE79, sink_node: 4, sink_var: rs
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE79, sink_node: 5, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 55, edges: 61
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 58, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 36, edges: 39
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 26, sink_var: bar
+    Flow CWE: CWE79, sink_node: 26, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 27, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 27, sink_var: bar
+    Flow CWE: CWE22, sink_node: 36, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 37, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 36, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 37, sink_var: new java.io
+  [FN_DIAGNOSTIC] ICFG nodes: 65, edges: 71
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+    Flow CWE: CWE79, sink_node: 8, sink_var: p
+    Flow CWE: CWE79, sink_node: 9, sink_var: p
+    Flow CWE: CWE78, sink_node: 16, sink_var: argList["*"]
+    Flow CWE: CWE78, sink_node: 17, sink_var: argList["*"]
+    Flow CWE: CWE79, sink_node: 26, sink_var: rs
+    Flow CWE: CWE79, sink_node: 25, sink_var: rs
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+  [FN_DIAGNOSTIC] ICFG nodes: 94, edges: 102
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 65, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 18, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 18, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 9, sink_var: statement
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE79, sink_node: 8, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE79, sink_node: 9, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: statement
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+  [FN_DIAGNOSTIC] ICFG nodes: 93, edges: 99
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 43, sink_var: input
+    Flow CWE: CWE327, sink_node: 42, sink_var: input
+    Flow CWE: CWE327, sink_node: 42, sink_var: c
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 85, edges: 91
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 35, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 36, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 35, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 36, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 43, sink_var: p
+    Flow CWE: CWE78, sink_node: 46, sink_var: bar
+    Flow CWE: CWE78, sink_node: 45, sink_var: bar
+    Flow CWE: CWE79, sink_node: 44, sink_var: p
+    Flow CWE: CWE501, sink_node: 44, sink_var: bar
+    Flow CWE: CWE501, sink_node: 45, sink_var: bar
+    Flow CWE: CWE79, sink_node: 43, sink_var: sql
+    Flow CWE: CWE89, sink_node: 46, sink_var: statement
+    Flow CWE: CWE79, sink_node: 44, sink_var: sql
+    Flow CWE: CWE79, sink_node: 43, sink_var: statement
+    Flow CWE: CWE89, sink_node: 45, sink_var: statement
+    Flow CWE: CWE79, sink_node: 44, sink_var: statement
+    Flow CWE: CWE89, sink_node: 46, sink_var: sql
+    Flow CWE: CWE79, sink_node: 44, sink_var: statement
+    Flow CWE: CWE89, sink_node: 45, sink_var: sql
+    Flow CWE: CWE89, sink_node: 46, sink_var: statement
+    Flow CWE: CWE89, sink_node: 45, sink_var: statement
+    Flow CWE: CWE79, sink_node: 43, sink_var: statement
+    Flow CWE: CWE79, sink_node: 43, sink_var: sql
+    Flow CWE: CWE79, sink_node: 44, sink_var: sql
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 75
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 14, sink_var: c
+    Flow CWE: CWE327, sink_node: 14, sink_var: input
+    Flow CWE: CWE327, sink_node: 15, sink_var: input
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 43, edges: 46
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 31, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 32, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 32, sink_var: bar
+    Flow CWE: CWE79, sink_node: 31, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 61, edges: 67
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE78, sink_node: 6, sink_var: bar
+    Flow CWE: CWE78, sink_node: 7, sink_var: bar
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE79, sink_node: 7, sink_var: sql
+    Flow CWE: CWE79, sink_node: 6, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 46, edges: 52
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 75
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 28, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 27, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 28, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 27, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE78, sink_node: 30, sink_var: argList["*"]
+    Flow CWE: CWE79, sink_node: 21, sink_var: p
+    Flow CWE: CWE79, sink_node: 22, sink_var: p
+    Flow CWE: CWE78, sink_node: 29, sink_var: argList["*"]
+    Flow CWE: CWE501, sink_node: 10, sink_var: bar
+    Flow CWE: CWE501, sink_node: 9, sink_var: bar
+    Flow CWE: CWE90, sink_node: 49, sink_var: ctx
+    Flow CWE: CWE90, sink_node: 49, sink_var: filter
+    Flow CWE: CWE90, sink_node: 50, sink_var: filter
+    Flow CWE: CWE90, sink_node: 50, sink_var: ctx
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 32, edges: 36
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 23, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 24, sink_var: bar
+    Flow CWE: CWE79, sink_node: 24, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 23, sink_var: bar
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 13, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 25, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 24, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 24, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 25, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 51, edges: 56
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE90, sink_node: 29, sink_var: idc
+    Flow CWE: CWE90, sink_node: 29, sink_var: filter
+    Flow CWE: CWE90, sink_node: 28, sink_var: idc
+    Flow CWE: CWE90, sink_node: 28, sink_var: filter
+    Flow CWE: CWE79, sink_node: 22, sink_var: obj
+    Flow CWE: CWE79, sink_node: 23, sink_var: obj
+    Flow CWE: CWE501, sink_node: 5, sink_var: bar
+    Flow CWE: CWE501, sink_node: 6, sink_var: bar
+    Flow CWE: CWE89, sink_node: 27, sink_var: sql
+    Flow CWE: CWE89, sink_node: 28, sink_var: sql
+    Flow CWE: CWE79, sink_node: 32, sink_var: sql
+    Flow CWE: CWE79, sink_node: 33, sink_var: sql
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: counts
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: counts
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 35, edges: 39
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 16, sink_var: bar
+    Flow CWE: CWE79, sink_node: 17, sink_var: bar
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 16, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 11, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 11, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 24, sink_var: bar
+    Flow CWE: CWE79, sink_node: 25, sink_var: bar
+    Flow CWE: CWE79, sink_node: 7, sink_var: bar
+    Flow CWE: CWE79, sink_node: 8, sink_var: bar
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: rs
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE79, sink_node: 25, sink_var: rs
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: statement
+    Flow CWE: CWE79, sink_node: 5, sink_var: sql
+    Flow CWE: CWE89, sink_node: 6, sink_var: sql
+    Flow CWE: CWE79, sink_node: 5, sink_var: statement
+    Flow CWE: CWE89, sink_node: 7, sink_var: statement
+    Flow CWE: CWE89, sink_node: 7, sink_var: sql
+    Flow CWE: CWE79, sink_node: 4, sink_var: statement
+    Flow CWE: CWE79, sink_node: 4, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 48, edges: 56
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE79, sink_node: 5, sink_var: p
+    Flow CWE: CWE78, sink_node: 13, sink_var: args
+    Flow CWE: CWE78, sink_node: 12, sink_var: args
+    Flow CWE: CWE79, sink_node: 4, sink_var: p
+    Flow CWE: CWE79, sink_node: 21, sink_var: sql
+    Flow CWE: CWE89, sink_node: 23, sink_var: statement
+    Flow CWE: CWE89, sink_node: 24, sink_var: statement
+    Flow CWE: CWE79, sink_node: 21, sink_var: statement
+    Flow CWE: CWE89, sink_node: 24, sink_var: sql
+    Flow CWE: CWE79, sink_node: 22, sink_var: statement
+    Flow CWE: CWE89, sink_node: 23, sink_var: sql
+    Flow CWE: CWE79, sink_node: 22, sink_var: sql
+    Flow CWE: CWE643, sink_node: 14, sink_var: expression
+    Flow CWE: CWE643, sink_node: 13, sink_var: expression
+    Flow CWE: CWE79, sink_node: 5, sink_var: value
+    Flow CWE: CWE79, sink_node: 6, sink_var: value
+    Flow CWE: CWE643, sink_node: 15, sink_var: expression
+    Flow CWE: CWE643, sink_node: 16, sink_var: expression
+    Flow CWE: CWE643, sink_node: 15, sink_var: xp.compile(expression)
+    Flow CWE: CWE643, sink_node: 14, sink_var: xp
+    Flow CWE: CWE643, sink_node: 13, sink_var: xp
+    Flow CWE: CWE643, sink_node: 16, sink_var: xp.compile(expression)
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 31, edges: 34
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 52, edges: 60
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+  [FN_DIAGNOSTIC] ICFG nodes: 89, edges: 97
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+    Flow CWE: CWE22, sink_node: 12, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 11, sink_var: new java.io
+    Flow CWE: CWE22, sink_node: 11, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 25, sink_var: bar
+    Flow CWE: CWE79, sink_node: 24, sink_var: bar
+    Flow CWE: CWE79, sink_node: 3, sink_var: obj
+    Flow CWE: CWE79, sink_node: 4, sink_var: obj
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 48, edges: 54
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 12, sink_var: bar
+    Flow CWE: CWE79, sink_node: 12, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 13, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 47, edges: 52
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 13, sink_var: bar
+    Flow CWE: CWE79, sink_node: 12, sink_var: bar
+    Flow CWE: CWE79, sink_node: 13, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 12, sink_var: new java.io
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 66, edges: 76
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE90, sink_node: 50, sink_var: idc
+    Flow CWE: CWE90, sink_node: 50, sink_var: filter
+    Flow CWE: CWE90, sink_node: 49, sink_var: filter
+    Flow CWE: CWE90, sink_node: 49, sink_var: idc
+    Flow CWE: CWE79, sink_node: 4, sink_var: bar
+    Flow CWE: CWE79, sink_node: 3, sink_var: bar
+    Flow CWE: CWE78, sink_node: 28, sink_var: args
+    Flow CWE: CWE79, sink_node: 25, sink_var: p
+    Flow CWE: CWE79, sink_node: 26, sink_var: p
+    Flow CWE: CWE78, sink_node: 27, sink_var: args
+    Flow CWE: CWE79, sink_node: 9, sink_var: sql
+    Flow CWE: CWE89, sink_node: 11, sink_var: statement
+    Flow CWE: CWE79, sink_node: 8, sink_var: sql
+    Flow CWE: CWE89, sink_node: 10, sink_var: statement
+    Flow CWE: CWE79, sink_node: 9, sink_var: rs
+    Flow CWE: CWE79, sink_node: 8, sink_var: rs
+    Flow CWE: CWE89, sink_node: 28, sink_var: statement
+    Flow CWE: CWE89, sink_node: 27, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: statement
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+    Flow CWE: CWE79, sink_node: 26, sink_var: statement
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE89, sink_node: 24, sink_var: statement
+    Flow CWE: CWE79, sink_node: 21, sink_var: sql
+    Flow CWE: CWE79, sink_node: 21, sink_var: statement
+    Flow CWE: CWE89, sink_node: 23, sink_var: statement
+    Flow CWE: CWE79, sink_node: 22, sink_var: statement
+    Flow CWE: CWE79, sink_node: 22, sink_var: sql
+    Flow CWE: CWE22, sink_node: 29, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 28, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 41, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 40, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 65, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Tainted: node=39, var=path=request.path
+    Tainted: node=40, var=path=request.path
+    Tainted: node=8, var=path=request.path
+    Tainted: node=38, var=path=request.path
+    Flow CWE: CWE89, sink_node: 46, sink_var: bar
+    Flow CWE: CWE79, sink_node: 44, sink_var: cur
+    Flow CWE: CWE89, sink_node: 45, sink_var: sql
+    Flow CWE: CWE79, sink_node: 43, sink_var: cur
+    Flow CWE: CWE89, sink_node: 46, sink_var: cur
+    Flow CWE: CWE89, sink_node: 45, sink_var: cur
+    Flow CWE: CWE89, sink_node: 45, sink_var: bar
+    Flow CWE: CWE79, sink_node: 44, sink_var: sql
+    Flow CWE: CWE79, sink_node: 43, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 75, edges: 79
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Tainted: node=42, var=os.path
+    Tainted: node=40, var=os.path
+    Tainted: node=45, var=os.path
+    Tainted: node=41, var=os.path
+    Tainted: node=35, var=os.path
+    Tainted: node=43, var=os.path
+    Tainted: node=37, var=os.path
+    Tainted: node=36, var=os.path
+    Tainted: node=39, var=os.path
+    Tainted: node=44, var=os.path
+    Tainted: node=38, var=os.path
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 60, edges: 55
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 61, edges: 56
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 18, sink_var: bar
+    Flow CWE: CWE22, sink_node: 19, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 56, edges: 50
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 77, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 62, edges: 59
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 60, edges: 55
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 61, edges: 56
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 84, edges: 84
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE502, sink_node: 16, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 15, sink_var: base64.urlsafe_b64decode(bar)
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 50, edges: 45
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 77, edges: 77
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 59, edges: 56
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Tainted: node=7, var=os.path
+    Tainted: node=8, var=os.path
+    Tainted: node=10, var=os.path
+    Tainted: node=5, var=os.path
+    Tainted: node=12, var=os.path
+    Tainted: node=9, var=os.path
+    Tainted: node=13, var=os.path
+    Tainted: node=11, var=os.path
+    Tainted: node=14, var=os.path
+    Tainted: node=6, var=os.path
+    Tainted: node=15, var=os.path
+  [FN_DIAGNOSTIC] ICFG nodes: 77, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 32, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 31, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 55, edges: 50
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 58, edges: 53
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+  [FN_DIAGNOSTIC] ICFG nodes: 82, edges: 81
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE502, sink_node: 18, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 19, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 27, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 28, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE78, sink_node: 8, sink_var: argStr
+    Flow CWE: CWE79, sink_node: 7, sink_var: proc
+    Flow CWE: CWE78, sink_node: 9, sink_var: argStr
+    Flow CWE: CWE79, sink_node: 6, sink_var: proc
+    Flow CWE: CWE502, sink_node: 21, sink_var: bar
+    Flow CWE: CWE502, sink_node: 21, sink_var: Loader=yaml.Loader
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 79, edges: 75
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 37, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 38, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 35, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 34, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 13, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 14, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 57, edges: 52
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 70, edges: 66
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+  [FN_DIAGNOSTIC] ICFG nodes: 68, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE502, sink_node: 18, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 18, sink_var: bar
+    Flow CWE: CWE22, sink_node: 19, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 20, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 66
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE502, sink_node: 15, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 15, sink_var: bar
+    Flow CWE: CWE22, sink_node: 44, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 43, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 43, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 44, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 58, edges: 52
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 68, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 75, edges: 72
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE502, sink_node: 6, sink_var: bar
+    Flow CWE: CWE502, sink_node: 6, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 7, sink_var: bar
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Tainted: node=33, var=os.path
+    Tainted: node=36, var=os.path
+    Tainted: node=41, var=os.path
+    Tainted: node=39, var=os.path
+    Tainted: node=42, var=os.path
+    Tainted: node=35, var=os.path
+    Tainted: node=34, var=os.path
+    Tainted: node=40, var=os.path
+    Tainted: node=38, var=os.path
+    Tainted: node=32, var=os.path
+    Tainted: node=37, var=os.path
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 86, edges: 87
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+  [FN_DIAGNOSTIC] ICFG nodes: 76, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 58, sink_var: bar
+    Flow CWE: CWE22, sink_node: 57, sink_var: bar
+    Flow CWE: CWE22, sink_node: 46, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 47, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 64, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 65, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 81, edges: 82
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 29, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 28, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 101, edges: 105
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 102, edges: 106
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 18, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 17, sink_var: fileName
+    Flow CWE: CWE502, sink_node: 33, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 33, sink_var: yaml
+    Flow CWE: CWE502, sink_node: 34, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 34, sink_var: bar
+    Flow CWE: CWE502, sink_node: 33, sink_var: bar
+    Flow CWE: CWE22, sink_node: 40, sink_var: bar
+    Flow CWE: CWE22, sink_node: 39, sink_var: bar
+    Flow CWE: CWE22, sink_node: 20, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 19, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 34, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 35, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 16, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 17, sink_var: fileName
+    Flow CWE: CWE89, sink_node: 30, sink_var: cur
+    Flow CWE: CWE89, sink_node: 30, sink_var: sql
+    Flow CWE: CWE89, sink_node: 30, sink_var: bar
+    Flow CWE: CWE79, sink_node: 29, sink_var: sql
+    Flow CWE: CWE79, sink_node: 28, sink_var: cur
+    Flow CWE: CWE79, sink_node: 28, sink_var: sql
+    Flow CWE: CWE89, sink_node: 31, sink_var: cur
+    Flow CWE: CWE89, sink_node: 31, sink_var: bar
+    Flow CWE: CWE79, sink_node: 29, sink_var: cur
+    Flow CWE: CWE502, sink_node: 22, sink_var: bar
+    Flow CWE: CWE502, sink_node: 21, sink_var: bar
+    Flow CWE: CWE502, sink_node: 21, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE502, sink_node: 19, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 18, sink_var: yaml
+    Flow CWE: CWE502, sink_node: 18, sink_var: bar
+    Flow CWE: CWE502, sink_node: 18, sink_var: Loader=yaml.Loader
+    Flow CWE: CWE502, sink_node: 19, sink_var: bar
+    Flow CWE: CWE502, sink_node: 18, sink_var: base64.urlsafe_b64decode(bar)
+    Flow CWE: CWE22, sink_node: 16, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 17, sink_var: fileName
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 49, edges: 44
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Tainted: node=34, var=os.path
+    Tainted: node=31, var=os.path
+    Tainted: node=30, var=os.path
+    Tainted: node=36, var=os.path
+    Tainted: node=26, var=os.path
+    Tainted: node=28, var=os.path
+    Tainted: node=33, var=os.path
+    Tainted: node=27, var=os.path
+    Tainted: node=35, var=os.path
+    Tainted: node=32, var=os.path
+    Tainted: node=29, var=os.path
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 54, edges: 50
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 35, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 34, sink_var: fileName
+    Flow CWE: CWE79, sink_node: 26, sink_var: cur
+    Flow CWE: CWE89, sink_node: 27, sink_var: param
+    Flow CWE: CWE89, sink_node: 27, sink_var: sql
+    Flow CWE: CWE89, sink_node: 28, sink_var: cur
+    Flow CWE: CWE89, sink_node: 27, sink_var: cur
+    Flow CWE: CWE89, sink_node: 28, sink_var: param
+    Flow CWE: CWE79, sink_node: 26, sink_var: sql
+    Flow CWE: CWE79, sink_node: 25, sink_var: cur
+    Flow CWE: CWE79, sink_node: 25, sink_var: sql
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 61, edges: 57
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+    Flow CWE: CWE22, sink_node: 24, sink_var: param
+    Flow CWE: CWE22, sink_node: 25, sink_var: param
+    Flow CWE: CWE22, sink_node: 41, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 40, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 29, sink_var: fileName
+    Flow CWE: CWE22, sink_node: 28, sink_var: fileName
+    Flow CWE: CWE502, sink_node: 40, sink_var: base64.urlsafe_b64decode(param)
+    Flow CWE: CWE502, sink_node: 39, sink_var: base64.urlsafe_b64decode(param)

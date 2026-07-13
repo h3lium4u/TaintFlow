@@ -1,0 +1,408 @@
+[
+  {
+    "benchmark_id": "BenchmarkTest00063",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 71: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00064",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 71: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00134",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 60: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00135",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 61: bar = \"bob\";\nLine 68: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00136",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 61: bar = \"bob\";\nLine 68: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00137",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 56: bar = (String) map53289.get(\"keyB-53289\"); // get it back out\nLine 57: bar = (String) map53289.get(\"keyA-53289\"); // get safe value back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00138",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 56: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00221",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 66: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00265",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 62: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00520",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 55: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00620",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 57: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00621",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 58: String c28566 = (String) map28566.get(\"key28566\"); // get it back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00622",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 58: bar = \"bob\";\nLine 65: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00623",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 48: String bar = \"\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00624",
+    "present": "NO",
+    "type": "Reflection/Helper Override",
+    "code": "Line 50: String bar = thing.doSomething(param);",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00625",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 52: if ((7 * 42) - num > 200) bar = \"This_should_always_happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00626",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 57: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00627",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 48: String bar = \"\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00628",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 58: String c24315 = (String) map24315.get(\"key24315\"); // get it back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00706",
+    "present": "NO",
+    "type": "Only Null/Existence Checks",
+    "code": "Line 45: if (values != null && values.length > 0) param = values[0];",
+    "would_stop": "NO"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00709",
+    "present": "NO",
+    "type": "Only Null/Existence Checks",
+    "code": "Line 45: if (values != null && values.length > 0) param = values[0];",
+    "would_stop": "NO"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00758",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 57: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00951",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 115: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00952",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 123: bar = \"bobs_your_uncle\";\nLine 130: bar = \"bobs_your_uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00953",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 96: String bar = \"\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00954",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 101: bar = (String) map9749.get(\"keyB-9749\"); // get it back out\nLine 102: bar = (String) map9749.get(\"keyA-9749\"); // get safe value back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00955",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 100: if ((7 * 42) - num > 200) bar = \"This_should_always_happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00956",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 101: else bar = \"This should never happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00957",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 120: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest00958",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 116: bar = (String) map37053.get(\"keyB-37053\"); // get it back out\nLine 117: bar = (String) map37053.get(\"keyA-37053\"); // get safe value back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01013",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 116: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01014",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 114: bar = \"bob\";\nLine 121: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01015",
+    "present": "NO",
+    "type": "Reflection/Helper Override",
+    "code": "Line 51: String bar = new Test().doSomething(request, param);\nLine 156: public String doSomething(HttpServletRequest request, String param)",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01016",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 168: bar = (String) map24774.get(\"keyB-24774\"); // get it back out\nLine 169: bar = (String) map24774.get(\"keyA-24774\"); // get safe value back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01017",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 173: String c27056 = (String) map27056.get(\"key27056\"); // get it back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01026",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 85: String c11433 = (String) map11433.get(\"key11433\"); // get it back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01027",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 80: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01028",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 104: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01029",
+    "present": "NO",
+    "type": "Reflection/Helper Override",
+    "code": "Line 51: String bar = new Test().doSomething(request, param);\nLine 95: public String doSomething(HttpServletRequest request, String param)\nLine 100: String bar = thing.doSomething(param);",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01030",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 108: bar = \"bob\";\nLine 115: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01031",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 97: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01032",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 90: else bar = \"This should never happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01033",
+    "present": "NO",
+    "type": "Reflection/Helper Override",
+    "code": "Line 51: String bar = new Test().doSomething(request, param);\nLine 82: public String doSomething(HttpServletRequest request, String param)\nLine 87: String bar = thing.doSomething(param);",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01034",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 85: String bar = \"\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01035",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 89: if ((7 * 42) - num > 200) bar = \"This_should_always_happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01036",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 101: bar = (String) map8487.get(\"keyB-8487\"); // get it back out\nLine 102: bar = (String) map8487.get(\"keyA-8487\"); // get safe value back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01109",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 95: String c87030 = (String) map87030.get(\"key87030\"); // get it back out",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01110",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 115: bar = \"bob\";\nLine 122: bar = \"bob's your uncle\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01111",
+    "present": "NO",
+    "type": "Constant Overwrite",
+    "code": "Line 103: else bar = \"This should never happen\";",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01144",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 87: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01158",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 99: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01225",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 96: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01331",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 93: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01332",
+    "present": "NO",
+    "type": "Map Safe Override",
+    "code": "Line 46: String[] values = map.get(\"BenchmarkTest01332\");",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest01377",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 76: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest02026",
+    "present": "NO",
+    "type": "List/Collection Safe Override",
+    "code": "Line 86: bar = valuesList.get(1); // get the last 'safe' value",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest02031",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 103: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  },
+  {
+    "benchmark_id": "BenchmarkTest02068",
+    "present": "NO",
+    "type": "Ternary Constant Mapping",
+    "code": "Line 82: bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;",
+    "would_stop": "YES"
+  }
+]

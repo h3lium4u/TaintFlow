@@ -1,0 +1,11 @@
+[package]
+name = "v2-workspace"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+v2-common  = { path = "../v2-common" }
+v2-scheduler = { path = "../v2-scheduler" }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+rayon      = { workspace = true }

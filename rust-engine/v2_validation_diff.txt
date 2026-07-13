@@ -1,0 +1,147 @@
+diff --git a/rust-engine/crates/cli/src/v2_validation.rs b/rust-engine/crates/cli/src/v2_validation.rs
+index b267728..825bda0 100644
+--- a/rust-engine/crates/cli/src/v2_validation.rs
++++ b/rust-engine/crates/cli/src/v2_validation.rs
+@@ -898,32 +898,7 @@ fn run_v2_analysis_safe(
+ 
+         let mut flows_touching_target = Vec::new();
+         for flow in &engine.flows {
+-            let mut touches = false;
+-            for fact in engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var) {
+-                let mut curr = fact;
+-                let mut path_facts = vec![curr];
+-                while let Some(parent) = engine.parent_map.get(curr) {
+-                    path_facts.push(parent);
+-                    curr = parent;
+-                }
+-                let mut current_touches = false;
+-                for f_step in path_facts {
+-                    if let Some(step_node) = icfg.nodes.get(&f_step.node_id) {
+-                        if let Some(path) = engine.get_method_file_path(step_node.method_id) {
+-                            let path_norm = path.to_lowercase().replace('\\', "/");
+-                            if cohort_paths.iter().any(|c_path| path_norm.ends_with(c_path) || c_path.ends_with(&path_norm)) {
+-                                current_touches = true;
+-                                break;
+-                            }
+-                        }
+-                    }
+-                }
+-                if current_touches {
+-                    touches = true;
+-                    break;
+-                }
+-            }
+-            if touches {
++            if flow.touches_target {
+                 flows_touching_target.push(flow.clone());
+             }
+         }
+@@ -1012,28 +987,32 @@ fn run_diagnostic(name: &str, code: &str, language: &str, entry_filter: Option<&
+         writeln!(out, "\n  Flows detected: {}", engine.flows.len()).unwrap();
+         for flow in &engine.flows {
+             writeln!(out, "  Flow: sink_node={} sink_var='{}'", flow.sink_node_id, flow.sink_var).unwrap();
++            #[cfg(feature = "solver_diagnostics")]
+             let matching_facts = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
+-            let mut best_path = Vec::new();
+-            for fact in matching_facts {
+-                let mut curr = fact;
+-                let mut path = vec![curr];
+-                while let Some(parent) = engine.parent_map.get(curr) {
+-                    path.push(parent);
+-                    curr = parent;
+-                }
+-                if path.len() > best_path.len() {
+-                    best_path = path;
++            #[cfg(feature = "solver_diagnostics")]
++            {
++                let mut best_path = Vec::new();
++                for fact in matching_facts {
++                    let mut curr = fact;
++                    let mut path = vec![curr];
++                    while let Some(parent) = engine.parent_map.get(curr) {
++                        path.push(parent);
++                        curr = parent;
++                    }
++                    if path.len() > best_path.len() {
++                        best_path = path;
++                    }
+                 }
+-            }
+-            if !best_path.is_empty() {
+-                writeln!(out, "    Trace path:").unwrap();
+-                best_path.reverse();
+-                for (step_idx, step) in best_path.iter().enumerate() {
+-                    let step_node = icfg.nodes.get(&step.node_id).unwrap();
+-                    let step_method = program.methods.get(&step_node.method_id).unwrap();
+-                    let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
+-                    writeln!(out, "      [{}] node={} method='{}' var='{}' inst={:?}", 
+-                        step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)).unwrap();
++                if !best_path.is_empty() {
++                    writeln!(out, "    Trace path:").unwrap();
++                    best_path.reverse();
++                    for (step_idx, step) in best_path.iter().enumerate() {
++                        let step_node = icfg.nodes.get(&step.node_id).unwrap();
++                        let step_method = program.methods.get(&step_node.method_id).unwrap();
++                        let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
++                        writeln!(out, "      [{}] node={} method='{}' var='{}' inst={:?}", 
++                            step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)).unwrap();
++                    }
+                 }
+             }
+         }
+@@ -1907,29 +1886,33 @@ fn main() {
+                             lines.push(format!("  [FP_DIAGNOSTIC] Flows detected: {}", engine.flows.len()));
+                             for flow in &engine.flows {
+                                 lines.push(format!("    Flow CWE: {:?}, sink_node: {}, sink_var: {}", flow.cwe, flow.sink_node_id, flow.sink_var));
++                                 #[cfg(feature = "solver_diagnostics")]
+                                 let matching_facts = engine.tainted_facts.iter().filter(|f| f.node_id == flow.sink_node_id && f.var == flow.sink_var);
+-                                let mut best_path = Vec::new();
+-                                for fact in matching_facts {
+-                                    let mut curr = fact;
+-                                    let mut path = vec![curr];
+-                                    while let Some(parent) = engine.parent_map.get(curr) {
+-                                        path.push(parent);
+-                                        curr = parent;
+-                                    }
+-                                    if path.len() > best_path.len() {
+-                                        best_path = path;
+-                                    }
+-                                }
+-                                if !best_path.is_empty() {
+-                                    best_path.reverse();
+-                                    for (step_idx, step) in best_path.iter().enumerate() {
+-                                        let step_node = icfg.nodes.get(&step.node_id).unwrap();
+-                                        let step_method = program.methods.get(&step_node.method_id).unwrap();
+-                                        let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
+-                                        lines.push(format!("      [{}] node={} method='{}' var='{}' inst={:?}", 
+-                                            step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)));
+-                                    }
+-                                }
++                                 #[cfg(feature = "solver_diagnostics")]
++                                 {
++                                     let mut best_path = Vec::new();
++                                     for fact in matching_facts {
++                                         let mut curr = fact;
++                                         let mut path = vec![curr];
++                                         while let Some(parent) = engine.parent_map.get(curr) {
++                                             path.push(parent);
++                                             curr = parent;
++                                         }
++                                         if path.len() > best_path.len() {
++                                             best_path = path;
++                                         }
++                                     }
++                                     if !best_path.is_empty() {
++                                         best_path.reverse();
++                                         for (step_idx, step) in best_path.iter().enumerate() {
++                                             let step_node = icfg.nodes.get(&step.node_id).unwrap();
++                                             let step_method = program.methods.get(&step_node.method_id).unwrap();
++                                             let step_inst = step_node.instruction_id.and_then(|id| program.instructions.get(&id));
++                                             lines.push(format!("      [{}] node={} method='{}' var='{}' inst={:?}", 
++                                                 step_idx, step.node_id, step_method.name, step.var, step_inst.map(|i| &i.kind)));
++                                         }
++                                     }
++                                 }
+                             }
+                         }
+                     }

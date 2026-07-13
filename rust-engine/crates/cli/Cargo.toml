@@ -13,7 +13,10 @@ rules = { path = "../rules" }
 features = { path = "../features" }
 ir = { path = "../ir" }
 semantic_rules = { path = "../semantic_rules" }
+v2-export-adapter = { path = "../v2-export-adapter" }
+v2-refiner-domain = { path = "../v2-refiner-domain" }
 serde = { version = "1.0", features = ["derive"] }
+
 serde_json = "1.0"
 rayon = "1.8"
 

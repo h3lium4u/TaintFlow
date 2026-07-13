@@ -1,0 +1,42 @@
+[
+  {
+    "class": "BenchmarkTest00134",
+    "status": "ANALYZED",
+    "tainted_var": "param",
+    "sink_line": 71,
+    "guard_fired_rc356": true,
+    "guard_line": "if (param != null) {",
+    "guard_var": "param",
+    "relationship": "SAME"
+  },
+  {
+    "class": "BenchmarkTest01239",
+    "status": "ANALYZED",
+    "tainted_var": "param",
+    "sink_line": 56,
+    "guard_fired_rc356": true,
+    "guard_line": "if (param == null) param = \"\";",
+    "guard_var": "param",
+    "relationship": "SAME"
+  },
+  {
+    "class": "BenchmarkTest02111",
+    "status": "ANALYZED",
+    "tainted_var": "param",
+    "sink_line": 56,
+    "guard_fired_rc356": true,
+    "guard_line": "if (param == null) param = \"\";",
+    "guard_var": "param",
+    "relationship": "SAME"
+  },
+  {
+    "class": "BenchmarkTest02468",
+    "status": "ANALYZED",
+    "tainted_var": "values",
+    "sink_line": 58,
+    "guard_fired_rc356": true,
+    "guard_line": "if (values != null && values.length > 0) param = values[0];",
+    "guard_var": "values",
+    "relationship": "SAME"
+  }
+]

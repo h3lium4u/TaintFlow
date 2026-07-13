@@ -1,0 +1,3332 @@
+[
+  {
+    "test_id": "BenchmarkTest00001",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00002",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00003",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 90,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00020",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 62,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00028",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00029",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 74,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00035",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 65,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00040",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00045",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00046",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 68,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00053",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 71,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00055",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest00055\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest00056",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest00056\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest00057",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest00057\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest00060",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00061",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00062",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00065",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"path\"), callee: java.nio.file.Paths.get, args: [\"fileName\"] }",
+    "file_line": 79,
+    "raw_code": "java.nio.file.Path path = java.nio.file.Paths.get(fileName);"
+  },
+  {
+    "test_id": "BenchmarkTest00070",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 92,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00071",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 92,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00073",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 73,
+    "raw_code": "bar = param;"
+  },
+  {
+    "test_id": "BenchmarkTest00074",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 96,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00120",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest00120\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 74,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00124",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest00124\")",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 56,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00133",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest00133\")",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00208",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 66,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00210",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 81,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00215",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00216",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00218",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00219",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00222",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00223",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 95,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00226",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 76,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest00227",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00254",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 79,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00256",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 56,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00269",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 58,
+    "raw_code": "else bar = param;"
+  },
+  {
+    "test_id": "BenchmarkTest00273",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 56,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00354",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 59,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00355",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 72,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00356",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 57,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00359",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00360",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00362",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00363",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00371",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 72,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00372",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 72,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00374",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00445",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 87,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00446",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 55,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00448",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 55,
+    "raw_code": "else bar = param;"
+  },
+  {
+    "test_id": "BenchmarkTest00449",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 59,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00452",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00453",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00455",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00456",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00457",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 53,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00459",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00462",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 53,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00464",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 74,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00465",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 74,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00521",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 84,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00522",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 65,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00525",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 63,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00526",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00527",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00528",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00529",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00531",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 94,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00532",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 101,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00533",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 63,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00534",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 67,
+    "raw_code": "bar = param;"
+  },
+  {
+    "test_id": "BenchmarkTest00536",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 86,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00537",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 81,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00565",
+    "cwe": "CWE-614",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: response.addCookie, args: [\"cookie\"] }",
+    "file_line": 83,
+    "raw_code": "response.addCookie(cookie);"
+  },
+  {
+    "test_id": "BenchmarkTest00608",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00609",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 69,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00610",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00611",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 53,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00614",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00615",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 77,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest00616",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 54,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00617",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 55,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest00619",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00623",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00624",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00627",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00629",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"path\"), callee: java.nio.file.Paths.get, args: [\"fileName\"] }",
+    "file_line": 59,
+    "raw_code": "java.nio.file.Path path = java.nio.file.Paths.get(fileName);"
+  },
+  {
+    "test_id": "BenchmarkTest00631",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 78,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00634",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00635",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00636",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00637",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 53,
+    "raw_code": "else bar = param;"
+  },
+  {
+    "test_id": "BenchmarkTest00638",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00684",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00685",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 71,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00688",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 72,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00691",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00692",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00693",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 68,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest00696",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00697",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00698",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00700",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00703",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 51,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00704",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 80,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00705",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 59,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest00708",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00710",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00779",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest00779\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest00779\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest00781",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest00781\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest00781\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest00783",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00785",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00787",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00788",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00789",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 98,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00790",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 91,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00794",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 94,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00796",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 100,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00797",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 99,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00855",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 50,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00872",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest00875",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 50,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00876",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: bar, src: param }",
+    "file_line": 52,
+    "raw_code": "bar = (7 * 18) + num > 200 ? \"This_should_always_happen\" : param;"
+  },
+  {
+    "test_id": "BenchmarkTest00945",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest00945\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest00946",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest00946\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest00949",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00950",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00952",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00953",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 99,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest00956",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest00961",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 71,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest00963",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 87,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01016",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest01016\")",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 74,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01017",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest01017\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 51,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01032",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01032\")",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01033",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01033\")",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01034",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01034\")",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01038",
+    "cwe": "CWE-328",
+    "source_api": "request.getHeader(\"BenchmarkTest01038\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 72,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01041",
+    "cwe": "CWE-328",
+    "source_api": "request.getHeader(\"BenchmarkTest01041\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 76,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01099",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 86,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01102",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 78,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01103",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 78,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01105",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01106",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01107",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 61,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01111",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01112",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01116",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 94,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01117",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01123",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 82,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01124",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 70,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01148",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 53,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01150",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 70,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01155",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 80,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01161",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 90,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01165",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 53,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01168",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 53,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01228",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 63,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01229",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 63,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01230",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 52,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01231",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01232",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01234",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01235",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01236",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01238",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 83,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01244",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 75,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01246",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01247",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01248",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01317",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 69,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01318",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 50,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01320",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01322",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01323",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01325",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 65,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01329",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 100,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01330",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01333",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01334",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01398",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 60,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01403",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01405",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01408",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01411",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 60,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01414",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 85,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01415",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 85,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01416",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 85,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01480",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01483",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01484",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01486",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01489",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 54,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01494",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01495",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01496",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01497",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 85,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01498",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01500",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"path\"), callee: java.nio.file.Paths.get, args: [\"fileName\"] }",
+    "file_line": 54,
+    "raw_code": "java.nio.file.Path path = java.nio.file.Paths.get(fileName);"
+  },
+  {
+    "test_id": "BenchmarkTest01503",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 48,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01504",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01565",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01566",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 54,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01571",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01572",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01577",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01579",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01580",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 48,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01634",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 70,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01637",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 70,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01638",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest01638\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest01638\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest01639",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 93,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01641",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 85,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01642",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01643",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01645",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01647",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01649",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 75,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest01650",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 70,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01651",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 91,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01653",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: new Test().doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 70,
+    "raw_code": "String bar = new Test().doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01654",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 95,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01740",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 53,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01757",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 76,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01822",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest01822\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest01823",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 66,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01829",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"userCookie\"), callee: new javax.servlet.http.Cookie, args: [\"\\\"BenchmarkTest01829\\\"\", \"\\\"someSecret\\\"\"] }",
+    "file_line": 36,
+    "raw_code": "javax.servlet.http.Cookie userCookie ="
+  },
+  {
+    "test_id": "BenchmarkTest01830",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 66,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01833",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01835",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01836",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01839",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01840",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01844",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 66,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01845",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 66,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01846",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 95,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01895",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest01895\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 51,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01897",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest01897\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 68,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01900",
+    "cwe": "CWE-327",
+    "source_api": "request.getHeader(\"BenchmarkTest01900\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 51,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01906",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01906\")",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 86,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest01907",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01907\")",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01908",
+    "cwe": "CWE-22",
+    "source_api": "request.getHeader(\"BenchmarkTest01908\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"path\"), callee: java.nio.file.Paths.get, args: [\"fileName\"] }",
+    "file_line": 57,
+    "raw_code": "java.nio.file.Path path = java.nio.file.Paths.get(fileName);"
+  },
+  {
+    "test_id": "BenchmarkTest01911",
+    "cwe": "CWE-328",
+    "source_api": "request.getHeader(\"BenchmarkTest01911\")",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 51,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest01978",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 78,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest01980",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01981",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 67,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest01983",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01985",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01987",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01988",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01989",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest01996",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 86,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest01997",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 86,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02017",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 72,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02020",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 76,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest02032",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02042",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 74,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02101",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 63,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02105",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 72,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest02106",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02109",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02112",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02113",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"path\"), callee: java.nio.file.Paths.get, args: [\"fileName\"] }",
+    "file_line": 52,
+    "raw_code": "java.nio.file.Path path = java.nio.file.Paths.get(fileName);"
+  },
+  {
+    "test_id": "BenchmarkTest02118",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 46,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02121",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02192",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02193",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 50,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02194",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02195",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02197",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02198",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02199",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02205",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02211",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02212",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02213",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 71,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02217",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 50,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02219",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 75,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02290",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 77,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02291",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 60,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02292",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 77,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02293",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 77,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02294",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 77,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02295",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 60,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02302",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02303",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02304",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 98,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest02307",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 89,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02308",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 81,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02311",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 81,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02373",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02374",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 65,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02375",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"algorithm\"), callee: benchmarkprops.getProperty, args: [\"\\\"cryptoAlg1\\\"\", \"\\\"DESede/ECB/PKCS5Padding\\\"\"] }",
+    "file_line": 54,
+    "raw_code": "String algorithm = benchmarkprops.getProperty(\"cryptoAlg1\", \"DESede/ECB/PKCS5Padding\");"
+  },
+  {
+    "test_id": "BenchmarkTest02377",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02378",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02383",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02385",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 48,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02386",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02387",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02388",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: inputParam, src: bar }",
+    "file_line": 53,
+    "raw_code": "Object inputParam = bar;"
+  },
+  {
+    "test_id": "BenchmarkTest02391",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02392",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02393",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 48,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02458",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"paramSpec\"), callee: new javax.crypto.spec.IvParameterSpec, args: [\"iv\"] }",
+    "file_line": 67,
+    "raw_code": "java.security.spec.AlgorithmParameterSpec paramSpec ="
+  },
+  {
+    "test_id": "BenchmarkTest02463",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02465",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02466",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02469",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02474",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02475",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02476",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 69,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02478",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 73,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02548",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest02548\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest02548\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest02549",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest02549\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest02549\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest02550",
+    "cwe": "CWE-327",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Assignment propagation failed",
+    "instruction": "Assign { dest: paramval, src: \"BenchmarkTest02550\" + \"=\" }",
+    "file_line": 44,
+    "raw_code": "String paramval = \"BenchmarkTest02550\" + \"=\";"
+  },
+  {
+    "test_id": "BenchmarkTest02555",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02556",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02559",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02560",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02561",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Collection modifier propagation failed",
+    "instruction": "Call { dest: None, callee: valuesList.add, args: [\"\\\"safe\\\"\"] }",
+    "file_line": 108,
+    "raw_code": "valuesList.add(\"safe\");"
+  },
+  {
+    "test_id": "BenchmarkTest02562",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02564",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02565",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02567",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02569",
+    "cwe": "CWE-22",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Source seeding failed",
+    "instruction": "None",
+    "file_line": 0,
+    "raw_code": "None"
+  },
+  {
+    "test_id": "BenchmarkTest02573",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 91,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02574",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 91,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02575",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 70,
+    "raw_code": "String bar = doSomething(request, param);"
+  },
+  {
+    "test_id": "BenchmarkTest02577",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 95,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02670",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"fileTarget\"), callee: new java.io.File, args: [\"new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)\", \"\\\"passwordFile.txt\\\"\"] }",
+    "file_line": 76,
+    "raw_code": "java.io.File fileTarget ="
+  },
+  {
+    "test_id": "BenchmarkTest02674",
+    "cwe": "CWE-328",
+    "source_api": "unknown",
+    "sink_api": "unknown",
+    "failure_reason": "Call return propagation failed (missing stub/propagator)",
+    "instruction": "Call { dest: Some(\"bar\"), callee: doSomething, args: [\"request\", \"param\"] }",
+    "file_line": 47,
+    "raw_code": "String bar = doSomething(request, param);"
+  }
+]

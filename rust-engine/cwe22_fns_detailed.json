@@ -1,0 +1,988 @@
+[
+  {
+    "fn_index": 1,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 29,
+    "edges": 31,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 16, sink_var: param",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: param",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 2,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 25,
+    "edges": 27,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 3,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 54,
+    "edges": 57,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 12, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 4,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 70,
+    "edges": 75,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 5,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00205",
+    "nodes": 62,
+    "edges": 69,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 18, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 18, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 6,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 36,
+    "edges": 38,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 7,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00307",
+    "nodes": 26,
+    "edges": 28,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 8,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00432",
+    "nodes": 51,
+    "edges": 58,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 18, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 18, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: fileURI"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 9,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00494",
+    "nodes": 40,
+    "edges": 45,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 12, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 10,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00494",
+    "nodes": 43,
+    "edges": 48,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 11,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00494",
+    "nodes": 69,
+    "edges": 77,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 14, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 14, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 12,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00602",
+    "nodes": 29,
+    "edges": 32,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 13,
+    "is_java": true,
+    "benchmark": "BenchmarkTest00602",
+    "nodes": 44,
+    "edges": 48,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 14,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 28,
+    "edges": 31,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 15,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 28,
+    "edges": 30,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 16,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 56,
+    "edges": 59,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 13, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 17,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 80,
+    "edges": 86,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 46, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 46, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 45, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 45, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 18,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01012",
+    "nodes": 53,
+    "edges": 61,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 19,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 48,
+    "edges": 52,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 20,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 64,
+    "edges": 70,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 32, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 33, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 33, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 32, sink_var: fileURI"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 21,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 59,
+    "edges": 65,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 18, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 18, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: fileURI"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 22,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 58,
+    "edges": 64,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 13, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 14, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 14, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 23,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 50,
+    "edges": 58,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 24,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01310",
+    "nodes": 66,
+    "edges": 74,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 14, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 14, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 25,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01459",
+    "nodes": 55,
+    "edges": 61,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 26,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01459",
+    "nodes": 58,
+    "edges": 63,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 27,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 36,
+    "edges": 39,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 26, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 26, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 27, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 27, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 28,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01622",
+    "nodes": 65,
+    "edges": 73,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 18, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 18, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 29,
+    "is_java": true,
+    "benchmark": "Unknown",
+    "nodes": 85,
+    "edges": 91,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 35, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 36, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 35, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 36, sink_var: fileURI"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 30,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01885",
+    "nodes": 43,
+    "edges": 46,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 31, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 32, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 32, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 31, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 31,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01885",
+    "nodes": 61,
+    "edges": 67,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 32,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01968",
+    "nodes": 46,
+    "edges": 52,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 33,
+    "is_java": true,
+    "benchmark": "BenchmarkTest01968",
+    "nodes": 67,
+    "edges": 75,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 28, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 27, sink_var: fileURI",
+      "Flow CWE: CWE79, sink_node: 28, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 27, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 34,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02104",
+    "nodes": 32,
+    "edges": 36,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 23, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 24, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 24, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 23, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 35,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02111",
+    "nodes": 51,
+    "edges": 56,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 36,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02185",
+    "nodes": 35,
+    "edges": 39,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 16, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 17, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 16, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 37,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02283",
+    "nodes": 48,
+    "edges": 56,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 38,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02370",
+    "nodes": 31,
+    "edges": 34,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 39,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02370",
+    "nodes": 52,
+    "edges": 60,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 40,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02485",
+    "nodes": 48,
+    "edges": 54,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 12, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: bar"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 41,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02485",
+    "nodes": 47,
+    "edges": 52,
+    "cluster": "A_CWE79_MISMAP",
+    "desc": "CWE-mapping defect: new java.io.* constructor mapped to CWE-79",
+    "flows": [
+      "Flow CWE: CWE79, sink_node: 13, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: bar",
+      "Flow CWE: CWE79, sink_node: 13, sink_var: new java.io",
+      "Flow CWE: CWE79, sink_node: 12, sink_var: new java.io"
+    ],
+    "tainted": []
+  },
+  {
+    "fn_index": 42,
+    "is_java": true,
+    "benchmark": "BenchmarkTest02485",
+    "nodes": 66,
+    "edges": 76,
+    "cluster": "D_JAVA_SILENCE",
+    "desc": "Java complete silence (TESTFILES_DIR suppressed flow prior to generation)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 43,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00006",
+    "nodes": 65,
+    "edges": 63,
+    "cluster": "H4_REQPATH_STRANDED",
+    "desc": "Python: request.path stranded",
+    "flows": [],
+    "tainted": [
+      "Tainted: node=39, var=path=request.path",
+      "Tainted: node=40, var=path=request.path",
+      "Tainted: node=8, var=path=request.path",
+      "Tainted: node=38, var=path=request.path"
+    ]
+  },
+  {
+    "fn_index": 44,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00011",
+    "nodes": 75,
+    "edges": 79,
+    "cluster": "C_OSPATH_STRANDED",
+    "desc": "Python: os.path module taint stranded",
+    "flows": [],
+    "tainted": [
+      "Tainted: node=42, var=os.path",
+      "Tainted: node=40, var=os.path",
+      "Tainted: node=45, var=os.path",
+      "Tainted: node=41, var=os.path",
+      "Tainted: node=35, var=os.path",
+      "Tainted: node=43, var=os.path",
+      "Tainted: node=37, var=os.path",
+      "Tainted: node=36, var=os.path",
+      "Tainted: node=39, var=os.path",
+      "Tainted: node=44, var=os.path",
+      "Tainted: node=38, var=os.path"
+    ]
+  },
+  {
+    "fn_index": 45,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00011",
+    "nodes": 60,
+    "edges": 55,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 46,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00011",
+    "nodes": 61,
+    "edges": 56,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 47,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 56,
+    "edges": 50,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 48,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 77,
+    "edges": 73,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 49,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 62,
+    "edges": 59,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 50,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 60,
+    "edges": 55,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 51,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 61,
+    "edges": 56,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 52,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 84,
+    "edges": 84,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 53,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 50,
+    "edges": 45,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 54,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 77,
+    "edges": 77,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 55,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00170",
+    "nodes": 59,
+    "edges": 56,
+    "cluster": "C_OSPATH_STRANDED",
+    "desc": "Python: os.path module taint stranded",
+    "flows": [],
+    "tainted": [
+      "Tainted: node=7, var=os.path",
+      "Tainted: node=8, var=os.path",
+      "Tainted: node=10, var=os.path",
+      "Tainted: node=5, var=os.path",
+      "Tainted: node=12, var=os.path",
+      "Tainted: node=9, var=os.path",
+      "Tainted: node=13, var=os.path",
+      "Tainted: node=11, var=os.path",
+      "Tainted: node=14, var=os.path",
+      "Tainted: node=6, var=os.path",
+      "Tainted: node=15, var=os.path"
+    ]
+  },
+  {
+    "fn_index": 56,
+    "is_java": false,
+    "benchmark": "Unknown",
+    "nodes": 67,
+    "edges": 64,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 57,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00442",
+    "nodes": 55,
+    "edges": 50,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 58,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00442",
+    "nodes": 58,
+    "edges": 53,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 59,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00512",
+    "nodes": 79,
+    "edges": 75,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 60,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00521",
+    "nodes": 57,
+    "edges": 52,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 61,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00521",
+    "nodes": 70,
+    "edges": 66,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 62,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00521",
+    "nodes": 69,
+    "edges": 66,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 63,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00663",
+    "nodes": 58,
+    "edges": 52,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 64,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00663",
+    "nodes": 68,
+    "edges": 64,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 65,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00663",
+    "nodes": 75,
+    "edges": 72,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 66,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00826",
+    "nodes": 67,
+    "edges": 64,
+    "cluster": "C_OSPATH_STRANDED",
+    "desc": "Python: os.path module taint stranded",
+    "flows": [],
+    "tainted": [
+      "Tainted: node=33, var=os.path",
+      "Tainted: node=36, var=os.path",
+      "Tainted: node=41, var=os.path",
+      "Tainted: node=39, var=os.path",
+      "Tainted: node=42, var=os.path",
+      "Tainted: node=35, var=os.path",
+      "Tainted: node=34, var=os.path",
+      "Tainted: node=40, var=os.path",
+      "Tainted: node=38, var=os.path",
+      "Tainted: node=32, var=os.path",
+      "Tainted: node=37, var=os.path"
+    ]
+  },
+  {
+    "fn_index": 67,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00826",
+    "nodes": 86,
+    "edges": 87,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 68,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00912",
+    "nodes": 81,
+    "edges": 82,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 69,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00917",
+    "nodes": 101,
+    "edges": 105,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 70,
+    "is_java": false,
+    "benchmark": "BenchmarkTest00917",
+    "nodes": 102,
+    "edges": 106,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 71,
+    "is_java": false,
+    "benchmark": "BenchmarkTest01180",
+    "nodes": 49,
+    "edges": 44,
+    "cluster": "C_OSPATH_STRANDED",
+    "desc": "Python: os.path module taint stranded",
+    "flows": [],
+    "tainted": [
+      "Tainted: node=34, var=os.path",
+      "Tainted: node=31, var=os.path",
+      "Tainted: node=30, var=os.path",
+      "Tainted: node=36, var=os.path",
+      "Tainted: node=26, var=os.path",
+      "Tainted: node=28, var=os.path",
+      "Tainted: node=33, var=os.path",
+      "Tainted: node=27, var=os.path",
+      "Tainted: node=35, var=os.path",
+      "Tainted: node=32, var=os.path",
+      "Tainted: node=29, var=os.path"
+    ]
+  },
+  {
+    "fn_index": 72,
+    "is_java": false,
+    "benchmark": "BenchmarkTest01180",
+    "nodes": 54,
+    "edges": 50,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  },
+  {
+    "fn_index": 73,
+    "is_java": false,
+    "benchmark": "BenchmarkTest01203",
+    "nodes": 61,
+    "edges": 57,
+    "cluster": "D_PY_SILENCE",
+    "desc": "Python complete silence (no open() sink flow generated)",
+    "flows": [],
+    "tainted": []
+  }
+]

@@ -1,0 +1,17 @@
+[package]
+name = "v2-scheduler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+rayon = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-parser = { path = "../v2-parser" }
+v2-semantic = { path = "../v2-semantic" }
+v2-ir = { path = "../v2-ir" }
+v2-cfg = { path = "../v2-cfg" }
+v2-callgraph = { path = "../v2-callgraph" }
+v2-icfg = { path = "../v2-icfg" }
+v2-solver = { path = "../v2-solver" }

@@ -1,0 +1,31 @@
+diff --git a/rust-engine/crates/cfg/src/icfg.rs b/rust-engine/crates/cfg/src/icfg.rs
+index afc860e..d78c748 100644
+--- a/rust-engine/crates/cfg/src/icfg.rs
++++ b/rust-engine/crates/cfg/src/icfg.rs
+@@ -491,7 +491,7 @@ impl<'a> MethodCfgBuilder<'a> {
+                 self.add_edge(stmt_id, self.method_exit_node_id, IcfgEdgeKind::Exception);
+                 stmt_id
+             }
+-            InstructionKind::Source { name } => {
++            InstructionKind::Source { name, .. } => {
+                 let stmt_id = self.alloc_node(
+                     IcfgNodeKind::Statement,
+                     Some(inst_id),
+@@ -500,7 +500,7 @@ impl<'a> MethodCfgBuilder<'a> {
+                 self.add_edge(stmt_id, target_exit, IcfgEdgeKind::CFG);
+                 stmt_id
+             }
+-            InstructionKind::Sink { name } => {
++            InstructionKind::Sink { name, .. } => {
+                 let stmt_id = self.alloc_node(
+                     IcfgNodeKind::Statement,
+                     Some(inst_id),
+@@ -509,7 +509,7 @@ impl<'a> MethodCfgBuilder<'a> {
+                 self.add_edge(stmt_id, target_exit, IcfgEdgeKind::CFG);
+                 stmt_id
+             }
+-            InstructionKind::Sanitizer { name } => {
++            InstructionKind::Sanitizer { name, .. } => {
+                 let stmt_id = self.alloc_node(
+                     IcfgNodeKind::Statement,
+                     Some(inst_id),

@@ -1,0 +1,1209 @@
+diff --git a/rust-engine/crates/taint/src/interproc.rs b/rust-engine/crates/taint/src/interproc.rs
+index 8ad0115..44ee041 100644
+--- a/rust-engine/crates/taint/src/interproc.rs
++++ b/rust-engine/crates/taint/src/interproc.rs
+@@ -13,6 +13,18 @@ struct ReturnScanStats {
+     total_candidates: u64,
+     max_candidates: usize,
+     total_duration_ns: u64,
++    total_invocations: u64,
++    empty_results: u64,
++    nonempty_results: u64,
++    total_variables_returned: u64,
++    return_expression_checked: u64,
++    return_expression_matched: u64,
++    parameter_lookup_attempted: u64,
++    parameter_lookup_matched: u64,
++    receiver_lookup_attempted: u64,
++    receiver_lookup_matched: u64,
++    destination_present: u64,
++    destination_absent: u64,
+ }
+ 
+ impl ReturnScanStats {
+@@ -22,6 +34,18 @@ impl ReturnScanStats {
+             total_candidates: 0,
+             max_candidates: 0,
+             total_duration_ns: 0,
++            total_invocations: 0,
++            empty_results: 0,
++            nonempty_results: 0,
++            total_variables_returned: 0,
++            return_expression_checked: 0,
++            return_expression_matched: 0,
++            parameter_lookup_attempted: 0,
++            parameter_lookup_matched: 0,
++            receiver_lookup_attempted: 0,
++            receiver_lookup_matched: 0,
++            destination_present: 0,
++            destination_absent: 0,
+         }
+     }
+ }
+@@ -30,6 +54,144 @@ thread_local! {
+     static RETURN_SCAN_INSTRUMENTATION: RefCell<ReturnScanStats> = RefCell::new(ReturnScanStats::new());
+ }
+ 
++#[derive(Debug, Clone, Copy)]
++pub enum PropCategory {
++    Initial,
++    CFG,
++    Call,
++    Return,
++    Exception,
++    ArrayContainer,
++    ReceiverField,
++}
++
++#[derive(Default, Clone)]
++struct CategoryStats {
++    attempts: u64,
++    enqueued: u64,
++    duplicates: u64,
++    insertions: u64,
++}
++
++struct SolverStats {
++    initial: CategoryStats,
++    cfg: CategoryStats,
++    call: CategoryStats,
++    return_scan: CategoryStats,
++    exception: CategoryStats,
++    array_container: CategoryStats,
++    receiver_field: CategoryStats,
++}
++
++impl SolverStats {
++    fn new() -> Self {
++        Self {
++            initial: Default::default(),
++            cfg: Default::default(),
++            call: Default::default(),
++            return_scan: Default::default(),
++            exception: Default::default(),
++            array_container: Default::default(),
++            receiver_field: Default::default(),
++        }
++    }
++}
++
++thread_local! {
++    static SOLVER_STATS: RefCell<SolverStats> = RefCell::new(SolverStats::new());
++}
++
++// TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++fn prop_category_to_u8(cat: PropCategory) -> u8 {
++    match cat {
++        PropCategory::Initial       => 0,
++        PropCategory::CFG           => 1,
++        PropCategory::Call          => 2,
++        PropCategory::Return        => 3,
++        PropCategory::Exception     => 4,
++        PropCategory::ArrayContainer => 5,
++        PropCategory::ReceiverField => 6,
++    }
++}
++
++fn prop_category_name(cat_u8: u8) -> &'static str {
++    match cat_u8 {
++        0 => "Initial",
++        1 => "CFG",
++        2 => "Call",
++        3 => "Return",
++        4 => "Exception",
++        5 => "ArrayContainer",
++        6 => "ReceiverField",
++        _ => "Unknown",
++    }
++}
++
++// Key: (node_id, var_string, category_u8) -> duplicate_count
++thread_local! {
++    static DUPLICATE_HOTSPOTS: RefCell<HashMap<(u32, String, u8), u64>> =
++        RefCell::new(HashMap::new());
++}
++
++fn record_duplicate_hotspot(node_id: u32, var: &str, cat: PropCategory) {
++    // TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++    DUPLICATE_HOTSPOTS.with(|map| {
++        let mut m = map.borrow_mut();
++        let key = (node_id, var.to_string(), prop_category_to_u8(cat));
++        *m.entry(key).or_insert(0) += 1;
++    });
++}
++// END TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++
++fn record_attempt(cat: PropCategory) {
++    SOLVER_STATS.with(|stats| {
++        let mut s = stats.borrow_mut();
++        let cat_stats = match cat {
++            PropCategory::Initial => &mut s.initial,
++            PropCategory::CFG => &mut s.cfg,
++            PropCategory::Call => &mut s.call,
++            PropCategory::Return => &mut s.return_scan,
++            PropCategory::Exception => &mut s.exception,
++            PropCategory::ArrayContainer => &mut s.array_container,
++            PropCategory::ReceiverField => &mut s.receiver_field,
++        };
++        cat_stats.attempts += 1;
++    });
++}
++
++fn record_success(cat: PropCategory) {
++    SOLVER_STATS.with(|stats| {
++        let mut s = stats.borrow_mut();
++        let cat_stats = match cat {
++            PropCategory::Initial => &mut s.initial,
++            PropCategory::CFG => &mut s.cfg,
++            PropCategory::Call => &mut s.call,
++            PropCategory::Return => &mut s.return_scan,
++            PropCategory::Exception => &mut s.exception,
++            PropCategory::ArrayContainer => &mut s.array_container,
++            PropCategory::ReceiverField => &mut s.receiver_field,
++        };
++        cat_stats.enqueued += 1;
++        cat_stats.insertions += 1;
++    });
++}
++
++fn record_duplicate(cat: PropCategory) {
++    SOLVER_STATS.with(|stats| {
++        let mut s = stats.borrow_mut();
++        let cat_stats = match cat {
++            PropCategory::Initial => &mut s.initial,
++            PropCategory::CFG => &mut s.cfg,
++            PropCategory::Call => &mut s.call,
++            PropCategory::Return => &mut s.return_scan,
++            PropCategory::Exception => &mut s.exception,
++            PropCategory::ArrayContainer => &mut s.array_container,
++            PropCategory::ReceiverField => &mut s.receiver_field,
++        };
++        cat_stats.duplicates += 1;
++    });
++}
++
+ #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+ pub struct TaintFact {
+     pub node_id: u32,
+@@ -37,6 +199,7 @@ pub struct TaintFact {
+     pub var: String,
+     pub sanitized_for: std::collections::BTreeSet<crate::CWE>,
+     pub source_domain: crate::CweDomain,
++    pub touches_target: bool,
+ }
+ 
+ #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+@@ -46,6 +209,7 @@ pub struct TaintFlow {
+     pub source_var: String,
+     pub sink_var: String,
+     pub cwe: crate::CWE,
++    pub touches_target: bool,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+@@ -57,6 +221,171 @@ pub struct SuppressedFlowDiagnostic {
+     pub reason: String,
+ }
+ 
++// TEMPORARY CARRIER INSTRUMENTATION
++#[derive(Debug, Clone)]
++pub struct MethodCarrierInfo {
++    pub escapes: bool,
++    pub fields: HashSet<String>,
++}
++
++fn receiver_escapes_in_expr(expr: &str, receiver: &str) -> bool {
++    let expr_lower = expr.to_lowercase();
++    let r_lower = receiver.to_lowercase();
++    
++    if !check_word_outside_quotes(&expr_lower, &r_lower) {
++        return false;
++    }
++    
++    let chars: Vec<char> = expr_lower.chars().collect();
++    let r_chars: Vec<char> = r_lower.chars().collect();
++    let mut i = 0;
++    
++    while i + r_chars.len() <= chars.len() {
++        if chars[i..i + r_chars.len()] == r_chars {
++            let before_ok = if i > 0 {
++                let c = chars[i - 1];
++                !c.is_alphanumeric() && c != '_'
++            } else {
++                true
++            };
++            let after_ok = if i + r_chars.len() < chars.len() {
++                let c = chars[i + r_chars.len()];
++                !c.is_alphanumeric() && c != '_'
++            } else {
++                true
++            };
++            
++            if before_ok && after_ok {
++                let mut next_idx = i + r_chars.len();
++                while next_idx < chars.len() && chars[next_idx].is_whitespace() {
++                    next_idx += 1;
++                }
++                if next_idx < chars.len() {
++                    let next_char = chars[next_idx];
++                    if next_char != '.' && next_char != '[' {
++                        return true;
++                    }
++                } else {
++                    return true;
++                }
++            }
++        }
++        i += 1;
++    }
++    false
++}
++
++fn extract_fields_from_expr(expr: &str, receiver: &str, fields: &mut HashSet<String>) {
++    let expr_lower = expr.to_lowercase();
++    let r_lower = receiver.to_lowercase();
++    let chars: Vec<char> = expr_lower.chars().collect();
++    let r_chars: Vec<char> = r_lower.chars().collect();
++    let mut i = 0;
++    while i + r_chars.len() <= chars.len() {
++        if chars[i..i + r_chars.len()] == r_chars {
++            let before_ok = if i > 0 {
++                let c = chars[i - 1];
++                !c.is_alphanumeric() && c != '_'
++            } else {
++                true
++            };
++            let after_ok = if i + r_chars.len() < chars.len() {
++                let c = chars[i + r_chars.len()];
++                !c.is_alphanumeric() && c != '_'
++            } else {
++                true
++            };
++            if before_ok && after_ok {
++                let mut next_idx = i + r_chars.len();
++                while next_idx < chars.len() && chars[next_idx].is_whitespace() {
++                    next_idx += 1;
++                }
++                if next_idx < chars.len() {
++                    if chars[next_idx] == '.' {
++                        let mut field_start = next_idx + 1;
++                        while field_start < chars.len() && chars[field_start].is_whitespace() {
++                            field_start += 1;
++                        }
++                        let mut field_end = field_start;
++                        while field_end < chars.len() && (chars[field_end].is_alphanumeric() || chars[field_end] == '_') {
++                            field_end += 1;
++                        }
++                        if field_end > field_start {
++                            let field_name = chars[field_start..field_end].iter().collect::<String>();
++                            let mut check_call = field_end;
++                            while check_call < chars.len() && chars[check_call].is_whitespace() {
++                                check_call += 1;
++                            }
++                            let is_call = check_call < chars.len() && chars[check_call] == '(';
++                            if !is_call {
++                                fields.insert(field_name);
++                            }
++                        }
++                    } else if chars[next_idx] == '[' {
++                        let mut key_start = next_idx + 1;
++                        while key_start < chars.len() && chars[key_start].is_whitespace() {
++                            key_start += 1;
++                        }
++                        if key_start < chars.len() && (chars[key_start] == '"' || chars[key_start] == '\'') {
++                            let quote = chars[key_start];
++                            let mut key_end = key_start + 1;
++                            while key_end < chars.len() && chars[key_end] != quote {
++                                key_end += 1;
++                            }
++                            if key_end < chars.len() {
++                                let key_name = chars[key_start + 1..key_end].iter().collect::<String>();
++                                fields.insert(key_name);
++                            }
++                        }
++                    }
++                }
++            }
++        }
++        i += 1;
++    }
++}
++
++fn collect_method_instructions(
++    body: &[ir::InstructionId],
++    program: &ir::Program,
++    out: &mut Vec<ir::InstructionId>,
++    visited: &mut HashSet<ir::InstructionId>,
++) {
++    for &id in body {
++        if !visited.insert(id) {
++            continue;
++        }
++        out.push(id);
++        if let Some(inst) = program.instructions.get(&id) {
++            match &inst.kind {
++                InstructionKind::Branch { then_block, else_block, .. } => {
++                    collect_method_instructions(then_block, program, out, visited);
++                    if let Some(eb) = else_block {
++                        collect_method_instructions(eb, program, out, visited);
++                    }
++                }
++                InstructionKind::Loop { body, .. } => {
++                    collect_method_instructions(body, program, out, visited);
++                }
++                InstructionKind::Try { body, catches, finally, .. } => {
++                    collect_method_instructions(body, program, out, visited);
++                    for catch_id in catches {
++                        collect_method_instructions(&[*catch_id], program, out, visited);
++                    }
++                    if let Some(fb) = finally {
++                        collect_method_instructions(fb, program, out, visited);
++                    }
++                }
++                InstructionKind::Catch { body, .. } => {
++                    collect_method_instructions(body, program, out, visited);
++                }
++                _ => {}
++            }
++        }
++    }
++}
++// END TEMPORARY CARRIER INSTRUMENTATION
++
+ pub struct InterproceduralTaintEngine<'a> {
+     pub program: &'a Program,
+     pub gst: &'a GlobalSymbolTable,
+@@ -78,6 +407,8 @@ pub struct InterproceduralTaintEngine<'a> {
+     pub related_types_cache: std::cell::RefCell<std::collections::HashMap<ir::TypeId, Rc<HashSet<ir::TypeId>>>>,
+     pub methods_by_type: HashMap<ir::TypeId, Vec<MethodId>>,
+     pub call_sites_by_callee: HashMap<MethodId, Vec<u32>>,
++    pub seen_return_scans: HashSet<(MethodId, String)>,
++    pub carrier_map: HashMap<MethodId, MethodCarrierInfo>,
+ }
+ 
+ impl<'a> InterproceduralTaintEngine<'a> {
+@@ -127,6 +458,80 @@ impl<'a> InterproceduralTaintEngine<'a> {
+             }
+         }
+ 
++        let mut carrier_map = HashMap::new();
++        for (&m_id, method) in &program.methods {
++            let mut escapes = false;
++            let mut fields = HashSet::new();
++            if let Some(first_param) = method.parameters.first() {
++                let r = clean_parameter_name(first_param);
++                if r == "self" || r == "this" || r == "cls" {
++                    let mut inst_ids = Vec::new();
++                    let mut visited = HashSet::new();
++                    collect_method_instructions(&method.body, program, &mut inst_ids, &mut visited);
++                    
++                    for inst_id in inst_ids {
++                        if let Some(inst) = program.instructions.get(&inst_id) {
++                            match &inst.kind {
++                                InstructionKind::Assign { dest, src } => {
++                                    if receiver_escapes_in_expr(dest, &r) || receiver_escapes_in_expr(src, &r) {
++                                        escapes = true;
++                                    }
++                                    extract_fields_from_expr(dest, &r, &mut fields);
++                                    extract_fields_from_expr(src, &r, &mut fields);
++                                }
++                                InstructionKind::Call { dest, callee, args } => {
++                                    if let Some(d) = dest {
++                                        if receiver_escapes_in_expr(d, &r) {
++                                            escapes = true;
++                                        }
++                                        extract_fields_from_expr(d, &r, &mut fields);
++                                    }
++                                    if receiver_escapes_in_expr(callee, &r) {
++                                        escapes = true;
++                                    }
++                                    extract_fields_from_expr(callee, &r, &mut fields);
++                                    for arg in args {
++                                        if receiver_escapes_in_expr(arg, &r) {
++                                            escapes = true;
++                                        }
++                                        extract_fields_from_expr(arg, &r, &mut fields);
++                                    }
++                                }
++                                InstructionKind::Return { val } => {
++                                    if let Some(v) = val {
++                                        if receiver_escapes_in_expr(v, &r) {
++                                            escapes = true;
++                                        }
++                                        extract_fields_from_expr(v, &r, &mut fields);
++                                    }
++                                }
++                                InstructionKind::Branch { cond, .. } => {
++                                    if receiver_escapes_in_expr(cond, &r) {
++                                        escapes = true;
++                                    }
++                                    extract_fields_from_expr(cond, &r, &mut fields);
++                                }
++                                InstructionKind::Loop { cond, .. } => {
++                                    if receiver_escapes_in_expr(cond, &r) {
++                                        escapes = true;
++                                    }
++                                    extract_fields_from_expr(cond, &r, &mut fields);
++                                }
++                                InstructionKind::Throw { val } => {
++                                    if receiver_escapes_in_expr(val, &r) {
++                                        escapes = true;
++                                    }
++                                    extract_fields_from_expr(val, &r, &mut fields);
++                                }
++                                _ => {}
++                            }
++                        }
++                    }
++                }
++            }
++            carrier_map.insert(m_id, MethodCarrierInfo { escapes, fields });
++        }
++
+         Self {
+             program,
+             gst,
+@@ -147,6 +552,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
+             related_types_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             methods_by_type,
+             call_sites_by_callee,
++            seen_return_scans: HashSet::new(),
++            carrier_map,
+         }
+     }
+ 
+@@ -343,7 +750,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+             }
+             if let Some(inst_id) = node.instruction_id {
+                 if let Some(inst) = self.program.instructions.get(&inst_id) {
+-                    if let InstructionKind::Source { name } = &inst.kind {
++                    if let InstructionKind::Source { name, .. } = &inst.kind {
+                         let domain = crate::map_source_to_domain(name);
+                         self.tainted_facts.insert(TaintFact {
+                             node_id,
+@@ -351,6 +758,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                             var: name.clone(),
+                             sanitized_for: std::collections::BTreeSet::new(),
+                             source_domain: domain,
++                            touches_target: false,
+                         });
+                     }
+                 }
+@@ -567,6 +975,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                             var: clean_param,
+                             sanitized_for: std::collections::BTreeSet::new(),
+                             source_domain: domain,
++                            touches_target: false,
+                         });
+                     }
+                 }
+@@ -613,6 +1022,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                             var: d.clone(),
+                                             sanitized_for: std::collections::BTreeSet::new(),
+                                             source_domain: domain,
++                                            touches_target: false,
+                                         });
+                                     }
+                                 }
+@@ -705,6 +1115,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 var: dest.clone(),
+                                 sanitized_for: std::collections::BTreeSet::new(),
+                                 source_domain: crate::CweDomain::Generic,
++                                touches_target: false,
+                             });
+                         }
+                     }
+@@ -732,6 +1143,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: dest.clone(),
+                                     sanitized_for: std::collections::BTreeSet::new(),
+                                     source_domain: domain,
++                                    touches_target: false,
+                                 });
+                             }
+                         }
+@@ -747,6 +1159,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                         var: arg.clone(),
+                                         sanitized_for: std::collections::BTreeSet::new(),
+                                         source_domain: domain,
++                                        touches_target: false,
+                                     });
+                                 }
+                             }
+@@ -759,6 +1172,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                         var: d.clone(),
+                                         sanitized_for: std::collections::BTreeSet::new(),
+                                         source_domain: domain,
++                                        touches_target: false,
+                                     });
+                                 }
+                             }
+@@ -772,6 +1186,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: expr.clone(),
+                                     sanitized_for: std::collections::BTreeSet::new(),
+                                     source_domain: domain,
++                                    touches_target: false,
+                                 });
+                             }
+                         }
+@@ -784,6 +1199,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: cond.clone(),
+                                     sanitized_for: std::collections::BTreeSet::new(),
+                                     source_domain: domain,
++                                    touches_target: false,
+                                 });
+                             }
+                         }
+@@ -796,6 +1212,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: cond.clone(),
+                                     sanitized_for: std::collections::BTreeSet::new(),
+                                     source_domain: domain,
++                                    touches_target: false,
+                                 });
+                             }
+                         }
+@@ -1035,6 +1452,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                         var: param,
+                         sanitized_for: std::collections::BTreeSet::new(),
+                         source_domain: crate::CweDomain::Deserialization,
++                        touches_target: false,
+                     });
+                 }
+             }
+@@ -1048,6 +1466,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                         var: arg,
+                         sanitized_for: std::collections::BTreeSet::new(),
+                         source_domain: crate::CweDomain::Deserialization,
++                        touches_target: false,
+                     });
+                 }
+             }
+@@ -1081,7 +1500,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+             for &inst_id in &method.body {
+                 if let Some(inst) = self.program.instructions.get(&inst_id) {
+                     match &inst.kind {
+-                        InstructionKind::Source { name } => {
++                        InstructionKind::Source { name, .. } => {
+                             // If the source name looks like a field assignment target, track it
+                             if name.contains('.') {
+                                 static_tainted_fields.insert(name.clone());
+@@ -1142,6 +1561,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 var: dest.clone(),
+                                 sanitized_for: std::collections::BTreeSet::new(),
+                                 source_domain: domain,
++                                touches_target: false,
+                             });
+                         }
+                     }
+@@ -1310,6 +1730,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                             var: dest.clone(),
+                                             sanitized_for: std::collections::BTreeSet::new(),
+                                             source_domain: crate::CweDomain::Generic,
++                                            touches_target: false,
+                                         });
+                                     }
+                                 }
+@@ -1334,6 +1755,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                                 var: dest.clone(),
+                                                 sanitized_for: std::collections::BTreeSet::new(),
+                                                 source_domain: crate::CweDomain::Generic,
++                                                touches_target: false,
+                                             });
+                                         }
+                                     }
+@@ -1366,16 +1788,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
+         fact
+     }
+ 
+-    fn add_fact(&mut self, worklist: &mut VecDeque<TaintFact>, initial_fact: TaintFact, initial_parent: Option<&TaintFact>) {
+-        let mut local_queue = VecDeque::new();
+-        local_queue.push_back((initial_fact, initial_parent.cloned()));
++    fn node_touches_target(&self, node_id: u32) -> bool {
++        if self.target_and_siblings.is_empty() {
++            return false;
++        }
++        if let Some(node) = self.icfg.nodes.get(&node_id) {
++            if let Some(file_path) = self.method_file_paths.get(&node.method_id) {
++                let fp_lower = file_path.to_lowercase().replace('\\', "/");
++                return self.target_and_siblings.iter().any(|s| {
++                    let s_lower = s.to_lowercase().replace('\\', "/");
++                    fp_lower.ends_with(&s_lower) || s_lower.ends_with(&fp_lower)
++                });
++            }
++        }
++        false
++    }
+ 
+-        while let Some((fact, parent)) = local_queue.pop_front() {
+-            let processed = self.postprocess_fact(fact);
++    fn add_fact(&mut self, worklist: &mut VecDeque<TaintFact>, initial_fact: TaintFact, initial_parent: Option<&TaintFact>, category: PropCategory) {
++        let mut local_queue = VecDeque::new();
++        local_queue.push_back((initial_fact, initial_parent.cloned(), category));
++
++        while let Some((fact, parent, cat)) = local_queue.pop_front() {
++            record_attempt(cat);
++            let mut processed = self.postprocess_fact(fact);
++            // Monotonically propagate touches_target
++            let parent_touches = parent.as_ref().map_or(false, |p| p.touches_target);
++            let node_touches = self.node_touches_target(processed.node_id);
++            if parent_touches || node_touches {
++                processed.touches_target = true;
++            }
+             if processed.var.len() > 150 {
+                 continue;
+             }
+             if self.tainted_facts.insert(processed.clone()) {
++                record_success(cat);
+                 if let Some(ref pf) = parent {
+                     self.parent_map.insert(processed.clone(), pf.clone());
+                 }
+@@ -1395,8 +1841,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 var: container,
+                                 sanitized_for: processed.sanitized_for.clone(),
+                                 source_domain: processed.source_domain,
++                                touches_target: processed.touches_target,
+                             };
+-                            local_queue.push_back((container_fact, parent.clone()));
++                            local_queue.push_back((container_fact, parent.clone(), PropCategory::ArrayContainer));
+                         }
+                     }
+                 }
+@@ -1414,8 +1861,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                         if let Some(m_ids) = self.methods_by_type.get(&m_type_id) {
+                                             for &m_id in m_ids {
+                                                 if related_types.contains(&m_type_id) && m_id != node.method_id {
+-                                                    // Seed the field at the entry node of this other method!
+-                                                    if let Some(&entry_node_id) = self.icfg.method_entry_node.get(&m_id) {
++                                                    let is_carrier = self.carrier_map.get(&m_id).map_or(true, |info| {
++                                                        info.escapes || info.fields.contains(field_name)
++                                                    });
++                                                    if is_carrier {
++                                                        // Seed the field at the entry node of this other method!
++                                                        if let Some(&entry_node_id) = self.icfg.method_entry_node.get(&m_id) {
+                                                         if let Some(method) = self.program.methods.get(&m_id) {
+                                                             let is_java = self.method_file_paths.get(&m_id)
+                                                                 .map_or(false, |path| path.ends_with(".java"));
+@@ -1429,15 +1880,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                                                 }
+                                                             };
+                                                             let target_var = format!("{}{}", receiver_prefix, field_name);
++                                                            let touches = processed.touches_target
++                                                                || parent.as_ref().map_or(false, |p| p.touches_target)
++                                                                || self.node_touches_target(processed.node_id);
+                                                             let next_fact = TaintFact {
+                                                                 node_id: entry_node_id,
+                                                                 context: 0,
+                                                                 var: target_var,
+                                                                 sanitized_for: processed.sanitized_for.clone(),
+                                                                 source_domain: processed.source_domain,
++                                                                touches_target: touches,
+                                                             };
+                                                             if !self.tainted_facts.contains(&next_fact) {
+-                                                                local_queue.push_back((next_fact, Some(processed.clone())));
++                                                                local_queue.push_back((next_fact, Some(processed.clone()), PropCategory::ReceiverField));
+                                                             }
+                                                         }
+                                                     }
+@@ -1451,6 +1906,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                     }
+                 }
+             }
++            } else {
++                record_duplicate(cat);
++                // TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++                record_duplicate_hotspot(processed.node_id, &processed.var, cat);
++                // END TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++            }
+         }
+     }
+ 
+@@ -1508,7 +1969,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+         let mut worklist = VecDeque::new();
+         let initial_facts: Vec<TaintFact> = self.tainted_facts.drain().collect();
+         for fact in initial_facts {
+-            self.add_fact(&mut worklist, fact, None);
++            self.add_fact(&mut worklist, fact, None, PropCategory::Initial);
+         }
+ 
+         let mut succ_edges: HashMap<u32, Vec<&IcfgEdge>> = HashMap::new();
+@@ -1535,6 +1996,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                     source_var: String::new(),
+                     sink_var: fact.var.clone(),
+                     cwe: target_cwe,
++                    touches_target: fact.touches_target,
+                 });
+             }
+ 
+@@ -1550,8 +2012,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: new_var,
+                                     sanitized_for: new_san,
+                                     source_domain: fact.source_domain,
++                                    touches_target: fact.touches_target,
+                                 };
+-                                self.add_fact(&mut worklist, next_fact, Some(&fact));
++                                self.add_fact(&mut worklist, next_fact, Some(&fact), PropCategory::CFG);
+                             }
+                         }
+                         IcfgEdgeKind::Call => {
+@@ -1582,8 +2045,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: new_var,
+                                     sanitized_for: fact.sanitized_for.clone(),
+                                     source_domain: fact.source_domain,
++                                    touches_target: fact.touches_target,
+                                 };
+-                                self.add_fact(&mut worklist, next_fact, Some(&fact));
++                                self.add_fact(&mut worklist, next_fact, Some(&fact), PropCategory::Call);
+                             }
+                         }
+                         IcfgEdgeKind::Return => {
+@@ -1615,8 +2079,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                         var: new_var,
+                                         sanitized_for: fact.sanitized_for.clone(),
+                                         source_domain: fact.source_domain,
++                                        touches_target: fact.touches_target,
+                                     };
+-                                    self.add_fact(&mut worklist, next_fact, Some(&fact));
++                                    self.add_fact(&mut worklist, next_fact, Some(&fact), PropCategory::Return);
+                                 }
+                             } else if callee_context == 0 {
+                                 // Facts seeded directly into a helper method (e.g. `badSource`)
+@@ -1627,6 +2092,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 let callee_method_id = node.method_id;
+                                 let return_inst_id = return_node.instruction_id;
+ 
++                                // EXPLOSION-1 deduplication: skip if we have already performed a
++                                // Ctx:0 return scan for this (callee_method, var) pair.  Duplicate
++                                // scans only generate facts that tainted_facts.contains() would
++                                // reject anyway, so skipping them is semantics-preserving.
++                                let scan_key = (callee_method_id, fact.var.clone());
++                                if !self.seen_return_scans.insert(scan_key) {
++                                    // Already scanned — skip to avoid O(candidates) work again.
++                                    continue;
++                                }
++
+                                 // Find pre-call nodes: Call edges from some node → entry of
+                                 // the callee method, where the caller's instruction == return_node's
+                                 // instruction (they share the same InstructionId in the ICFG).
+@@ -1679,8 +2154,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                             var: new_var,
+                                             sanitized_for: fact.sanitized_for.clone(),
+                                             source_domain: fact.source_domain,
++                                            touches_target: fact.touches_target,
+                                         };
+-                                        self.add_fact(&mut worklist, next_fact, Some(&fact));
++                                        self.add_fact(&mut worklist, next_fact, Some(&fact), PropCategory::Return);
+                                     }
+                                 }
+                             }
+@@ -1694,8 +2170,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                     var: new_var,
+                                     sanitized_for: new_san,
+                                     source_domain: fact.source_domain,
++                                    touches_target: fact.touches_target,
+                                 };
+-                                self.add_fact(&mut worklist, next_fact, Some(&fact));
++                                self.add_fact(&mut worklist, next_fact, Some(&fact), PropCategory::Exception);
+                             }
+                         }
+                     }
+@@ -1703,20 +2180,126 @@ impl<'a> InterproceduralTaintEngine<'a> {
+             }
+         }
+         println!("[ENGINE] finished after {} iterations", iterations);
++        SOLVER_STATS.with(|stats| {
++            let s = stats.borrow();
++            println!("=================================");
++            println!("SOLVER PROPAGATION STATISTICS");
++            println!("---------------------------------");
++            println!("CFG:");
++            println!("  attempts: {}", s.cfg.attempts);
++            println!("  enqueued: {}", s.cfg.enqueued);
++            println!("  duplicates: {}", s.cfg.duplicates);
++            println!("  insertions: {}", s.cfg.insertions);
++            println!();
++            println!("Receiver-field:");
++            println!("  attempts: {}", s.receiver_field.attempts);
++            println!("  enqueued: {}", s.receiver_field.enqueued);
++            println!("  duplicates: {}", s.receiver_field.duplicates);
++            println!("  insertions: {}", s.receiver_field.insertions);
++            println!();
++            println!("Return scan:");
++            println!("  attempts: {}", s.return_scan.attempts);
++            println!("  enqueued: {}", s.return_scan.enqueued);
++            println!("  duplicates: {}", s.return_scan.duplicates);
++            println!("  insertions: {}", s.return_scan.insertions);
++            println!();
++            println!("Call:");
++            println!("  attempts: {}", s.call.attempts);
++            println!("  enqueued: {}", s.call.enqueued);
++            println!("  duplicates: {}", s.call.duplicates);
++            println!("  insertions: {}", s.call.insertions);
++            println!();
++            println!("Exception:");
++            println!("  attempts: {}", s.exception.attempts);
++            println!("  enqueued: {}", s.exception.enqueued);
++            println!("  duplicates: {}", s.exception.duplicates);
++            println!("  insertions: {}", s.exception.insertions);
++            println!();
++            println!("Array container:");
++            println!("  attempts: {}", s.array_container.attempts);
++            println!("  enqueued: {}", s.array_container.enqueued);
++            println!("  duplicates: {}", s.array_container.duplicates);
++            println!("  insertions: {}", s.array_container.insertions);
++            println!();
++            println!("Initial:");
++            println!("  attempts: {}", s.initial.attempts);
++            println!("  enqueued: {}", s.initial.enqueued);
++            println!("  duplicates: {}", s.initial.duplicates);
++            println!("  insertions: {}", s.initial.insertions);
++            println!("=================================");
++        });
+         RETURN_SCAN_INSTRUMENTATION.with(|stats| {
+             let s = stats.borrow();
+-            let avg = if s.invocations > 0 { s.total_candidates as f64 / s.invocations as f64 } else { 0.0 };
++            let avg_produced = if s.nonempty_results > 0 {
++                s.total_variables_returned as f64 / s.nonempty_results as f64
++            } else {
++                0.0
++            };
++            let success_return = if s.return_expression_checked > 0 {
++                s.return_expression_matched as f64 / s.return_expression_checked as f64 * 100.0
++            } else {
++                0.0
++            };
++            let success_param = if s.parameter_lookup_attempted > 0 {
++                s.parameter_lookup_matched as f64 / s.parameter_lookup_attempted as f64 * 100.0
++            } else {
++                0.0
++            };
++            let success_receiver = if s.receiver_lookup_attempted > 0 {
++                s.receiver_lookup_matched as f64 / s.receiver_lookup_attempted as f64 * 100.0
++            } else {
++                0.0
++            };
++            println!("Total invocations: {}", s.total_invocations);
++            println!("Empty invocations: {}", s.empty_results);
++            println!("Non-empty invocations: {}", s.nonempty_results);
++            println!("Total variables produced: {}", s.total_variables_returned);
++            println!("Average variables produced per non-empty invocation: {:.4}", avg_produced);
++            println!("Return expression checked: {}", s.return_expression_checked);
++            println!("Return expression matched: {}", s.return_expression_matched);
++            println!("Parameter lookup attempted: {}", s.parameter_lookup_attempted);
++            println!("Parameter lookup matched: {}", s.parameter_lookup_matched);
++            println!("Receiver lookup attempted: {}", s.receiver_lookup_attempted);
++            println!("Receiver lookup matched: {}", s.receiver_lookup_matched);
++            println!("Destination present: {}", s.destination_present);
++            println!("Destination absent: {}", s.destination_absent);
++            println!("Success rate of:");
++            println!("- return expression mapping: {:.2}%", success_return);
++            println!("- parameter mapping: {:.2}%", success_param);
++            println!("- receiver mapping: {:.2}%", success_receiver);
++        });
++        // TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
++        DUPLICATE_HOTSPOTS.with(|map| {
++            let m = map.borrow();
++            if m.is_empty() {
++                return;
++            }
++            // Collect and sort by descending duplicate count
++            let mut entries: Vec<(&(u32, String, u8), &u64)> = m.iter().collect();
++            entries.sort_by(|a, b| b.1.cmp(a.1));
++            let top20 = entries.into_iter().take(20);
++
+             println!("=================================");
+-            println!("RETURN SCAN HOTSPOT ANALYSIS");
++            println!("TOP 20 DUPLICATE HOTSPOTS");
+             println!("---------------------------------");
+-            println!("Invocations: {}", s.invocations);
+-            println!("Average candidates: {:.4}", avg);
+-            println!("Maximum candidates: {}", s.max_candidates);
+-            println!("Total duration: {} ms", s.total_duration_ns / 1_000_000);
++            println!("{:<14} {:<10} {:<15} {:<30}",
++                     "duplicates", "node_id", "category", "variable (truncated)");
++            println!("{}", "-".repeat(72));
++            for ((node_id, var, cat_u8), count) in top20 {
++                let var_display = if var.len() > 28 {
++                    &var[..28]
++                } else {
++                    var.as_str()
++                };
++                println!("{:<14} {:<10} {:<15} {:<30}",
++                         count, node_id, prop_category_name(*cat_u8), var_display);
++            }
+             println!("=================================");
+         });
++        // END TEMPORARY DUPLICATE HOTSPOT INSTRUMENTATION
+     }
+ 
++
+     fn check_sink_flow_domain(&mut self, fact: &TaintFact, target_cwe: crate::CWE, node_id: u32, sink_var: &str) -> bool {
+         if target_cwe == crate::CWE::CWE22 {
+             if let Some(node) = self.icfg.nodes.get(&node_id) {
+@@ -1818,7 +2401,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                             }
+                         }
+                     }
+-                    InstructionKind::Sink { name } => {
++                    InstructionKind::Sink { name, .. } => {
+                         if expr_uses_var(name, &fact.var) {
+                             let file_path = self.get_method_file_path(node.method_id);
+                             let target_cwe = crate::map_sink_to_cwe_heuristic(name, file_path).unwrap_or(crate::CWE::CWE79);
+@@ -2374,7 +2957,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
+ 
+                         return results;
+                     }
+-                    InstructionKind::Sanitizer { name } => {
++                    InstructionKind::Sanitizer { name, .. } => {
+                         if expr_uses_var(name, &fact.var) {
+                             let mut new_san = fact.sanitized_for.clone();
+                             new_san.insert(crate::CWE::CWE22);
+@@ -2814,15 +3397,34 @@ impl<'a> InterproceduralTaintEngine<'a> {
+         tainted_var: &str,
+     ) -> Vec<String> {
+         let mut results = Vec::new();
+-        let call_node = match self.icfg.nodes.get(&call_node_id) {
+-            Some(n) => n,
+-            None => return vec![],
+-        };
+-
+-        if let Some(inst_id) = call_node.instruction_id {
+-            if let Some(inst) = self.program.instructions.get(&inst_id) {
+-                if let InstructionKind::Call { dest, callee, args } = &inst.kind {
+-                    let mut has_implicit_receiver = true;
++        let mut dest_is_none = true;
++        let mut is_param = false;
++        let mut is_receiver_var = false;
++
++        let mut return_expression_checked = false;
++        let mut return_expression_matched = false;
++        let mut parameter_lookup_attempted = false;
++        let mut parameter_lookup_matched = false;
++        let mut receiver_lookup_attempted = false;
++        let mut receiver_lookup_matched = false;
++        let mut destination_present = false;
++        let mut destination_absent = false;
++
++        if let Some(call_node) = self.icfg.nodes.get(&call_node_id) {
++            if let Some(inst_id) = call_node.instruction_id {
++                if let Some(inst) = self.program.instructions.get(&inst_id) {
++                    if let InstructionKind::Call { dest, callee, args } = &inst.kind {
++                        dest_is_none = dest.is_none();
++                        if dest.is_some() {
++                            destination_present = true;
++                        } else {
++                            destination_absent = true;
++                        }
++                        is_receiver_var = tainted_var == "self" || tainted_var == "this" || tainted_var == "cls"
++                            || tainted_var.starts_with("self.") || tainted_var.starts_with("this.") || tainted_var.starts_with("cls.")
++                            || (tainted_var.starts_with("this[\"") || tainted_var.starts_with("self[\"") || tainted_var.starts_with("cls[\""));
++                        
++                        let mut has_implicit_receiver = true;
+                     // Check if callee returned the tainted variable
+                     let method_id_opt = callee_method_id.or_else(|| {
+                         self.call_graph
+@@ -2833,6 +3435,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                     });
+                     if let Some(method_id) = method_id_opt {
+                         if let Some(method) = self.program.methods.get(&method_id) {
++                            parameter_lookup_attempted = true;
++                            is_param = method.parameters.iter().any(|p| {
++                                let cp = clean_parameter_name(p);
++                                cp == tainted_var || tainted_var.starts_with(&format!("{}[\"", cp))
++                            });
+                             let mut returns_tainted = false;
+                             let mut tainted_return_var = None;
+                             let has_cached = self.method_insts_cache.borrow().contains_key(&method_id);
+@@ -2881,39 +3488,40 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 collect_insts(&method.body, self.program, &mut insts, &mut visited);
+                                 self.method_insts_cache.borrow_mut().insert(method_id, insts);
+                             }
+-
+-                            let cache_borrow = self.method_insts_cache.borrow();
+-                            let all_insts = cache_borrow.get(&method_id).unwrap();
+-
+-                            for &body_inst_id in all_insts {
+-                                if let Some(body_inst) =
+-                                    self.program.instructions.get(&body_inst_id)
+-                                {
+-                                    if let InstructionKind::Return { val: Some(v) } =
+-                                        &body_inst.kind
+-                                    {
+-                                        if expr_uses_var(v, tainted_var) {
+-                                            returns_tainted = true;
+-                                            break;
+-                                        } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+-                                            if expr_uses_var(v, &container) {
+-                                                if let Some(d) = dest {
+-                                                    tainted_return_var = Some(format!("{}[\"{}\"]", d, key));
+-                                                }
+-                                                break;
+-                                            }
+-                                        }
+-                                    }
+-                                }
+-                            }
+-
+-                            if returns_tainted {
+-                                if let Some(d) = dest {
+-                                    results.push(d.clone());
+-                                }
+-                            } else if let Some(trv) = tainted_return_var {
+-                                results.push(trv);
+-                            }
++                                  return_expression_checked = true;
++                             let cache_borrow = self.method_insts_cache.borrow();
++                             let all_insts = cache_borrow.get(&method_id).unwrap();
++ 
++                             for &body_inst_id in all_insts {
++                                 if let Some(body_inst) =
++                                     self.program.instructions.get(&body_inst_id)
++                                 {
++                                     if let InstructionKind::Return { val: Some(v) } =
++                                         &body_inst.kind
++                                     {
++                                         if expr_uses_var(v, tainted_var) {
++                                             returns_tainted = true;
++                                             break;
++                                         } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
++                                             if expr_uses_var(v, &container) {
++                                                 if let Some(d) = dest {
++                                                     tainted_return_var = Some(format!("{}[\"{}\"]", d, key));
++                                                 }
++                                                 break;
++                                             }
++                                         }
++                                     }
++                                 }
++                             }
++ 
++                             return_expression_matched = returns_tainted || tainted_return_var.is_some();
++                             if returns_tainted {
++                                 if let Some(d) = dest {
++                                     results.push(d.clone());
++                                 }
++                             } else if let Some(trv) = tainted_return_var {
++                                 results.push(trv);
++                             }
+ 
+                             // Propagate parameter reference mutations back to arguments
+                             let mut param_idx_opt = None;
+@@ -2963,43 +3571,87 @@ impl<'a> InterproceduralTaintEngine<'a> {
+                                 }
+                             }
+                             if let Some(param_idx) = param_idx_opt {
++                                parameter_lookup_matched = true;
+                                 if param_idx >= param_offset {
+-                                    if let Some(arg) = args.get(param_idx - param_offset) {
+-                                        if let Some(key) = key_opt {
+-                                            results.push(format!("{}[\"{}\"]", arg, key));
+-                                        } else {
+-                                            results.push(arg.clone());
+-                                        }
+-                                    }
+-                                }
+-                            }
+-                        }
+-                    }
+-
+-                    // Receiver propagation back to caller (receiver side mutation)
+-                    if has_implicit_receiver {
+-                        if let Some(receiver) = get_receiver_name_safe(callee) {
+-                            if tainted_var == "this" || tainted_var == "self" || tainted_var == "cls" {
+-                                results.push(receiver.clone());
+-                            } else if tainted_var.starts_with("this.") {
+-                                let suffix = &tainted_var["this.".len()..];
+-                                results.push(format!("{}.{}", receiver, suffix));
+-                            } else if tainted_var.starts_with("self.") {
+-                                let suffix = &tainted_var["self.".len()..];
+-                                results.push(format!("{}.{}", receiver, suffix));
+-                            } else if tainted_var.starts_with("cls.") {
+-                                let suffix = &tainted_var["cls.".len()..];
+-                                results.push(format!("{}.{}", receiver, suffix));
+-                            } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
+-                                if container == "this" || container == "self" || container == "cls" {
+-                                    results.push(format!("{}[\"{}\"]", receiver, key));
+-                                }
+-                            }
+-                        }
+-                    }
++                                     if let Some(arg) = args.get(param_idx - param_offset) {
++                                         if let Some(key) = key_opt {
++                                             results.push(format!("{}[\"{}\"]", arg, key));
++                                         } else {
++                                             results.push(arg.clone());
++                                         }
++                                     }
++                                 }
++                             }
++                         }
++                     }
++ 
++                     // Receiver propagation back to caller (receiver side mutation)
++                     let results_len_before_receiver = results.len();
++                     if has_implicit_receiver {
++                         if let Some(receiver) = get_receiver_name_safe(callee) {
++                             receiver_lookup_attempted = true;
++                             if tainted_var == "this" || tainted_var == "self" || tainted_var == "cls" {
++                                 results.push(receiver.clone());
++                             } else if tainted_var.starts_with("this.") {
++                                 let suffix = &tainted_var["this.".len()..];
++                                 results.push(format!("{}.{}", receiver, suffix));
++                             } else if tainted_var.starts_with("self.") {
++                                 let suffix = &tainted_var["self.".len()..];
++                                 results.push(format!("{}.{}", receiver, suffix));
++                             } else if tainted_var.starts_with("cls.") {
++                                 let suffix = &tainted_var["cls.".len()..];
++                                 results.push(format!("{}.{}", receiver, suffix));
++                             } else if let Some((container, key)) = parse_java_or_python_container_read(tainted_var) {
++                                 if container == "this" || container == "self" || container == "cls" {
++                                     results.push(format!("{}[\"{}\"]", receiver, key));
++                                 }
++                             }
++                         }
++                     }
++                     if results.len() > results_len_before_receiver {
++                         receiver_lookup_matched = true;
++                     }
+                 }
+             }
+         }
++        
++        let is_empty = results.is_empty();
++        RETURN_SCAN_INSTRUMENTATION.with(|stats| {
++            let mut s = stats.borrow_mut();
++            s.total_invocations += 1;
++            if is_empty {
++                s.empty_results += 1;
++            } else {
++                s.nonempty_results += 1;
++                s.total_variables_returned += results.len() as u64;
++            }
++            if return_expression_checked {
++                s.return_expression_checked += 1;
++            }
++            if return_expression_matched {
++                s.return_expression_matched += 1;
++            }
++            if parameter_lookup_attempted {
++                s.parameter_lookup_attempted += 1;
++            }
++            if parameter_lookup_matched {
++                s.parameter_lookup_matched += 1;
++            }
++            if receiver_lookup_attempted {
++                s.receiver_lookup_attempted += 1;
++            }
++            if receiver_lookup_matched {
++                s.receiver_lookup_matched += 1;
++            }
++            if destination_present {
++                s.destination_present += 1;
++            }
++            if destination_absent {
++                s.destination_absent += 1;
++            }
++        });
++
++        }
+         results
+     }
+ 

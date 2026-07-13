@@ -514,6 +514,8 @@ dependencies = [
  "serde_json",
  "symbols",
  "taint",
+ "v2-export-adapter",
+ "v2-refiner-domain",
 ]
 
 [[package]]
@@ -573,6 +575,31 @@ dependencies = [
  "getrandom",
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "v2-export-adapter"
+version = "0.1.0"
+dependencies = [
+ "cfg",
+ "ir",
+ "serde",
+ "serde_json",
+ "symbols",
+ "taint",
+]
+
+[[package]]
+name = "v2-refiner-domain"
+version = "0.1.0"
+dependencies = [
+ "cfg",
+ "ir",
+ "serde",
+ "serde_json",
+ "symbols",
+ "taint",
+ "v2-export-adapter",
 ]
 
 [[package]]

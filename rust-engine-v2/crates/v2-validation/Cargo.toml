@@ -1,0 +1,28 @@
+[package]
+name = "v2-validation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-workspace = { path = "../v2-workspace" }
+v2-engine = { path = "../v2-engine" }
+v2-reporting = { path = "../v2-reporting" }
+v2-rules = { path = "../v2-rules" }
+v2-rulepacks = { path = "../v2-rulepacks" }
+v2-context = { path = "../v2-context" }
+v2-taint = { path = "../v2-taint" }
+v2-frontend-base = { path = "../v2-frontend-base" }
+v2-frontend-java = { path = "../v2-frontend-java" }
+v2-semantic = { path = "../v2-semantic" }
+v2-ir = { path = "../v2-ir" }
+
+[[bin]]
+name = "v2-validation"
+path = "src/main.rs"
+
+[[bench]]
+name = "validation_bench"
+harness = false

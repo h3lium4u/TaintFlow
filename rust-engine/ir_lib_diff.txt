@@ -1,0 +1,216 @@
+diff --git a/rust-engine/crates/ir/src/lib.rs b/rust-engine/crates/ir/src/lib.rs
+index 1a6164d..f43808f 100644
+--- a/rust-engine/crates/ir/src/lib.rs
++++ b/rust-engine/crates/ir/src/lib.rs
+@@ -56,12 +56,15 @@ pub enum InstructionKind {
+         val: String,
+     },
+     Source {
++        dest: Option<String>,
+         name: String,
+     },
+     Sink {
++        dest: Option<String>,
+         name: String,
+     },
+     Sanitizer {
++        dest: Option<String>,
+         name: String,
+     },
+ }
+@@ -528,14 +531,31 @@ impl Program {
+                                 args.push(arg.raw.clone());
+                             }
+                         }
+-                        let inst_id = self.alloc_instruction(
++                        let callee_method = callee.split('.').last().unwrap_or(&callee);
++                        let callee_method_lower = callee_method.to_lowercase();
++                        let kind = if is_ir_taint_source(&callee) {
++                            InstructionKind::Source {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_precise_sink(&callee_method_lower) {
++                            InstructionKind::Sink {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_sanitizer(&callee_method_lower) {
++                            InstructionKind::Sanitizer {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else {
+                             InstructionKind::Call {
+                                 dest: Some(lhs_raw),
+                                 callee,
+                                 args,
+-                            },
+-                            file_line,
+-                        );
++                            }
++                        };
++                        let inst_id = self.alloc_instruction(kind, file_line);
+                         insts.push(inst_id);
+                     } else {
+                         let mut nested_calls = Vec::new();
+@@ -577,14 +597,31 @@ impl Program {
+                                 args.push(arg.raw.clone());
+                             }
+                         }
+-                        let inst_id = self.alloc_instruction(
++                        let callee_method = callee.split('.').last().unwrap_or(&callee);
++                        let callee_method_lower = callee_method.to_lowercase();
++                        let kind = if is_ir_taint_source(&callee) {
++                            InstructionKind::Source {
++                                dest: Some(name),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_precise_sink(&callee_method_lower) {
++                            InstructionKind::Sink {
++                                dest: Some(name),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_sanitizer(&callee_method_lower) {
++                            InstructionKind::Sanitizer {
++                                dest: Some(name),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else {
+                             InstructionKind::Call {
+                                 dest: Some(name),
+                                 callee,
+                                 args,
+-                            },
+-                            file_line,
+-                        );
++                            }
++                        };
++                        let inst_id = self.alloc_instruction(kind, file_line);
+                         insts.push(inst_id);
+                     } else {
+                         let mut nested_calls = Vec::new();
+@@ -625,14 +662,17 @@ impl Program {
+                 let callee_method_lower = callee_method.to_lowercase();
+                 let kind = if is_ir_taint_source(&callee) {
+                     InstructionKind::Source {
++                        dest: None,
+                         name: format!("{}({})", callee, args.join(", ")),
+                     }
+                 } else if is_ir_precise_sink(&callee_method_lower) {
+                     InstructionKind::Sink {
++                        dest: None,
+                         name: format!("{}({})", callee, args.join(", ")),
+                     }
+                 } else if is_ir_sanitizer(&callee_method_lower) {
+                     InstructionKind::Sanitizer {
++                        dest: None,
+                         name: format!("{}({})", callee, args.join(", ")),
+                     }
+                 } else {
+@@ -662,14 +702,31 @@ impl Program {
+                                 args.push(arg.raw.clone());
+                             }
+                         }
+-                        let call_inst = self.alloc_instruction(
++                        let callee_method = callee.split('.').last().unwrap_or(&callee);
++                        let callee_method_lower = callee_method.to_lowercase();
++                        let call_inst_kind = if is_ir_taint_source(&callee) {
++                            InstructionKind::Source {
++                                dest: None,
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_precise_sink(&callee_method_lower) {
++                            InstructionKind::Sink {
++                                dest: None,
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_sanitizer(&callee_method_lower) {
++                            InstructionKind::Sanitizer {
++                                dest: None,
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else {
+                             InstructionKind::Call {
+                                 dest: None,
+                                 callee,
+                                 args,
+-                            },
+-                            file_line,
+-                        );
++                            }
++                        };
++                        let call_inst = self.alloc_instruction(call_inst_kind, file_line);
+                         insts.push(call_inst);
+                     } else {
+                         let mut nested_calls = Vec::new();
+@@ -765,10 +822,29 @@ impl Program {
+                                 args.push(arg.raw.clone());
+                             }
+                         }
+-                        InstructionKind::Call {
+-                            dest: Some(clean_var),
+-                            callee,
+-                            args,
++                        let callee_method = callee.split('.').last().unwrap_or(&callee);
++                        let callee_method_lower = callee_method.to_lowercase();
++                        if is_ir_taint_source(&callee) {
++                            InstructionKind::Source {
++                                dest: Some(clean_var),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_precise_sink(&callee_method_lower) {
++                            InstructionKind::Sink {
++                                dest: Some(clean_var),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_sanitizer(&callee_method_lower) {
++                            InstructionKind::Sanitizer {
++                                dest: Some(clean_var),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else {
++                            InstructionKind::Call {
++                                dest: Some(clean_var),
++                                callee,
++                                args,
++                            }
+                         }
+                     } else {
+                         InstructionKind::Assign {
+@@ -896,14 +972,31 @@ impl Program {
+                                 args.push(arg.raw.clone());
+                             }
+                         }
+-                        let inst_id = self.alloc_instruction(
++                        let callee_method = callee.split('.').last().unwrap_or(&callee);
++                        let callee_method_lower = callee_method.to_lowercase();
++                        let kind = if is_ir_taint_source(&callee) {
++                            InstructionKind::Source {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_precise_sink(&callee_method_lower) {
++                            InstructionKind::Sink {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else if is_ir_sanitizer(&callee_method_lower) {
++                            InstructionKind::Sanitizer {
++                                dest: Some(lhs_raw),
++                                name: format!("{}({})", callee, args.join(", ")),
++                            }
++                        } else {
+                             InstructionKind::Call {
+                                 dest: Some(lhs_raw),
+                                 callee,
+                                 args,
+-                            },
+-                            file_line,
+-                        );
++                            }
++                        };
++                        let inst_id = self.alloc_instruction(kind, file_line);
+                         insts.push(inst_id);
+                     } else {
+                         let mut nested_calls = Vec::new();

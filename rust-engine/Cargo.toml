@@ -12,5 +12,9 @@ members = [
     "crates/rpc",
     "crates/cli",
     "crates/ir",
-    "crates/semantic_rules"
+    "crates/semantic_rules",
+    "crates/v2-export-adapter",
+    "crates/v2-refiner-domain"
 ]
+
+

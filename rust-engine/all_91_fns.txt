@@ -1,0 +1,236 @@
+﻿
+Index className          CWE     Nodes Edges Flows File                                          
+----- ---------          ---     ----- ----- ----- ----                                          
+   36 BenchmarkTest00037 CWE-89     29    31     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+   55 BenchmarkTest00056 CWE-327    25    27     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  175 BenchmarkTest00176 CWE-78     54    57     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  203 BenchmarkTest00204 CWE-89     70    75     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  289 BenchmarkTest00290 CWE-79     62    69     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  371 BenchmarkTest00372 CWE-328    96   103     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  430 BenchmarkTest00431 CWE-89     96   103     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  509 BenchmarkTest00510 CWE-89     36    38     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  515 BenchmarkTest00516 CWE-89     26    28     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  723 BenchmarkTest00724 CWE-79     67    73     3 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  858 BenchmarkTest00859 CWE-327    51    58     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  944 BenchmarkTest00945 CWE-327    43    48     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  967 BenchmarkTest00968 CWE-78     69    77     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+  973 BenchmarkTest00974 CWE-330    69    77     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1037 BenchmarkTest01038 CWE-328    29    32     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1261 BenchmarkTest01262 CWE-79     44    48     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1266 BenchmarkTest01267 CWE-79     28    30     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1394 BenchmarkTest01395 CWE-89     28    30     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1557 BenchmarkTest01558 CWE-89     59    63     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1615 BenchmarkTest01616 CWE-501    80    86     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1619 BenchmarkTest01620 CWE-89     80    86     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1688 BenchmarkTest01689 CWE-78     53    61     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1690 BenchmarkTest01691 CWE-78     80    88     3 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 1962 BenchmarkTest01963 CWE-89     90    98     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2031 BenchmarkTest02032 CWE-22     64    70     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2178 BenchmarkTest02179 CWE-89     59    65     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2343 BenchmarkTest02344 CWE-78     59    65     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2359 BenchmarkTest02360 CWE-89     73    79     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2361 BenchmarkTest02362 CWE-89     50    58     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2382 BenchmarkTest02383 CWE-22     50    58     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2390 BenchmarkTest02391 CWE-328    84    91     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2392 BenchmarkTest02393 CWE-328    66    74     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2408 BenchmarkTest02409 CWE-79     55    61     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2426 BenchmarkTest02427 CWE-614    58    63     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2428 BenchmarkTest02429 CWE-78     36    39     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2432 BenchmarkTest02433 CWE-78     65    71     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2445 BenchmarkTest02446 CWE-501    65    73     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2450 BenchmarkTest02451 CWE-89     65    73     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2472 BenchmarkTest02473 CWE-330    93    99     3 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2479 BenchmarkTest02480 CWE-79     85    91     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2482 BenchmarkTest02483 CWE-79     69    75     3 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2530 BenchmarkTest02531 CWE-89     43    46     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2542 BenchmarkTest02543 CWE-89     61    67     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2563 BenchmarkTest02564 CWE-22     67    75     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2591 BenchmarkTest02592 CWE-79     67    75     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2659 BenchmarkTest02660 CWE-327    32    36     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2674 BenchmarkTest02675 CWE-328    51    56     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2676 BenchmarkTest02677 CWE-328    35    39     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2699 BenchmarkTest02700 CWE-330    48    56     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2700 BenchmarkTest02701 CWE-330    52    60     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2701 BenchmarkTest02702 CWE-330    52    60     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2702 BenchmarkTest02703 CWE-330    89    97     5 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2703 BenchmarkTest02704 CWE-330    47    52     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2704 BenchmarkTest02705 CWE-330    47    52     4 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2705 BenchmarkTest02706 CWE-330    66    76     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2706 BenchmarkTest02707 CWE-330    65    63     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2707 BenchmarkTest02708 CWE-330    75    79     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2708 BenchmarkTest02709 CWE-614    61    56     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2709 BenchmarkTest02710 CWE-614    61    56     0 d:\V2 Backup\benchmarks\benchmark_java.jsonl  
+ 2740 unknown            CWE-22     69    64     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2741 unknown            CWE-22     77    73     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2742 unknown            CWE-22     77    73     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2747 unknown            CWE-22     60    55     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2752 unknown            CWE-327    61    56     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2755 unknown            CWE-327    61    56     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2756 unknown            CWE-327    84    84     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2757 unknown            CWE-327    77    77     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2758 unknown            CWE-327    59    56     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2762 unknown            CWE-502    59    56     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2766 unknown            CWE-22     77    73     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2768 unknown            CWE-22     67    64     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2770 unknown            CWE-22     58    53     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2773 unknown            CWE-22     58    53     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2777 unknown            CWE-89     82    81     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2779 unknown            CWE-327    79    75     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2780 unknown            CWE-327    70    66     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2781 unknown            CWE-327    70    66     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2782 unknown            CWE-327    68    63     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2788 unknown            CWE-502    69    66     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2789 unknown            CWE-78     58    52     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2790 unknown            CWE-78     68    64     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2791 unknown            CWE-78     75    72     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2792 unknown            CWE-78     67    64     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2794 unknown            CWE-22     86    87     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2795 unknown            CWE-22     76    73     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2796 unknown            CWE-22     81    82     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2798 unknown            CWE-22    102   106     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2800 unknown            CWE-22    102   106     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2801 unknown            CWE-22     49    44     0 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2803 unknown            CWE-22     54    50     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2805 unknown            CWE-22     61    57     2 d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2809 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2813 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2814 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2815 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2816 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2821 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2822 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2823 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2824 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2826 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2830 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2831 unknown            CWE-89                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2832 unknown            CWE-89                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2836 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2837 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2838 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2839 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2840 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2843 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2844 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2845 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2846 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2853 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2855 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2859 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2864 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2865 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2867 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2869 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2870 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2871 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2874 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2875 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2880 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2881 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2885 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2886 unknown            CWE-89                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2887 unknown            CWE-89                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2888 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2889 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2890 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2891 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2895 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2899 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2902 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2903 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2907 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2908 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2914 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2917 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2920 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2922 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2923 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2924 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2925 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2927 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2928 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2933 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2934 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2935 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2938 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2940 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2941 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2943 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2946 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2947 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2948 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2949 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2950 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2951 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2954 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2955 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2958 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2963 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2966 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2968 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2969 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2970 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2971 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2975 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2976 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2977 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2978 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2980 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2981 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2983 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2985 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2987 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2988 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2995 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2996 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2997 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 2999 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3008 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3009 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3011 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3013 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3015 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3018 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3019 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3023 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3024 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3027 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3033 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3034 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3040 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3041 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3044 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3048 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3049 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3050 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3052 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3054 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3057 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3058 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3059 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3061 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3062 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3064 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3065 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3066 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3083 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3090 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3112 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3113 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3114 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3115 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3116 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3125 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3127 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3128 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3129 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3130 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3131 unknown            CWE-78                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3132 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3134 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3135 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3140 unknown            CWE-22                    d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3141 unknown            CWE-502                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+ 3145 unknown            CWE-327                   d:\V2 Backup\benchmarks\benchmark_python.jsonl
+
+

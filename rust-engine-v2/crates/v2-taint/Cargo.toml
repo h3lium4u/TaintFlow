@@ -1,0 +1,19 @@
+[package]
+name = "v2-taint"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+v2-common = { path = "../v2-common" }
+v2-ir = { path = "../v2-ir" }
+v2-cfg = { path = "../v2-cfg" }
+v2-callgraph = { path = "../v2-callgraph" }
+v2-icfg = { path = "../v2-icfg" }
+v2-solver = { path = "../v2-solver" }
+v2-accesspath = { path = "../v2-accesspath" }
+v2-pointsto = { path = "../v2-pointsto" }
+v2-alias = { path = "../v2-alias" }
+v2-rules = { path = "../v2-rules" }
+v2-semantic = { path = "../v2-semantic" }
+serde = { workspace = true }
+serde_json = { workspace = true }

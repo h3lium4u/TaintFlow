@@ -1,0 +1,38 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/v2-common",
+    "crates/v2-parser",
+    "crates/v2-semantic",
+    "crates/v2-ir",
+    "crates/v2-frontend-base",
+    "crates/v2-frontend-python",
+    "crates/v2-frontend-java",
+    "crates/v2-cfg",
+    "crates/v2-callgraph",
+    "crates/v2-solver",
+    "crates/v2-rules",
+    "crates/v2-taint",
+    "crates/v2-reporting",
+    "crates/v2-rulepacks",
+    "crates/v2-cli",
+    "crates/v2-icfg",
+    "crates/v2-scheduler",
+    "crates/v2-accesspath",
+    "crates/v2-pointsto",
+    "crates/v2-alias",
+    "crates/v2-workspace",
+    "crates/v2-context",
+    "crates/v2-engine",
+    "crates/v2-validation",
+    "crates/v2-benchmarks",
+]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
+rayon = "1.8"
+tree-sitter = "0.20.10"
+tree-sitter-python = "0.20.4"
+tree-sitter-java = "0.20.2"
+uuid = { version = "1.4", features = ["v4"] }

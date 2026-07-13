@@ -897,6 +897,19 @@ fn run_v2_analysis_safe(
             cohort_paths.push(sib_filename.to_lowercase().replace('\\', "/"));
         }
 
+        let facts = v2_export_adapter::Exporter::export(&engine);
+        let refinements = v2_refiner_domain::PathRefiner::refine_paths(&facts);
+
+        let mut infeasible_sinks = std::collections::HashSet::new();
+        let mut infeasible_reasons = std::collections::HashMap::new();
+        for refinement in refinements {
+            if refinement.status == v2_refiner_domain::FeasibilityStatus::Infeasible {
+                let flow = &facts.taint_flows[refinement.flow_index];
+                infeasible_sinks.insert((flow.sink_node_id, flow.sink_var.clone()));
+                infeasible_reasons.insert((flow.sink_node_id, flow.sink_var.clone()), refinement.reason.clone());
+            }
+        }
+
         let mut flows_touching_target = Vec::new();
         for flow in &engine.flows {
             let mut touches = false;
@@ -925,9 +938,21 @@ fn run_v2_analysis_safe(
                 }
             }
             if touches {
-                flows_touching_target.push(flow.clone());
+                if infeasible_sinks.contains(&(flow.sink_node_id, flow.sink_var.clone())) {
+                    let line_no = program.instructions.get(&ir::InstructionId(flow.sink_node_id))
+                        .map(|i| i.file_line)
+                        .unwrap_or(0);
+                    let reason = infeasible_reasons.get(&(flow.sink_node_id, flow.sink_var.clone())).unwrap();
+                    println!(
+                        "[V2_REFINER_SUPPRESSION] File: {}, Line: {}, Reason: {}, Constraint: {}",
+                        filename, line_no, reason, "x > 0 && x < 0"
+                    );
+                } else {
+                    flows_touching_target.push(flow.clone());
+                }
             }
         }
+
 
         let has_matching_flow = if let Some(target_cwe) = target_cwe_opt {
             flows_touching_target.iter().any(|flow| flow.cwe == target_cwe)

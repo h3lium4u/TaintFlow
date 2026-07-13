@@ -1,0 +1,521 @@
+==========================================
+ SUMMARY FOR BenchmarkTest00011
+==========================================
+Instructions (29 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 4: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 5: Entry/Exit
+  Node 6: Entry/Exit
+  Node 7: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(12)], else_block: Some([InstructionId(13)]) }
+  Node 8: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 9: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 10: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 12: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 13: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 14: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 15: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 16: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["param", "\"/Test.txt\""] }
+  Node 17: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["param", "\"/Test.txt\""] }
+  Node 18: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 19: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 20: Branch { cond: "(headers != null && headers.hasMoreElements())", then_block: [InstructionId(6)], else_block: None }
+  Node 21: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 22: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 23: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 24: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 25: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest00011\""] }
+  Node 26: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest00011\""] }
+  Node 27: Assign { dest: "param", src: "\"\"" }
+  Node 28: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 29: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00040
+==========================================
+Instructions (25 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(10)], else_block: Some([InstructionId(11)]) }
+  Node 4: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 5: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 6: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 7: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 8: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 9: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 10: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 12: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["param"] }
+  Node 13: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["param"] }
+  Node 14: Branch { cond: "(param == null)", then_block: [InstructionId(5)], else_block: None }
+  Node 15: Assign { dest: "param", src: "\"\"" }
+  Node 16: Call { dest: Some("param"), callee: "scr.getTheParameter", args: ["\"BenchmarkTest00040\""] }
+  Node 17: Call { dest: Some("param"), callee: "scr.getTheParameter", args: ["\"BenchmarkTest00040\""] }
+  Node 18: Call { dest: Some("scr"), callee: "new org.owasp.benchmark.helpers.SeparateClassRequest", args: ["request"] }
+  Node 19: Call { dest: Some("scr"), callee: "new org.owasp.benchmark.helpers.SeparateClassRequest", args: ["request"] }
+  Node 20: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 21: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 22: Entry/Exit
+  Node 23: Entry/Exit
+  Node 24: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 25: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00065
+==========================================
+Instructions (70 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Branch { cond: "(is != null)", then_block: [InstructionId(39)], else_block: None }
+  Node 4: Try { body: [InstructionId(36), InstructionId(37)], catches: [InstructionId(38)], finally: None }
+  Node 5: Assign { dest: "is", src: "null" }
+  Node 6: Call { dest: None, callee: "is.close", args: [] }
+  Node 7: Call { dest: None, callee: "is.close", args: [] }
+  Node 8: Catch { exception_var: Some("Exception e"), body: [] }
+  Node 9: Try { body: [InstructionId(26), InstructionId(27), InstructionId(28), InstructionId(29), InstructionId(30), InstructionId(31), InstructionId(32)], catches: [InstructionId(35)], finally: Some([InstructionId(40)]) }
+  Node 10: Call { dest: None, callee: "is.close", args: [] }
+  Node 11: Call { dest: None, callee: "is.close", args: [] }
+  Node 12: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["org.owasp.esapi.ESAPI.encoder().encodeForHTML(new String(b, 0, size))"] }
+  Node 13: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["org.owasp.esapi.ESAPI.encoder().encodeForHTML(new String(b, 0, size))"] }
+  Node 14: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"The beginning of file: '\"\n                                    + org.owasp.esapi.ESAPI.encoder().encodeForHTML(fileName)\n                                    + \"' is:\\n\\n\""] }
+  Node 15: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"The beginning of file: '\"\n                                    + org.owasp.esapi.ESAPI.encoder().encodeForHTML(fileName)\n                                    + \"' is:\\n\\n\""] }
+  Node 16: Call { dest: Some("size"), callee: "is.read", args: ["b"] }
+  Node 17: Call { dest: Some("size"), callee: "is.read", args: ["b"] }
+  Node 18: Assign { dest: "b", src: "new byte[1000]" }
+  Node 19: Call { dest: Some("is"), callee: "java.nio.file.Files.newInputStream", args: ["path", "java.nio.file.StandardOpenOption.READ"] }
+  Node 20: Call { dest: Some("is"), callee: "java.nio.file.Files.newInputStream", args: ["path", "java.nio.file.StandardOpenOption.READ"] }
+  Node 21: Call { dest: Some("path"), callee: "java.nio.file.Paths.get", args: ["fileName"] }
+  Node 22: Call { dest: Some("path"), callee: "java.nio.file.Paths.get", args: ["fileName"] }
+  Node 23: Catch { exception_var: Some("Exception e"), body: [InstructionId(33), InstructionId(34)] }
+  Node 24: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Problem getting InputStream: \"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(e.getMessage())"] }
+  Node 25: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Problem getting InputStream: \"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(e.getMessage())"] }
+  Node 26: Call { dest: None, callee: "System.out.println", args: ["\"Couldn't open InputStream on file: '\" + fileName + \"'\""] }
+  Node 27: Call { dest: None, callee: "System.out.println", args: ["\"Couldn't open InputStream on file: '\" + fileName + \"'\""] }
+  Node 28: Assign { dest: "is", src: "null" }
+  Node 29: Assign { dest: "fileName", src: "org.owasp.benchmark.helpers.Utils.TESTFILES_DIR + bar" }
+  Node 30: Branch { cond: "(param != null)", then_block: [InstructionId(22)], else_block: None }
+  Node 31: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 32: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 33: Assign { dest: "bar", src: "\"\"" }
+  Node 34: Branch { cond: "(theCookies != null)", then_block: [InstructionId(19)], else_block: None }
+  Node 35: Loop { cond: "javax.servlet.http.Cookie", body: [InstructionId(14), InstructionId(15), InstructionId(16), InstructionId(18)] }
+  Node 36: Branch { cond: "(theCookie.getName().equals(\"BenchmarkTest00065\"))", then_block: [InstructionId(17)], else_block: None }
+  Node 37: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 38: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 39: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 40: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 41: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00065\""] }
+  Node 42: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00065\""] }
+  Node 43: Assign { dest: "theCookie", src: "theCookies" }
+  Node 44: Assign { dest: "param", src: "\"noCookieValueSupplied\"" }
+  Node 45: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 46: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 47: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 48: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 49: Entry/Exit
+  Node 50: Entry/Exit
+  Node 51: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 52: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 53: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-00/BenchmarkTest00065.html\""] }
+  Node 54: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-00/BenchmarkTest00065.html\""] }
+  Node 55: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 56: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 57: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 58: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 59: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 60: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 61: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 62: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 63: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 64: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 65: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 66: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 67: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00065\"", "\"FileName\""] }
+  Node 68: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00065\"", "\"FileName\""] }
+  Node 69: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 70: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00060
+==========================================
+Instructions (54 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 4: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 5: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-00/BenchmarkTest00060.html\""] }
+  Node 6: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-00/BenchmarkTest00060.html\""] }
+  Node 7: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 8: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 9: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 10: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 11: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 12: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 13: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 14: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 15: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 16: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 17: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 18: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 19: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00060\"", "\"FileName\""] }
+  Node 20: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00060\"", "\"FileName\""] }
+  Node 21: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 22: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 23: Entry/Exit
+  Node 24: Entry/Exit
+  Node 25: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(27)], else_block: Some([InstructionId(28)]) }
+  Node 26: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 27: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 28: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 29: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 30: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 31: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 32: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 33: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 34: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)", "bar"] }
+  Node 35: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["new java.io.File(org.owasp.benchmark.helpers.Utils.TESTFILES_DIR)", "bar"] }
+  Node 36: Branch { cond: "(param != null)", then_block: [InstructionId(22)], else_block: None }
+  Node 37: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 38: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 39: Assign { dest: "bar", src: "\"\"" }
+  Node 40: Branch { cond: "(theCookies != null)", then_block: [InstructionId(19)], else_block: None }
+  Node 41: Loop { cond: "javax.servlet.http.Cookie", body: [InstructionId(14), InstructionId(15), InstructionId(16), InstructionId(18)] }
+  Node 42: Branch { cond: "(theCookie.getName().equals(\"BenchmarkTest00060\"))", then_block: [InstructionId(17)], else_block: None }
+  Node 43: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 44: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 45: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 46: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 47: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00060\""] }
+  Node 48: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00060\""] }
+  Node 49: Assign { dest: "theCookie", src: "theCookies" }
+  Node 50: Assign { dest: "param", src: "\"noCookieValueSupplied\"" }
+  Node 51: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 52: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 53: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 54: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: 
+  Flows detected: 4
+  Flow CWE: CWE22, sink_node: 35, sink_var: bar
+  Flow CWE: CWE22, sink_node: 35, sink_var: new java.io
+  Flow CWE: CWE22, sink_node: 34, sink_var: bar
+  Flow CWE: CWE22, sink_node: 34, sink_var: new java.io
+
+==========================================
+ SUMMARY FOR BenchmarkTest00262
+==========================================
+Instructions (36 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(23)], else_block: Some([InstructionId(24)]) }
+  Node 4: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 5: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 6: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 7: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 8: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 9: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 10: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 12: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 13: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 14: Branch { cond: "switchTarget == 'A'", then_block: [InstructionId(11)], else_block: Some([InstructionId(18)]) }
+  Node 15: Branch { cond: "switchTarget == 'B'", then_block: [InstructionId(12)], else_block: Some([InstructionId(17)]) }
+  Node 16: Branch { cond: "switchTarget == 'C'", then_block: [InstructionId(16)], else_block: Some([InstructionId(15)]) }
+  Node 17: Assign { dest: "bar", src: "param" }
+  Node 18: Call { dest: Some("switchTarget"), callee: "guess.charAt", args: ["2"] }
+  Node 19: Call { dest: Some("switchTarget"), callee: "guess.charAt", args: ["2"] }
+  Node 20: Assign { dest: "guess", src: "\"ABC\"" }
+  Node 21: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 22: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 23: Branch { cond: "(headers != null && headers.hasMoreElements())", then_block: [InstructionId(6)], else_block: None }
+  Node 24: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 25: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 26: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 27: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 28: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest00262\""] }
+  Node 29: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest00262\""] }
+  Node 30: Assign { dest: "param", src: "\"\"" }
+  Node 31: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 32: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 33: Entry/Exit
+  Node 34: Entry/Exit
+  Node 35: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 36: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00697
+==========================================
+Instructions (28 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 4: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 5: Entry/Exit
+  Node 6: Entry/Exit
+  Node 7: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(13)], else_block: Some([InstructionId(14)]) }
+  Node 8: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 9: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 10: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 12: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 13: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 14: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 15: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 16: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 17: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 18: Branch { cond: "(param != null)", then_block: [InstructionId(8)], else_block: None }
+  Node 19: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 20: Call { dest: Some("bar"), callee: "new String", args: ["org.apache.commons.codec.binary.Base64.decodeBase64(\n                                    org.apache.commons.codec.binary.Base64.encodeBase64(\n                                            param.getBytes()))"] }
+  Node 21: Assign { dest: "bar", src: "\"\"" }
+  Node 22: Branch { cond: "(values != null && values.length > 0)", then_block: [InstructionId(4)], else_block: Some([InstructionId(5)]) }
+  Node 23: Assign { dest: "param", src: "values[0]" }
+  Node 24: Assign { dest: "param", src: "\"\"" }
+  Node 25: Call { dest: Some("values"), callee: "request.getParameterValues", args: ["\"BenchmarkTest00697\""] }
+  Node 26: Call { dest: Some("values"), callee: "request.getParameterValues", args: ["\"BenchmarkTest00697\""] }
+  Node 27: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 28: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00698
+==========================================
+Instructions (28 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 4: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 5: Entry/Exit
+  Node 6: Entry/Exit
+  Node 7: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(12)], else_block: Some([InstructionId(13)]) }
+  Node 8: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 9: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 10: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 12: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 13: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 14: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 15: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 16: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar", "\"/Test.txt\""] }
+  Node 17: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar", "\"/Test.txt\""] }
+  Node 18: Call { dest: Some("bar"), callee: "thing.doSomething", args: ["param"] }
+  Node 19: Call { dest: Some("bar"), callee: "thing.doSomething", args: ["param"] }
+  Node 20: Call { dest: Some("thing"), callee: "org.owasp.benchmark.helpers.ThingFactory.createThing", args: [] }
+  Node 21: Call { dest: Some("thing"), callee: "org.owasp.benchmark.helpers.ThingFactory.createThing", args: [] }
+  Node 22: Branch { cond: "(values != null && values.length > 0)", then_block: [InstructionId(4)], else_block: Some([InstructionId(5)]) }
+  Node 23: Assign { dest: "param", src: "values[0]" }
+  Node 24: Assign { dest: "param", src: "\"\"" }
+  Node 25: Call { dest: Some("values"), callee: "request.getParameterValues", args: ["\"BenchmarkTest00698\""] }
+  Node 26: Call { dest: Some("values"), callee: "request.getParameterValues", args: ["\"BenchmarkTest00698\""] }
+  Node 27: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 28: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest00952
+==========================================
+Instructions (80 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 4: Call { dest: None, callee: "rd.include", args: ["request", "response"] }
+  Node 5: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-01/BenchmarkTest00952.html\""] }
+  Node 6: Call { dest: Some("rd"), callee: "request.getRequestDispatcher", args: ["\"/pathtraver-01/BenchmarkTest00952.html\""] }
+  Node 7: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 8: Call { dest: None, callee: "response.addCookie", args: ["userCookie"] }
+  Node 9: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 10: Call { dest: None, callee: "userCookie.setDomain", args: ["new java.net.URL(request.getRequestURL().toString()).getHost()"] }
+  Node 11: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 12: Call { dest: None, callee: "userCookie.setPath", args: ["request.getRequestURI()"] }
+  Node 13: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 14: Call { dest: None, callee: "userCookie.setHttpOnly", args: ["true"] }
+  Node 15: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 16: Call { dest: None, callee: "userCookie.setSecure", args: ["true"] }
+  Node 17: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 18: Call { dest: None, callee: "userCookie.setMaxAge", args: ["60 * 3"] }
+  Node 19: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00952\"", "\"FileName\""] }
+  Node 20: Call { dest: Some("userCookie"), callee: "new javax.servlet.http.Cookie", args: ["\"BenchmarkTest00952\"", "\"FileName\""] }
+  Node 21: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 22: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 23: Entry/Exit
+  Node 24: Entry/Exit
+  Node 25: Return { val: Some("bar") }
+  Node 26: Branch { cond: "switchTarget == 'A'", then_block: [InstructionId(43)], else_block: Some([InstructionId(50)]) }
+  Node 27: Branch { cond: "switchTarget == 'B'", then_block: [InstructionId(44)], else_block: Some([InstructionId(49)]) }
+  Node 28: Branch { cond: "switchTarget == 'C'", then_block: [InstructionId(48)], else_block: Some([InstructionId(47)]) }
+  Node 29: Assign { dest: "bar", src: "param" }
+  Node 30: Call { dest: Some("switchTarget"), callee: "guess.charAt", args: ["2"] }
+  Node 31: Call { dest: Some("switchTarget"), callee: "guess.charAt", args: ["2"] }
+  Node 32: Assign { dest: "guess", src: "\"ABC\"" }
+  Node 33: Entry/Exit
+  Node 34: Entry/Exit
+  Node 35: Try { body: [InstructionId(31), InstructionId(32), InstructionId(33), InstructionId(34), InstructionId(37)], catches: [InstructionId(39)], finally: None }
+  Node 36: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(35)], else_block: Some([InstructionId(36)]) }
+  Node 37: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 38: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 39: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 40: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 41: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 42: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 43: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Access to file: '\"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(fileTarget.toString())\n                                    + \"' created.\""] }
+  Node 44: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Access to file: '\"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(fileTarget.toString())\n                                    + \"' created.\""] }
+  Node 45: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["fileURI"] }
+  Node 46: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["fileURI"] }
+  Node 47: Call { dest: Some("fileURI"), callee: "new java.net.URI", args: ["\"file\"", "null", "startURIslashes\n                                    + org.owasp.benchmark.helpers.Utils.TESTFILES_DIR\n                                            .replace('\\\\', java.io.File.separatorChar)\n                                            .replace(' ', '_')\n                                    + bar", "null", "null"] }
+  Node 48: Call { dest: Some("fileURI"), callee: "new java.net.URI", args: ["\"file\"", "null", "startURIslashes\n                                    + org.owasp.benchmark.helpers.Utils.TESTFILES_DIR\n                                            .replace('\\\\', java.io.File.separatorChar)\n                                            .replace(' ', '_')\n                                    + bar", "null", "null"] }
+  Node 49: Catch { exception_var: Some("java.net.URISyntaxException e"), body: [InstructionId(38)] }
+  Node 50: Throw { val: "new ServletException(e)" }
+  Node 51: Branch { cond: "(System.getProperty(\"os.name\").indexOf(\"Windows\") != -1)", then_block: [InstructionId(25), InstructionId(26), InstructionId(29)], else_block: None }
+  Node 52: Branch { cond: "(System.getProperty(\"os.name\").indexOf(\"Windows\") != -1)", then_block: [InstructionId(27)], else_block: Some([InstructionId(28)]) }
+  Node 53: Assign { dest: "startURIslashes", src: "\"/\"" }
+  Node 54: Assign { dest: "startURIslashes", src: "\"//\"" }
+  Node 55: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 56: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 57: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 58: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 59: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 60: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 61: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 62: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 63: Assign { dest: "startURIslashes", src: "\"\"" }
+  Node 64: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 65: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 66: Branch { cond: "(theCookies != null)", then_block: [InstructionId(19)], else_block: None }
+  Node 67: Loop { cond: "javax.servlet.http.Cookie", body: [InstructionId(14), InstructionId(15), InstructionId(16), InstructionId(18)] }
+  Node 68: Branch { cond: "(theCookie.getName().equals(\"BenchmarkTest00952\"))", then_block: [InstructionId(17)], else_block: None }
+  Node 69: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 70: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["theCookie.getValue()", "\"UTF-8\""] }
+  Node 71: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 72: Call { dest: None, callee: "theCookie.getName", args: [] }
+  Node 73: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00952\""] }
+  Node 74: Call { dest: None, callee: "theCookie.getName().equals", args: ["\"BenchmarkTest00952\""] }
+  Node 75: Assign { dest: "theCookie", src: "theCookies" }
+  Node 76: Assign { dest: "param", src: "\"noCookieValueSupplied\"" }
+  Node 77: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 78: Call { dest: Some("theCookies"), callee: "request.getCookies", args: [] }
+  Node 79: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 80: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest01155
+==========================================
+Instructions (48 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(13)], else_block: Some([InstructionId(14)]) }
+  Node 4: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 5: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 6: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 7: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 8: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 9: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 10: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 11: Call { dest: None, callee: "response.getWriter()\n                .println", args: ["\"Access to file: '\"\n                                + org.owasp\n                                        .esapi\n                                        .ESAPI\n                                        .encoder()\n                                        .encodeForHTML(fileTarget.toString())\n                                + \"' created.\""] }
+  Node 12: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 13: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["bar"] }
+  Node 14: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 15: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 16: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 17: Call { dest: Some("param"), callee: "java.net.URLDecoder.decode", args: ["param", "\"UTF-8\""] }
+  Node 18: Branch { cond: "(headers != null && headers.hasMoreElements())", then_block: [InstructionId(6)], else_block: None }
+  Node 19: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 20: Call { dest: Some("param"), callee: "headers.nextElement", args: [] }
+  Node 21: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 22: Call { dest: None, callee: "headers.hasMoreElements", args: [] }
+  Node 23: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest01155\""] }
+  Node 24: Call { dest: Some("headers"), callee: "request.getHeaders", args: ["\"BenchmarkTest01155\""] }
+  Node 25: Assign { dest: "param", src: "\"\"" }
+  Node 26: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 27: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 28: Entry/Exit
+  Node 29: Entry/Exit
+  Node 30: Return { val: Some("bar") }
+  Node 31: Branch { cond: "(param != null)", then_block: [InstructionId(17), InstructionId(18), InstructionId(19), InstructionId(20), InstructionId(21), InstructionId(22)], else_block: None }
+  Node 32: Call { dest: Some("bar"), callee: "valuesList.get", args: ["0"] }
+  Node 33: Call { dest: Some("bar"), callee: "valuesList.get", args: ["0"] }
+  Node 34: Call { dest: None, callee: "valuesList.remove", args: ["0"] }
+  Node 35: Call { dest: None, callee: "valuesList.remove", args: ["0"] }
+  Node 36: Call { dest: None, callee: "valuesList.add", args: ["\"moresafe\""] }
+  Node 37: Call { dest: None, callee: "valuesList.add", args: ["\"moresafe\""] }
+  Node 38: Call { dest: None, callee: "valuesList.add", args: ["param"] }
+  Node 39: Call { dest: None, callee: "valuesList.add", args: ["param"] }
+  Node 40: Call { dest: None, callee: "valuesList.add", args: ["\"safe\""] }
+  Node 41: Call { dest: None, callee: "valuesList.add", args: ["\"safe\""] }
+  Node 42: Call { dest: Some("valuesList"), callee: "new java.util.ArrayList<String>", args: [] }
+  Node 43: Call { dest: Some("valuesList"), callee: "new java.util.ArrayList<String>", args: [] }
+  Node 44: Assign { dest: "bar", src: "\"\"" }
+  Node 45: Entry/Exit
+  Node 46: Entry/Exit
+  Node 47: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 48: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+Flows: NONE
+  Flows detected: 0
+
+==========================================
+ SUMMARY FOR BenchmarkTest01236
+==========================================
+Instructions (50 nodes):
+  Node 1: Entry/Exit
+  Node 2: Entry/Exit
+  Node 3: Try { body: [InstructionId(16), InstructionId(17), InstructionId(18), InstructionId(19), InstructionId(22)], catches: [InstructionId(24)], finally: None }
+  Node 4: Branch { cond: "(fileTarget.exists())", then_block: [InstructionId(20)], else_block: Some([InstructionId(21)]) }
+  Node 5: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 6: Call { dest: None, callee: "response.getWriter().println", args: ["\" And file already exists.\""] }
+  Node 7: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 8: Call { dest: None, callee: "response.getWriter().println", args: ["\" But file doesn't exist yet.\""] }
+  Node 9: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 10: Call { dest: None, callee: "fileTarget.exists", args: [] }
+  Node 11: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Access to file: '\"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(fileTarget.toString())\n                                    + \"' created.\""] }
+  Node 12: Call { dest: None, callee: "response.getWriter()\n                    .println", args: ["\"Access to file: '\"\n                                    + org.owasp\n                                            .esapi\n                                            .ESAPI\n                                            .encoder()\n                                            .encodeForHTML(fileTarget.toString())\n                                    + \"' created.\""] }
+  Node 13: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["fileURI"] }
+  Node 14: Call { dest: Some("fileTarget"), callee: "new java.io.File", args: ["fileURI"] }
+  Node 15: Call { dest: Some("fileURI"), callee: "new java.net.URI", args: ["\"file:\"\n                                    + startURIslashes\n                                    + org.owasp.benchmark.helpers.Utils.TESTFILES_DIR\n                                            .replace('\\\\', '/')\n                                            .replace(' ', '_')\n                                    + bar"] }
+  Node 16: Call { dest: Some("fileURI"), callee: "new java.net.URI", args: ["\"file:\"\n                                    + startURIslashes\n                                    + org.owasp.benchmark.helpers.Utils.TESTFILES_DIR\n                                            .replace('\\\\', '/')\n                                            .replace(' ', '_')\n                                    + bar"] }
+  Node 17: Catch { exception_var: Some("java.net.URISyntaxException e"), body: [InstructionId(23)] }
+  Node 18: Throw { val: "new ServletException(e)" }
+  Node 19: Branch { cond: "(System.getProperty(\"os.name\").indexOf(\"Windows\") != -1)", then_block: [InstructionId(10), InstructionId(11), InstructionId(14)], else_block: None }
+  Node 20: Branch { cond: "(System.getProperty(\"os.name\").indexOf(\"Windows\") != -1)", then_block: [InstructionId(12)], else_block: Some([InstructionId(13)]) }
+  Node 21: Assign { dest: "startURIslashes", src: "\"/\"" }
+  Node 22: Assign { dest: "startURIslashes", src: "\"//\"" }
+  Node 23: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 24: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 25: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 26: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 27: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 28: Call { dest: None, callee: "System.getProperty", args: ["\"os.name\""] }
+  Node 29: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 30: Call { dest: None, callee: "System.getProperty(\"os.name\").indexOf", args: ["\"Windows\""] }
+  Node 31: Assign { dest: "startURIslashes", src: "\"\"" }
+  Node 32: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 33: Call { dest: Some("bar"), callee: "new Test().doSomething", args: ["request", "param"] }
+  Node 34: Branch { cond: "(param == null)", then_block: [InstructionId(4)], else_block: None }
+  Node 35: Assign { dest: "param", src: "\"\"" }
+  Node 36: Call { dest: Some("param"), callee: "request.getParameter", args: ["\"BenchmarkTest01236\""] }
+  Node 37: Call { dest: Some("param"), callee: "request.getParameter", args: ["\"BenchmarkTest01236\""] }
+  Node 38: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 39: Call { dest: None, callee: "response.setContentType", args: ["\"text/html;charset=UTF-8\""] }
+  Node 40: Entry/Exit
+  Node 41: Entry/Exit
+  Node 42: Return { val: Some("bar") }
+  Node 43: Call { dest: Some("bar"), callee: "thing.doSomething", args: ["param"] }
+  Node 44: Call { dest: Some("bar"), callee: "thing.doSomething", args: ["param"] }
+  Node 45: Call { dest: Some("thing"), callee: "org.owasp.benchmark.helpers.ThingFactory.createThing", args: [] }
+  Node 46: Call { dest: Some("thing"), callee: "org.owasp.benchmark.helpers.ThingFactory.createThing", args: [] }
+  Node 47: Entry/Exit
+  Node 48: Entry/Exit
+  Node 49: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+  Node 50: Call { dest: None, callee: "doPost", args: ["request", "response"] }
+Flows: NONE
+  Flows detected: 0

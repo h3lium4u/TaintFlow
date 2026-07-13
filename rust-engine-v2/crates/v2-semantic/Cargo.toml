@@ -1,0 +1,10 @@
+[package]
+name = "v2-semantic"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-parser = { path = "../v2-parser" }
+v2-ir = { path = "../v2-ir" }

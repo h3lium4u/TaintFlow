@@ -1,0 +1,16 @@
+[package]
+name = "v2-alias"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-ir = { path = "../v2-ir" }
+v2-cfg = { path = "../v2-cfg" }
+v2-icfg = { path = "../v2-icfg" }
+v2-accesspath = { path = "../v2-accesspath" }
+v2-pointsto = { path = "../v2-pointsto" }
+v2-callgraph = { path = "../v2-callgraph" }
+v2-semantic = { path = "../v2-semantic" }

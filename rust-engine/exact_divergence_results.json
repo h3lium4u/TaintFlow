@@ -1,0 +1,432 @@
+[
+  {
+    "benchmark_id": "BenchmarkTest00063",
+    "guard_expression": "if (theCookies != null) {",
+    "guard_variable": "theCookies",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest00064",
+    "guard_expression": "if (theCookies != null) {",
+    "guard_variable": "theCookies",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest00134",
+    "guard_expression": "if (request.getHeader(\"BenchmarkTest00134\") != null) {",
+    "guard_variable": "request.getHeader(...)",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": true,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest00221",
+    "guard_expression": "if (values != null && values.hasMoreElements()) {",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest00265",
+    "guard_expression": "if (headers != null && headers.hasMoreElements()) {",
+    "guard_variable": "headers",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest00364",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00620",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00626",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00862",
+    "guard_expression": "N/A",
+    "guard_variable": "N/A",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00864",
+    "guard_expression": "if (param != null) {",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00865",
+    "guard_expression": "if (param != null) {",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest00951",
+    "guard_expression": "if (theCookies != null) {",
+    "guard_variable": "theCookies",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01027",
+    "guard_expression": "if (request.getHeader(\"BenchmarkTest01027\") != null) {",
+    "guard_variable": "request.getHeader(...)",
+    "tainted_variable": "param",
+    "sink_variable": "bar",
+    "equals": false,
+    "aliases": true,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01028",
+    "guard_expression": "if (request.getHeader(\"BenchmarkTest01028\") != null) {",
+    "guard_variable": "request.getHeader(...)",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": false,
+    "aliases": true,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01031",
+    "guard_expression": "if (request.getHeader(\"BenchmarkTest01031\") != null) {",
+    "guard_variable": "request.getHeader(...)",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": true,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01158",
+    "guard_expression": "if (headers != null && headers.hasMoreElements()) {",
+    "guard_variable": "headers",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01239",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01240",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01331",
+    "guard_expression": "if (values != null) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01570",
+    "guard_expression": "if (values != null && values.length > 0) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01573",
+    "guard_expression": "if (values != null && values.length > 0) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest01644",
+    "guard_expression": "if (queryString != null) paramLoc = queryString.indexOf(paramval);",
+    "guard_variable": "queryString",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01745",
+    "guard_expression": "N/A",
+    "guard_variable": "N/A",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01746",
+    "guard_expression": "N/A",
+    "guard_variable": "N/A",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01748",
+    "guard_expression": "if (fis != null) {",
+    "guard_variable": "fis",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01749",
+    "guard_expression": "if (fis != null) {",
+    "guard_variable": "fis",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01751",
+    "guard_expression": "if (fos != null) {",
+    "guard_variable": "fos",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01752",
+    "guard_expression": "N/A",
+    "guard_variable": "N/A",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest01837",
+    "guard_expression": "if (theCookies != null) {",
+    "guard_variable": "theCookies",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02026",
+    "guard_expression": "if (headers != null && headers.hasMoreElements()) {",
+    "guard_variable": "headers",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02031",
+    "guard_expression": "if (headers != null && headers.hasMoreElements()) {",
+    "guard_variable": "headers",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02110",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02111",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02200",
+    "guard_expression": "if (values != null) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "bar",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02204",
+    "guard_expression": "if (values != null) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02301",
+    "guard_expression": "if (values != null) {",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "bar",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02379",
+    "guard_expression": "if (param == null) param = \"\";",
+    "guard_variable": "param",
+    "tainted_variable": "param",
+    "sink_variable": "fileURI",
+    "equals": true,
+    "aliases": true,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02468",
+    "guard_expression": "if (values != null && values.length > 0) param = values[0];",
+    "guard_variable": "values",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": true
+  },
+  {
+    "benchmark_id": "BenchmarkTest02554",
+    "guard_expression": "if (queryString != null) paramLoc = queryString.indexOf(paramval);",
+    "guard_variable": "queryString",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02557",
+    "guard_expression": "if (queryString != null) paramLoc = queryString.indexOf(paramval);",
+    "guard_variable": "queryString",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02666",
+    "guard_expression": "if (fis != null) {",
+    "guard_variable": "fis",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02668",
+    "guard_expression": "if (fos != null) {",
+    "guard_variable": "fos",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  },
+  {
+    "benchmark_id": "BenchmarkTest02669",
+    "guard_expression": "if (fos != null) {",
+    "guard_variable": "fos",
+    "tainted_variable": "param",
+    "sink_variable": "fileName",
+    "equals": false,
+    "aliases": false,
+    "is_container": false
+  }
+]

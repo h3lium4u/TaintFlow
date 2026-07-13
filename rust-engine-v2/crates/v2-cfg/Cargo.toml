@@ -1,0 +1,9 @@
+[package]
+name = "v2-cfg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-ir = { path = "../v2-ir" }

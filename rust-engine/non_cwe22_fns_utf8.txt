@@ -1,0 +1,378 @@
+﻿--- Non-CWE-22 FN #1 at line 30412 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 85, edges: 92
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=3.8695ms siblings=300ns mocks=400ns cg_icfg=480.2┬╡s engine=1.5767917s nodes=96 edges=103
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 96, edges: 103
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+--- Non-CWE-22 FN #2 at line 30423 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 96, edges: 103
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.6209ms siblings=100ns mocks=400ns cg_icfg=1.2025ms engine=1.3449514s nodes=84 edges=92
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.9465ms siblings=300ns mocks=600ns cg_icfg=301.4┬╡s engine=1.1563001s nodes=72 edges=79
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #3 at line 31853 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_327.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=2.4198ms siblings=100ns mocks=400ns cg_icfg=340.5┬╡s engine=866.3761ms nodes=70 edges=77
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_327.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=4.4409ms siblings=300ns mocks=500ns cg_icfg=436.8┬╡s engine=1.1513976s nodes=89 edges=95
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_327.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=5.7235ms siblings=400ns mocks=600ns cg_icfg=461.1┬╡s engine=1.1629049s nodes=67 edges=73
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.3824ms siblings=200ns mocks=700ns cg_icfg=190.8┬╡s engine=136.4019ms nodes=33 edges=37
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.0162ms siblings=100ns mocks=400ns cg_icfg=230.5┬╡s engine=271.1583ms nodes=51 edges=58
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 51, edges: 58
+  [FN_DIAGNOSTIC] Program Methods:
+--- Non-CWE-22 FN #4 at line 35284 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 59, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=3.0085ms siblings=300ns mocks=500ns cg_icfg=416.4┬╡s engine=97.8922ms nodes=81 edges=85
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.0486ms siblings=100ns mocks=300ns cg_icfg=295.5┬╡s engine=66.769ms nodes=62 edges=67
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.1885ms siblings=200ns mocks=400ns cg_icfg=161.7┬╡s engine=55.5705ms nodes=32 edges=32
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=2.385ms siblings=300ns mocks=400ns cg_icfg=125.8┬╡s engine=24.9503ms nodes=20 edges=21
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=2.0868ms siblings=100ns mocks=400ns cg_icfg=116.9┬╡s engine=27.1386ms nodes=19 edges=19
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #5 at line 36916 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 80, edges: 88
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_327.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=3.2522ms siblings=200ns mocks=500ns cg_icfg=352.6┬╡s engine=981.2034ms nodes=81 edges=90
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.0679ms siblings=100ns mocks=300ns cg_icfg=311.1┬╡s engine=419.1005ms nodes=68 edges=75
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.1322ms siblings=100ns mocks=400ns cg_icfg=291┬╡s engine=320.8773ms nodes=66 edges=74
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.916ms siblings=200ns mocks=400ns cg_icfg=237.8┬╡s engine=914.6371ms nodes=56 edges=63
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.9673ms siblings=100ns mocks=500ns cg_icfg=255.6┬╡s engine=478.3395ms nodes=60 edges=67
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.2522ms siblings=100ns mocks=400ns cg_icfg=273.1┬╡s engine=346.0106ms nodes=63 edges=70
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #6 at line 36955 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 90, edges: 98
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.7366ms siblings=400ns mocks=500ns cg_icfg=361.9┬╡s engine=550.1268ms nodes=79 edges=89
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.4196ms siblings=100ns mocks=400ns cg_icfg=332.6┬╡s engine=480.4206ms nodes=78 edges=86
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_330.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #7 at line 37246 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 73, edges: 79
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 23, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: input
+    Flow CWE: CWE328, sink_node: 22, sink_var: md
+    Flow CWE: CWE328, sink_node: 20, sink_var: md
+    Flow CWE: CWE328, sink_node: 21, sink_var: md
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.2543ms siblings=200ns mocks=300ns cg_icfg=306.8┬╡s engine=612.2658ms nodes=68 edges=74
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=3.4496ms siblings=300ns mocks=500ns cg_icfg=338.8┬╡s engine=557.2803ms nodes=70 edges=76
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.2907ms siblings=200ns mocks=400ns cg_icfg=180.3┬╡s engine=127.6023ms nodes=36 edges=39
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.2926ms siblings=100ns mocks=300ns cg_icfg=206.7┬╡s engine=129.869ms nodes=40 edges=42
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.3167ms siblings=100ns mocks=800ns cg_icfg=209.9┬╡s engine=121.0968ms nodes=41 edges=44
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #8 at line 39102 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 84, edges: 91
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 15, sink_var: input
+    Flow CWE: CWE327, sink_node: 14, sink_var: input
+    Flow CWE: CWE327, sink_node: 14, sink_var: c
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=4.4297ms siblings=300ns mocks=500ns cg_icfg=1.4312ms engine=691.0347ms nodes=70 edges=79
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=2.5638ms siblings=200ns mocks=300ns cg_icfg=359.7┬╡s engine=371.8197ms nodes=81 edges=89
+[FP_DIAGNOSTIC] Repo: OWASP, CWE: CWE-90, Commit: 
+  [FP_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.6206ms siblings=200ns mocks=400ns cg_icfg=362.3┬╡s engine=449.9647ms nodes=78 edges=87
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.0425ms siblings=100ns mocks=400ns cg_icfg=306.6┬╡s engine=296.422ms nodes=66 edges=74
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 66, edges: 74
+  [FN_DIAGNOSTIC] Program Methods:
+--- Non-CWE-22 FN #9 at line 40503 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 65, edges: 71
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.5394ms siblings=200ns mocks=400ns cg_icfg=357.2┬╡s engine=505.6314ms nodes=76 edges=83
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_328.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-328 target=2.4905ms siblings=500ns mocks=500ns cg_icfg=359.9┬╡s engine=301.7298ms nodes=77 edges=83
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.286ms siblings=100ns mocks=300ns cg_icfg=149.3┬╡s engine=111.0301ms nodes=33 edges=35
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.043ms siblings=100ns mocks=400ns cg_icfg=171.8┬╡s engine=51.501ms nodes=26 edges=28
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.1774ms siblings=200ns mocks=500ns cg_icfg=121.4┬╡s engine=84.6134ms nodes=25 edges=27
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #10 at line 40992 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 94, edges: 102
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 18, sink_var: input
+    Flow CWE: CWE327, sink_node: 19, sink_var: input
+    Flow CWE: CWE327, sink_node: 18, sink_var: c
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.8156ms siblings=300ns mocks=700ns cg_icfg=269.7┬╡s engine=308.9713ms nodes=48 edges=55
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.1465ms siblings=200ns mocks=500ns cg_icfg=304.8┬╡s engine=477.0257ms nodes=65 edges=73
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 65, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 4
+    Flow CWE: CWE79, sink_node: 18, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 17, sink_var: new java.io
+    Flow CWE: CWE79, sink_node: 17, sink_var: fileURI
+    Flow CWE: CWE79, sink_node: 18, sink_var: new java.io
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #11 at line 41939 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 93, edges: 99
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 43, sink_var: input
+    Flow CWE: CWE327, sink_node: 42, sink_var: input
+    Flow CWE: CWE327, sink_node: 42, sink_var: c
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=2.9379ms siblings=200ns mocks=500ns cg_icfg=420.8┬╡s engine=461.9443ms nodes=91 edges=99
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=2.8497ms siblings=100ns mocks=400ns cg_icfg=416.4┬╡s engine=395.7776ms nodes=90 edges=97
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.0537ms siblings=800ns mocks=500ns cg_icfg=326.3┬╡s engine=232.1107ms nodes=67 edges=70
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.474ms siblings=200ns mocks=500ns cg_icfg=307.2┬╡s engine=156.7311ms nodes=61 edges=64
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.8027ms siblings=100ns mocks=300ns cg_icfg=273.8┬╡s engine=141.6651ms nodes=58 edges=61
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.2958ms siblings=100ns mocks=400ns cg_icfg=363.2┬╡s engine=250.4896ms nodes=85 edges=91
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+--- Non-CWE-22 FN #12 at line 42916 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-327, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 75
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 3
+    Flow CWE: CWE327, sink_node: 14, sink_var: c
+    Flow CWE: CWE327, sink_node: 14, sink_var: input
+    Flow CWE: CWE327, sink_node: 15, sink_var: input
+  Progress: 1900/3149
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_327.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=2.3582ms siblings=200ns mocks=500ns cg_icfg=351.1┬╡s engine=496.2242ms nodes=70 edges=76
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=2.918ms siblings=100ns mocks=400ns cg_icfg=364.3┬╡s engine=591.1188ms nodes=76 edges=84
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_90.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-90 target=3.4072ms siblings=400ns mocks=400ns cg_icfg=316.9┬╡s engine=391.1421ms nodes=65 edges=72
+[FP_DIAGNOSTIC] Repo: OWASP, CWE: CWE-90, Commit: 
+  [FP_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_22.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.4361ms siblings=200ns mocks=500ns cg_icfg=203.5┬╡s engine=121.3242ms nodes=43 edges=46
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 43, edges: 46
+--- Non-CWE-22 FN #13 at line 47272 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-328, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 89, edges: 97
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 5
+    Flow CWE: CWE328, sink_node: 18, sink_var: md
+    Flow CWE: CWE328, sink_node: 17, sink_var: md
+    Flow CWE: CWE328, sink_node: 19, sink_var: input
+    Flow CWE: CWE328, sink_node: 18, sink_var: input
+    Flow CWE: CWE328, sink_node: 16, sink_var: md
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.1283ms siblings=400ns mocks=400ns cg_icfg=165.2┬╡s engine=41.2735ms nodes=26 edges=28
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.0751ms siblings=200ns mocks=400ns cg_icfg=160.9┬╡s engine=96.9336ms nodes=30 edges=33
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.6245ms siblings=100ns mocks=400ns cg_icfg=244.8┬╡s engine=227.1182ms nodes=49 edges=53
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.4474ms siblings=200ns mocks=500ns cg_icfg=1.2527ms engine=127.6903ms nodes=30 edges=33
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-79 target=1.1457ms siblings=100ns mocks=400ns cg_icfg=134.7┬╡s engine=26.0358ms nodes=25 edges=27
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: Test_CWE_79.java, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #14 at line 49728 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-78, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 69, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.2285ms siblings=200ns mocks=1.3┬╡s cg_icfg=213.9┬╡s engine=44.6498ms nodes=78 edges=77
+[FP_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FP_DIAGNOSTIC] Flows detected: 2
+    Flow CWE: CWE22, sink_node: 18, sink_var: bar
+      [0] node=36 method='init' var='values' inst=Some(Call { dest: Some("values"), callee: "request.form.getlist", args: ["\"BenchmarkTest00170\""] })
+      [1] node=35 method='init' var='values' inst=Some(Assign { dest: "param", src: "\"\"" })
+      [2] node=33 method='init' var='values' inst=Some(Branch { cond: "values", then_block: [InstructionId(8)], else_block: None })
+      [3] node=34 method='init' var='param' inst=Some(Assign { dest: "param", src: "values[0]" })
+      [4] node=32 method='init' var='param' inst=Some(Assign { dest: "bar", src: "'safe!'" })
+      [5] node=31 method='init' var='param' inst=Some(Call { dest: Some("conf64047"), callee: "configparser.ConfigParser", args: [] })
+      [6] node=30 method='init' var='param' inst=Some(Call { dest: Some("conf64047"), callee: "configparser.ConfigParser", args: [] })
+      [7] node=29 method='init' var='param' inst=Some(Call { dest: None, callee: "conf64047.add_section", args: ["'section64047'"] })
+      [8] node=28 method='init' var='param' inst=Some(Call { dest: None, callee: "conf64047.add_section", args: ["'section64047'"] })
+      [9] node=27 method='init' var='param' inst=Some(Call { dest: None, callee: "conf64047.set", args: ["'section64047'", "'keyA-64047'", "'a_Value'"] })
+      [10] node=26 method='init' var='param' inst=Some(Call { dest: None, callee: "conf64047.set", args: ["'section64047'", "'keyA-64047'", "'a_Value'"] })
+--- Non-CWE-22 FN #15 at line 49977 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-78, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 77, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=968.3┬╡s siblings=100ns mocks=1.1┬╡s cg_icfg=134.1┬╡s engine=48.1938ms nodes=48 edges=44
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=3.0876ms siblings=100ns mocks=1.3┬╡s cg_icfg=157.1┬╡s engine=51.232ms nodes=56 edges=53
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=896.8┬╡s siblings=100ns mocks=1.2┬╡s cg_icfg=126.1┬╡s engine=56.7976ms nodes=48 edges=45
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.4883ms siblings=200ns mocks=1.6┬╡s cg_icfg=204.6┬╡s engine=75.1775ms nodes=77 edges=73
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.2144ms siblings=200ns mocks=1.5┬╡s cg_icfg=209┬╡s engine=30.0043ms nodes=67 edges=64
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-22, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 67, edges: 64
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.9344ms siblings=300ns mocks=1.6┬╡s cg_icfg=193.8┬╡s engine=28.2836ms nodes=70 edges=68
+--- Non-CWE-22 FN #16 at line 50048 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-89, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 82, edges: 81
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-89 target=1.0337ms siblings=200ns mocks=1.2┬╡s cg_icfg=190.9┬╡s engine=67.0671ms nodes=71 edges=70
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=2.484ms siblings=300ns mocks=1.4┬╡s cg_icfg=245.4┬╡s engine=175.5011ms nodes=100 edges=97
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=2.1557ms siblings=100ns mocks=1.3┬╡s cg_icfg=302┬╡s engine=181.1436ms nodes=118 edges=124
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=1.3876ms siblings=100ns mocks=800ns cg_icfg=257.7┬╡s engine=224.5167ms nodes=104 edges=102
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-327 target=1.6493ms siblings=200ns mocks=1.2┬╡s cg_icfg=346.8┬╡s engine=174.116ms nodes=118 edges=124
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+--- Non-CWE-22 FN #17 at line 50413 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-78, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 68, edges: 63
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=1.06ms siblings=200ns mocks=1.3┬╡s cg_icfg=132.6┬╡s engine=39.7855ms nodes=52 edges=47
+[FP_DIAGNOSTIC] Repo: OWASP, CWE: CWE-502, Commit: 
+  [FP_DIAGNOSTIC] Flows detected: 2
+    Flow CWE: CWE502, sink_node: 18, sink_var: Loader=yaml.Loader
+      [0] node=18 method='init' var='Loader=yaml.Loader' inst=Some(Call { dest: Some("yobj"), callee: "yaml.load", args: ["bar", "Loader=yaml.Loader"] })
+    Flow CWE: CWE502, sink_node: 18, sink_var: bar
+      [0] node=18 method='init' var='bar' inst=Some(Call { dest: Some("yobj"), callee: "yaml.load", args: ["bar", "Loader=yaml.Loader"] })
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=1.01ms siblings=100ns mocks=1.1┬╡s cg_icfg=141.1┬╡s engine=67.3155ms nodes=58 edges=54
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.4822ms siblings=200ns mocks=1.9┬╡s cg_icfg=150┬╡s engine=74.4234ms nodes=55 edges=52
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.155ms siblings=200ns mocks=1.2┬╡s cg_icfg=163.8┬╡s engine=62.7206ms nodes=55 edges=51
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.1718ms siblings=200ns mocks=1.6┬╡s cg_icfg=182.5┬╡s engine=81.1209ms nodes=65 edges=62
+--- Non-CWE-22 FN #18 at line 50823 ---
+[FN_DIAGNOSTIC] Repo: OWASP, CWE: CWE-78, Commit: 
+  [FN_DIAGNOSTIC] ICFG nodes: 76, edges: 73
+  [FN_DIAGNOSTIC] Program Methods:
+  [FN_DIAGNOSTIC] Flows detected: 0
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-78 target=1.6585ms siblings=200ns mocks=1.5┬╡s cg_icfg=257.4┬╡s engine=5.0925ms nodes=94 edges=95
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=1.0822ms siblings=100ns mocks=1.7┬╡s cg_icfg=218.2┬╡s engine=6.5078ms nodes=76 edges=77
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=946.4┬╡s siblings=300ns mocks=1.2┬╡s cg_icfg=144.1┬╡s engine=7.2067ms nodes=53 edges=49
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=996.3┬╡s siblings=400ns mocks=1.2┬╡s cg_icfg=182┬╡s engine=7.6385ms nodes=62 edges=59
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-502 target=862.4┬╡s siblings=200ns mocks=1.1┬╡s cg_icfg=703.3┬╡s engine=5.6541ms nodes=55 edges=52
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=2.5014ms siblings=300ns mocks=2.3┬╡s cg_icfg=231.3┬╡s engine=145.0169ms nodes=83 edges=82
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.9175ms siblings=200ns mocks=1.5┬╡s cg_icfg=233.9┬╡s engine=171.2832ms nodes=95 edges=96
+[RC108A_DIAGNOSTIC] Repo: OWASP, Filename: test.py, Virtual __init__.py Count: 0
+[TIMING] repo=OWASP cwe=CWE-22 target=1.7726ms siblings=200ns mocks=4.2┬╡s cg_icfg=368.3┬╡s engine=199.9277ms nodes=104 edges=105

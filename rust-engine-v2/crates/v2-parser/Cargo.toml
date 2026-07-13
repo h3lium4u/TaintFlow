@@ -1,0 +1,11 @@
+[package]
+name = "v2-parser"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+tree-sitter = { workspace = true }
+tree-sitter-python = { workspace = true }
+tree-sitter-java = { workspace = true }
+v2-common = { path = "../v2-common" }

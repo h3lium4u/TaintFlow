@@ -1,0 +1,28 @@
+[package]
+name = "v2-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+rayon = { workspace = true }
+v2-common = { path = "../v2-common" }
+v2-ir = { path = "../v2-ir" }
+v2-parser = { path = "../v2-parser" }
+v2-semantic = { path = "../v2-semantic" }
+v2-frontend-python = { path = "../v2-frontend-python" }
+v2-frontend-java = { path = "../v2-frontend-java" }
+v2-frontend-base = { path = "../v2-frontend-base" }
+v2-cfg = { path = "../v2-cfg" }
+v2-callgraph = { path = "../v2-callgraph" }
+v2-solver = { path = "../v2-solver" }
+v2-rules = { path = "../v2-rules" }
+v2-taint = { path = "../v2-taint" }
+v2-reporting = { path = "../v2-reporting" }
+v2-rulepacks = { path = "../v2-rulepacks" }
+v2-workspace = { path = "../v2-workspace" }
+v2-context = { path = "../v2-context" }
+v2-engine = { path = "../v2-engine" }
+toml = "0.7"
+serde_yaml = "0.9"

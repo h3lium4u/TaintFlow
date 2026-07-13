@@ -1,0 +1,9 @@
+[package]
+name = "v2-rulepacks"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+v2-rules   = { path = "../v2-rules" }
+serde      = { workspace = true }
+serde_json = { workspace = true }

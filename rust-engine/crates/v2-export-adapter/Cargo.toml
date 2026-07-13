@@ -1,0 +1,12 @@
+[package]
+name = "v2-export-adapter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ir = { path = "../ir" }
+taint = { path = "../taint" }
+symbols = { path = "../symbols" }
+cfg = { path = "../cfg" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
