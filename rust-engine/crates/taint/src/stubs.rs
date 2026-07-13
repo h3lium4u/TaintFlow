@@ -568,6 +568,11 @@ impl StubRegistry {
                     kind: StubKind::Sink,
                     propagates_from: None,
                 },
+                MethodStub {
+                    name: "addBatch".to_string(),
+                    kind: StubKind::Propagator,
+                    propagates_from: Some(vec![0]),
+                },
             ],
         });
         self.register(LibraryStub {

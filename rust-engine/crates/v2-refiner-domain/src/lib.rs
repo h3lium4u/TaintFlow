@@ -979,20 +979,34 @@ impl<'a> SsaBuilder<'a> {
 
                             if callee.contains('.') {
                                 let parts: Vec<&str> = callee.split('.').collect();
-                                if parts.len() == 2 {
-                                    let receiver = parts[0];
-                                    let method = parts[1];
-                                    if method == "add" || method == "append" {
-                                        if args.len() == 1 {
-                                            let renamed_arg =
-                                                rename_expression(&args[0], &curr_defs);
-                                            let resolved_arg =
-                                                resolve_ssa_val(&renamed_arg, &ssa_assignments);
-                                            local_list_elements
-                                                .entry(receiver.to_string())
-                                                .or_default()
-                                                .push(resolved_arg);
+                                if parts.len() >= 2 {
+                                    let receiver = parts[..parts.len() - 1].join(".");
+                                    let method = parts[parts.len() - 1];
+                                    if (method == "add" || method == "append") && args.len() == 1 {
+                                        let renamed_arg =
+                                            rename_expression(&args[0], &curr_defs);
+                                        let resolved_arg =
+                                            resolve_ssa_val(&renamed_arg, &ssa_assignments);
+                                        local_list_elements
+                                            .entry(receiver.clone())
+                                            .or_default()
+                                            .push(resolved_arg);
+                                    }
+
+                                    if curr_defs.contains_key(&receiver) {
+                                        let mut dest_defs = std::collections::HashSet::new();
+                                        dest_defs.insert(inst_id.0 as usize);
+                                        let renamed_receiver_new = get_renamed_var(&receiver, &dest_defs);
+                                        let old_defs = curr_defs.get(&receiver).unwrap();
+                                        let renamed_receiver_old = get_renamed_var(&receiver, old_defs);
+                                        let mut dependency_expr = renamed_receiver_old;
+                                        for arg in args {
+                                            let renamed_arg = rename_expression(arg, &curr_defs);
+                                            let resolved_arg = resolve_ssa_val(&renamed_arg, &ssa_assignments);
+                                            dependency_expr = format!("{} + {}", dependency_expr, resolved_arg);
                                         }
+                                        ssa_assignments.push((renamed_receiver_new, dependency_expr));
+                                        curr_defs.insert(receiver.clone(), dest_defs);
                                     }
                                 }
                             }
