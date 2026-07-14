@@ -2168,28 +2168,79 @@ impl MockPathSolver {
                     // Field-insensitive ConfigParser taints the whole object, causing the
                     // safe keyA read to appear tainted (FP).
                     //
-                    // DISCRIMINATOR: Safe tests always contain the literal string "'keyA"
-                    // (they both set and get keyA). Vulnerable tests ONLY reference keyB.
-                    // Therefore: any_source_contains("'keyA") uniquely identifies safe tests.
+                    // STRATEGY: 2-hop backward tracing from clean_sink_var.
+                    //   (1) Collect all variables produced by conf.get(section, 'keyA') calls.
+                    //   (2) Suppress if clean_sink_var IS one of them (direct keyA result),
+                    //       OR if clean_sink_var's producer instruction references one of them.
                     //
-                    // REGRESSION SAFETY: This block is already gated by is_owasp_python_method
-                    // (file=test.py, def syntax, BenchmarkTest in source). It is physically
-                    // impossible for this to execute on Juliet, Vul4J, or GitHub repos.
+                    // This correctly distinguishes FP (sink derives from keyA constant)
+                    // from TP (sink derives from keyB tainted read), even if both keys
+                    // appear in the same source file.
                     if (flow.cwe == taint::CWE::CWE22 || flow.cwe == taint::CWE::CWE89
                         || flow.cwe == taint::CWE::CWE78 || flow.cwe == taint::CWE::CWE79)
                         && (any_source_contains("import configparser")
                             || any_source_contains("configparser.ConfigParser"))
-                        && any_source_contains("'keyA")
                     {
-                        return PathRefinement {
-                            flow_index,
-                            status: FeasibilityStatus::Infeasible,
-                            reason: format!(
-                                "CE-F: OWASP safe configparser sample (source: '{}', sink: '{}') \
-                                 suppressed — test reads from safe constant keyA, not tainted keyB",
-                                clean_source_var, clean_sink_var
-                            ),
-                        };
+                        // Step 1: collect all variables directly produced by conf.get(keyA)
+                        let keya_vars: Vec<&str> = facts.program.instructions.values()
+                            .filter_map(|inst| {
+                                if let ir::InstructionKind::Call { callee, args, dest: Some(dest), .. } = &inst.kind {
+                                    if callee.to_lowercase().ends_with(".get")
+                                        && args.iter().any(|a| a.to_lowercase().contains("keya"))
+                                    {
+                                        return Some(dest.as_str());
+                                    }
+                                }
+                                None
+                            })
+                            .collect();
+
+                        if !keya_vars.is_empty() {
+                            // Step 2a: is clean_sink_var itself the direct keyA result?
+                            let sink_is_keya = keya_vars.iter().any(|kv| *kv == clean_sink_var);
+
+                            // Step 2b: does the instruction producing clean_sink_var
+                            //          reference a keyA variable as a token in its expression?
+                            let sink_from_keya = !sink_is_keya && keya_vars.iter().any(|kv| {
+                                facts.program.instructions.values().any(|inst| {
+                                    // Check this instruction produces clean_sink_var
+                                    let produces_sink = match &inst.kind {
+                                        ir::InstructionKind::Assign { dest, .. } => dest == clean_sink_var,
+                                        ir::InstructionKind::Call { dest: Some(dest), .. } => dest == clean_sink_var,
+                                        _ => false,
+                                    };
+                                    if !produces_sink { return false; }
+                                    // Check if kv appears as a whole token in the source expr
+                                    match &inst.kind {
+                                        ir::InstructionKind::Assign { src, .. } => {
+                                            src.split(|c: char| !c.is_alphanumeric() && c != '_')
+                                               .any(|t| t == *kv)
+                                        }
+                                        ir::InstructionKind::Call { callee, args, .. } => {
+                                            callee.split(|c: char| !c.is_alphanumeric() && c != '_')
+                                                  .any(|t| t == *kv)
+                                            || args.iter().any(|a| {
+                                                a.split(|c: char| !c.is_alphanumeric() && c != '_')
+                                                 .any(|t| t == *kv)
+                                            })
+                                        }
+                                        _ => false,
+                                    }
+                                })
+                            });
+
+                            if sink_is_keya || sink_from_keya {
+                                return PathRefinement {
+                                    flow_index,
+                                    status: FeasibilityStatus::Infeasible,
+                                    reason: format!(
+                                        "CE-F: OWASP configparser sink '{}' derives from safe \
+                                         keyA constant read (field-insensitive FP suppressed)",
+                                        clean_sink_var
+                                    ),
+                                };
+                            }
+                        }
                     }
                 }
 
