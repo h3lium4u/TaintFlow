@@ -3396,11 +3396,13 @@ impl StubRegistry {
         });
 
         // Python shlex module stubs
+        // RC700 Fix 1: shlex.quote is a CWE-78 shell-escape sanitizer, not a propagator.
+        // The generic sanitizer list contains "shlex" but the registered stub took priority.
         self.register(LibraryStub {
             class_fqn: "shlex".to_string(),
             methods: vec![MethodStub {
                 name: "quote".to_string(),
-                kind: StubKind::Propagator,
+                kind: StubKind::Sanitizer,
                 propagates_from: None,
             }],
         });

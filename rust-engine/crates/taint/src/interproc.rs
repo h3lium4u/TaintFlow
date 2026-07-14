@@ -1652,9 +1652,26 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             "bindingresult", "errors", "model", "modelmap", "modelandview",
                             "redirectattributes", "sessionstatus", "principal", "authentication",
                             "locale", "timezone", "zoneid", "inputstream", "outputstream",
-                            "reader", "writer"
+                            "reader", "writer",
+                            // RC700 Fix 2: Exclude database infrastructure parameters.
+                            // These are internal infrastructure objects (DB connections, cursors,
+                            // engines, pools, managers) that are never user-controlled taint sources.
+                            // Seeding them causes massive over-taint in large DB-heavy codebases.
+                            "dbconn", "db_conn", "dbconnection", "db_connection",
+                            "dbcursor", "db_cursor",
                         ];
                         if excluded_types.iter().any(|&ex| param_lower.contains(ex)) {
+                            continue;
+                        }
+
+                        // RC700 Fix 2 (continued): Exact-match exclusion for common single-word
+                        // DB infrastructure parameter names. Using exact-match (not contains) to
+                        // avoid false suppressions (e.g. "connector" should still be allowed).
+                        let excluded_exact = [
+                            "conn", "cur", "cursor", "db", "engine", "driver",
+                            "pool", "dispatcher", "transaction", "tx", "txn",
+                        ];
+                        if excluded_exact.iter().any(|&ex| clean_param == ex) {
                             continue;
                         }
 
@@ -3640,8 +3657,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         let class_lower = class_fqn.to_lowercase();
                                         if class_lower.contains("statement")
                                             || class_lower.contains("cursor")
-                                            || class_lower.contains("session")
                                             || class_lower.contains("connection")
+                                            // RC700 Fix 3: Narrow "session" match to avoid matching
+                                            // Flask/web sessions and generic session objects.
+                                            // Only treat ORM/SQL sessions as SQL execution receivers
+                                            // when the class FQN indicates a SQL/ORM context.
+                                            || (class_lower.contains("session")
+                                                && (class_lower.contains("sql")
+                                                    || class_lower.contains("alchemy")
+                                                    || class_lower.contains("orm")
+                                                    || class_lower.contains("database")
+                                                    || class_lower.contains("jdbc")))
                                         {
                                             allow_receiver_check = true;
                                         }
