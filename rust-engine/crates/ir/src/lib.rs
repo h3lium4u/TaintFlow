@@ -1022,6 +1022,32 @@ impl Program {
 
                     let switch_insts = self.build_switch_branches(&groups, 0, &expr_raw);
                     insts.extend(switch_insts);
+                } else if node_typ == "match_statement" {
+                    let expr_raw = if let Some(expr_node) = node.children.first() {
+                        expr_node.raw.trim().to_string()
+                    } else {
+                        "match_expr".to_string()
+                    };
+
+                    let mut groups = Vec::new();
+                    if let Some(block) = node.children.iter().find(|c| match &c.kind {
+                        NodeKind::Block => true,
+                        NodeKind::Unknown(t) => t == "block",
+                        _ => false,
+                    }) {
+                        for child in &block.children {
+                            let is_case = match &child.kind {
+                                NodeKind::Unknown(t) => t == "case_clause",
+                                _ => false,
+                            };
+                            if is_case {
+                                groups.push(child);
+                            }
+                        }
+                    }
+
+                    let match_insts = self.build_python_match_branches(&groups, 0, &expr_raw, file_line);
+                    insts.extend(match_insts);
                 } else if node_typ == "throw_statement"
                     || node.raw.starts_with("throw ")
                     || node.raw.starts_with("raise ")
@@ -1138,6 +1164,77 @@ impl Program {
                 group.span.start_line,
             );
             vec![inst_id]
+        }
+    }
+
+    fn build_python_match_branches(
+        &mut self,
+        groups: &[&AstNode],
+        index: usize,
+        expr_raw: &str,
+        file_line: usize,
+    ) -> Vec<InstructionId> {
+        if index >= groups.len() {
+            return Vec::new();
+        }
+
+        let group = groups[index];
+        let mut group_insts = Vec::new();
+        let mut conditions = Vec::new();
+        let mut is_default = false;
+
+        if let Some(pattern_node) = group.children.first() {
+            let pat_raw = pattern_node.raw.trim();
+            if pat_raw == "_" {
+                is_default = true;
+            } else {
+                let parts: Vec<&str> = pat_raw.split('|').map(|s| s.trim()).collect();
+                for part in parts {
+                    if part.chars().all(|c| c.is_alphanumeric() || c == '_') && part != "_" && !part.starts_with('\'') && !part.starts_with('"') && part.parse::<f64>().is_err() {
+                        let assign_inst = self.alloc_instruction(
+                            InstructionKind::Assign {
+                                dest: part.to_string(),
+                                src: expr_raw.to_string(),
+                            },
+                            file_line,
+                        );
+                        group_insts.push(assign_inst);
+                    } else {
+                        conditions.push(format!("{} == {}", expr_raw, part));
+                    }
+                }
+            }
+        }
+
+        for child in group.children.iter().skip(1) {
+            self.collect_statements(child, &mut group_insts);
+        }
+
+        if is_default || conditions.is_empty() {
+            group_insts
+        } else {
+            let cond_str = if conditions.len() == 1 {
+                conditions[0].clone()
+            } else {
+                format!("({})", conditions.join(" || "))
+            };
+
+            let else_insts = self.build_python_match_branches(groups, index + 1, expr_raw, file_line);
+            let else_block = if else_insts.is_empty() {
+                None
+            } else {
+                Some(else_insts)
+            };
+
+            let branch_inst = self.alloc_instruction(
+                InstructionKind::Branch {
+                    cond: cond_str,
+                    then_block: group_insts,
+                    else_block,
+                },
+                file_line,
+            );
+            vec![branch_inst]
         }
     }
 }

@@ -1,11 +1,11 @@
 use std::fs;
 
 fn main() {
-    let java_bench_path = "d:/V2 Backup/benchmarks/benchmark_java.jsonl";
+    let java_bench_path = "d:/V2 Backup/benchmarks/benchmark_python.jsonl";
     let content = fs::read_to_string(java_bench_path).unwrap();
     let mut code = String::new();
     for line in content.lines() {
-        if line.contains("BenchmarkTest01026") {
+        if line.contains("BenchmarkTest00516") && !line.contains("vulnerable\":false") {
             let data: serde_json::Value = serde_json::from_str(line).unwrap();
             code = data.get("code").unwrap().as_str().unwrap().to_string();
             break;
@@ -14,14 +14,19 @@ fn main() {
 
     let mut program = ir::Program::new();
     let mut gst = symbols::global::GlobalSymbolTable::new();
-    let filename = "BenchmarkTest01026.java".to_string();
+    let filename = "BenchmarkTest00516.py".to_string();
 
-    gst.load_file(&mut program, &code, &filename, "java")
+    gst.load_file(&mut program, &code, &filename, "python")
         .unwrap();
     gst.resolve_inheritance_hierarchy();
 
     let cg = symbols::call_graph::CallGraph::build(&program, &gst);
     let icfg = cfg::icfg::InterproceduralCFG::build(&program, &cg);
+
+    println!("=== Normalized AST ===");
+    let ast_root = parser::UnifiedParser::parse(&code, "python").unwrap();
+    let mut normalizer = normalizer::Normalizer::new();
+    let normalized_root = normalizer.normalize(&ast_root, "python");
 
     println!("=== All Instructions ===");
     let mut keys: Vec<&ir::InstructionId> = program.instructions.keys().collect();
@@ -35,6 +40,11 @@ fn main() {
             .map(|(&node_id, _)| node_id)
             .collect();
         println!("  {:?} node_ids={:?} | {:?}", id, node_ids, inst.kind);
+    }
+
+    println!("\n=== ICFG Edges ===");
+    for edge in &icfg.edges {
+        println!("Edge: {} -> {} ({:?})", edge.from, edge.to, edge.kind);
     }
 
     println!("\n=== Running Taint Engine ===");

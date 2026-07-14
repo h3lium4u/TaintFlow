@@ -162,26 +162,47 @@ impl CfgBuilder {
                 Some(branch_id)
             }
             NormalizedKind::Block(children) => {
-                let mut current_exit = target_exit;
-                let mut last_entry = None;
+                let raw_trim = node.raw.trim();
+                let has_case_child = children.iter().any(|c| {
+                    let c_raw = c.raw.trim();
+                    c_raw.starts_with("case") || c_raw.starts_with("default")
+                });
+                let is_match_or_switch = raw_trim.starts_with("match") || raw_trim.starts_with("switch") || has_case_child;
 
-                let is_switch = node.raw.trim().starts_with("switch");
-                let child_break_target = if is_switch {
-                    Some(target_exit)
-                } else {
-                    break_target
-                };
+                if is_match_or_switch {
+                    let branch_id = self.next_node_id()?;
+                    self.nodes.push(CfgNode {
+                        id: branch_id,
+                        kind: CfgNodeKind::Branch,
+                    });
 
-                // Build backwards to link correctly
-                for child in children.iter().rev() {
-                    if let Some(entry) =
-                        self.build_recursive(child, parent_entry, current_exit, child_break_target)
-                    {
-                        last_entry = Some(entry);
-                        current_exit = entry;
+                    for child in children {
+                        let child_raw = child.raw.trim();
+                        if child_raw.starts_with("case") || child_raw.starts_with("default") || child_raw.contains("case ") {
+                            let case_entry = self.build_recursive(child, branch_id, target_exit, Some(target_exit));
+                            if let Some(ce) = case_entry {
+                                self.edges.push(CfgEdge {
+                                    from: branch_id,
+                                    to: ce,
+                                });
+                            }
+                        }
                     }
+                    Some(branch_id)
+                } else {
+                    let mut current_exit = target_exit;
+                    let mut last_entry = None;
+
+                    for child in children.iter().rev() {
+                        if let Some(entry) =
+                            self.build_recursive(child, parent_entry, current_exit, break_target)
+                        {
+                            last_entry = Some(entry);
+                            current_exit = entry;
+                        }
+                    }
+                    last_entry
                 }
-                last_entry
             }
             NormalizedKind::While { condition: _, body } => {
                 let loop_id = self.next_node_id()?;

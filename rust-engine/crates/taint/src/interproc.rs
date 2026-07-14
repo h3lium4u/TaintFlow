@@ -76,6 +76,209 @@ pub struct ShadowDisagreementRecord {
     pub file: String,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum JavaBeanKind {
+    Getter,
+    Setter,
+    None,
+}
+
+pub struct JavaBeanClassifier<'a> {
+    program: &'a Program,
+    gst: &'a GlobalSymbolTable,
+}
+
+impl<'a> JavaBeanClassifier<'a> {
+    pub fn new(program: &'a Program, gst: &'a GlobalSymbolTable) -> Self {
+        Self { program, gst }
+    }
+
+    pub fn classify(&self, method_id: MethodId, has_stub: bool) -> JavaBeanKind {
+        if has_stub {
+            return JavaBeanKind::None;
+        }
+
+        let method = match self.program.methods.get(&method_id) {
+            Some(m) => m,
+            None => return JavaBeanKind::None,
+        };
+
+        if !method.body.is_empty() {
+            return self.classify_semantically(method_id, method);
+        }
+
+        self.classify_by_naming(method_id, method)
+    }
+
+    fn classify_semantically(&self, method_id: MethodId, method: &ir::Method) -> JavaBeanKind {
+        let method_info = match self.gst.program_index.methods.get(&method_id) {
+            Some(info) => info,
+            None => return JavaBeanKind::None,
+        };
+
+        if method.parameters.is_empty()
+            && method_info.return_type.as_deref() != Some("void")
+            && method_info.return_type.is_some()
+        {
+            if method.body.len() == 1 {
+                if let Some(inst) = self.program.instructions.get(&method.body[0]) {
+                    if let ir::InstructionKind::Return {
+                        val: Some(ref expr),
+                    } = &inst.kind
+                    {
+                        if self.is_structural_field_read(method_id, expr) {
+                            return JavaBeanKind::Getter;
+                        }
+                    }
+                }
+            }
+        }
+
+        if method.parameters.len() == 1 {
+            if method.body.len() == 1 {
+                if let Some(inst) = self.program.instructions.get(&method.body[0]) {
+                    if let ir::InstructionKind::Assign { dest, src } = &inst.kind {
+                        if self.is_structural_field_write(method_id, dest) {
+                            let param_name = &method.parameters[0];
+                            if src == param_name {
+                                return JavaBeanKind::Setter;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        JavaBeanKind::None
+    }
+
+    fn is_structural_field_read(&self, method_id: MethodId, expr: &str) -> bool {
+        let class_fields = self.get_class_fields(method_id);
+        if class_fields.contains(expr) {
+            return true;
+        }
+        if let Some(stripped) = expr.strip_prefix("this.") {
+            if class_fields.contains(stripped) && !stripped.contains('.') {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn is_structural_field_write(&self, method_id: MethodId, dest: &str) -> bool {
+        let class_fields = self.get_class_fields(method_id);
+        if class_fields.contains(dest) {
+            return true;
+        }
+        if let Some(stripped) = dest.strip_prefix("this.") {
+            if class_fields.contains(stripped) && !stripped.contains('.') {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn get_class_fields(&self, method_id: MethodId) -> HashSet<String> {
+        let mut fields = HashSet::new();
+        if let Some(method) = self.program.methods.get(&method_id) {
+            let mut curr_class_id = method.parent_type_id;
+            while let Some(class_id) = curr_class_id {
+                if let Some(class_info) = self.program.types.get(&class_id) {
+                    for &fid in &class_info.fields {
+                        if let Some(field) = self.program.fields.get(&fid) {
+                            fields.insert(field.name.clone());
+                        }
+                    }
+                    if let Some(ref parent_name) = class_info.parent_type {
+                        curr_class_id = self
+                            .program
+                            .types
+                            .values()
+                            .find(|t| &t.name == parent_name)
+                            .map(|t| t.id);
+                    } else {
+                        curr_class_id = None;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        fields
+    }
+
+    fn classify_by_naming(&self, method_id: MethodId, method: &ir::Method) -> JavaBeanKind {
+        let method_name = method.name.split('.').last().unwrap_or(&method.name);
+        let method_lower = method_name.to_lowercase();
+
+        let blocklist = [
+            "size",
+            "length",
+            "hashcode",
+            "clone",
+            "iterator",
+            "stream",
+            "values",
+            "keyset",
+            "entryset",
+            "isempty",
+            "get",
+            "getinstance",
+            "getclass",
+            "getclassloader",
+            "getconnection",
+            "getmetadata",
+            "equals",
+        ];
+        if blocklist.contains(&method_lower.as_str()) {
+            return JavaBeanKind::None;
+        }
+
+        if let Some(method_info) = self.gst.program_index.methods.get(&method_id) {
+            if let Some(class_id) = method_info.parent_type_id {
+                if let Some(class_info) = self.gst.program_index.types.get(&class_id) {
+                    let pkg_blocklist = [
+                        "java.util.",
+                        "java.sql.",
+                        "java.io.",
+                        "java.net.",
+                        "java.lang.ThreadLocal",
+                        "java.lang.System",
+                        "java.lang.Class",
+                    ];
+                    if pkg_blocklist
+                        .iter()
+                        .any(|&pkg| class_info.fqn.starts_with(pkg))
+                    {
+                        return JavaBeanKind::None;
+                    }
+                }
+            }
+        }
+
+        let method_info = match self.gst.program_index.methods.get(&method_id) {
+            Some(info) => info,
+            None => return JavaBeanKind::None,
+        };
+
+        if (method_lower.starts_with("set") || method_lower.starts_with("with"))
+            && method.parameters.len() == 1
+        {
+            return JavaBeanKind::Setter;
+        }
+
+        if (method_lower.starts_with("get") || method_lower.starts_with("is"))
+            && method.parameters.is_empty()
+        {
+            if method_info.return_type.as_deref() != Some("void") {
+                return JavaBeanKind::Getter;
+            }
+        }
+
+        JavaBeanKind::None
+    }
+}
+
 pub struct InterproceduralTaintEngine<'a> {
     pub program: &'a Program,
     pub gst: &'a GlobalSymbolTable,
@@ -94,6 +297,7 @@ pub struct InterproceduralTaintEngine<'a> {
         std::cell::RefCell<std::collections::HashMap<(MethodId, String), Option<(String, String)>>>,
     pub method_insts_cache:
         std::cell::RefCell<std::collections::HashMap<ir::MethodId, Vec<ir::InstructionId>>>,
+    pub javabean_cache: std::cell::RefCell<std::collections::HashMap<ir::MethodId, JavaBeanKind>>,
     pub target_file: Option<String>,
     pub target_and_siblings: HashSet<String>,
     pub related_types_cache:
@@ -169,6 +373,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
             resolved_call_instructions,
             callee_info_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
             method_insts_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+            javabean_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
             target_file: None,
             target_and_siblings: HashSet::new(),
             related_types_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
@@ -181,6 +386,105 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
     pub fn get_method_file_path(&self, method_id: MethodId) -> Option<&str> {
         self.method_file_paths.get(&method_id).map(|s| s.as_str())
+    }
+
+    fn inherits_repository_interface(&self, type_id: ir::TypeId) -> bool {
+        let mut visited = HashSet::new();
+        let mut queue = vec![type_id];
+        while let Some(curr_id) = queue.pop() {
+            if !visited.insert(curr_id) {
+                continue;
+            }
+            if let Some(type_info) = self.gst.program_index.types.get(&curr_id) {
+                let name = &type_info.name;
+                let fqn = &type_info.fqn;
+                if name == "JpaRepository" || fqn.contains("JpaRepository")
+                    || name == "CrudRepository" || fqn.contains("CrudRepository")
+                    || name == "PagingAndSortingRepository" || fqn.contains("PagingAndSortingRepository")
+                    || name == "Repository" || fqn.contains("Repository")
+                {
+                    return true;
+                }
+
+                if type_info.annotations.iter().any(|a| {
+                    a.contains("Repository") || a.contains("Mapper") || a.contains("RepositoryDefinition")
+                }) {
+                    return true;
+                }
+
+                if let Some(parent_name) = self.gst.child_to_parent.get(&curr_id) {
+                    if let Some(parent_info) = self.gst.program_index.types.values().find(|t| &t.fqn == parent_name || &t.name == parent_name) {
+                        queue.push(parent_info.id);
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    fn is_repository_propagation(&self, method_id: ir::MethodId, callee: &str) -> bool {
+        let method = match self.program.methods.get(&method_id) {
+            Some(m) => m,
+            None => return false,
+        };
+
+        if !method.body.is_empty() {
+            return false;
+        }
+
+        let parent_type_id = match method.parent_type_id {
+            Some(pid) => pid,
+            None => return false,
+        };
+
+        let type_info = match self.gst.program_index.types.get(&parent_type_id) {
+            Some(t) => t,
+            None => return false,
+        };
+
+        if type_info.kind != symbols::global::TypeKind::Interface {
+            return false;
+        }
+
+        if !self.inherits_repository_interface(parent_type_id) {
+            return false;
+        }
+
+        let method_name = callee.split('.').last().unwrap_or(callee);
+        let name_lower = method_name.to_lowercase();
+        if name_lower.starts_with("exists") || name_lower.starts_with("count") || name_lower.starts_with("delete") {
+            return false;
+        }
+
+        if let Some(m_info) = self.gst.program_index.methods.get(&method_id) {
+            if let Some(ref rt) = m_info.return_type {
+                let rt_lower = rt.to_lowercase();
+                let primitives = [
+                    "void", "boolean", "int", "long", "double", "float",
+                    "char", "byte", "short", "java.lang.boolean", "java.lang.integer",
+                    "java.lang.long", "java.lang.double", "java.lang.float",
+                    "java.lang.void"
+                ];
+                if primitives.iter().any(|&p| rt_lower == p) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    fn is_json_binding_method(&self, callee: &str) -> bool {
+        let parts: Vec<&str> = callee.split('.').collect();
+        if let Some(&method_name) = parts.last() {
+            let clean_name = method_name.split('(').next().unwrap_or(method_name).trim();
+            matches!(
+                clean_name,
+                "readValue" | "convertValue" | "treeToValue" | "valueToTree" | "fromJson" | "toJson"
+            )
+        } else {
+            false
+        }
     }
 
     pub fn get_all_method_instructions(&self, method_id: MethodId) -> Vec<ir::InstructionId> {
@@ -1135,12 +1439,24 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 continue;
             }
             let mut is_entry = false;
-
             // Check framework annotations
+            let is_controller = if let Some(parent_id) = method.parent_type_id {
+                if let Some(parent_info) = self.gst.program_index.types.get(&parent_id) {
+                    parent_info.annotations.iter().any(|ann| {
+                        let a_lower = ann.to_lowercase();
+                        a_lower.contains("controller") || a_lower.contains("restcontroller")
+                    })
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+
             if let Some(method_info) = self.gst.program_index.methods.get(&method_id) {
-                for ann in &method_info.annotations {
+                let has_mapping = method_info.annotations.iter().any(|ann| {
                     let ann_lower = ann.to_lowercase();
-                    if ann_lower.contains("route")
+                    ann_lower.contains("route")
                         || ann_lower.contains("mapping")
                         || ann_lower.contains("get")
                         || ann_lower.contains("post")
@@ -1148,10 +1464,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         || ann_lower.contains("delete")
                         || ann_lower.contains("patch")
                         || ann_lower.contains("request")
-                    {
-                        is_entry = true;
-                        break;
-                    }
+                });
+                if has_mapping || is_controller {
+                    is_entry = true;
                 }
             }
 
@@ -1164,6 +1479,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         || param_lower.contains("@modelattribute")
                         || param_lower.contains("@sessionattribute")
                         || param_lower.contains("@cookievalue")
+                        || param_lower.contains("@requestheader")
+                        || param_lower.contains("httpservletrequest")
+                        || param_lower.contains("multipartfile")
+                        || param_lower.contains("webrequest")
                         || param_lower.contains("query(")
                         || param_lower.contains("=query")
                         || param_lower.contains(":query")
@@ -1316,8 +1635,6 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         let clean_param = clean_parameter_name(param);
 
                         // Skip response/context objects, OOP receivers, and internal object params.
-                        // Parameters typed as Python forward-reference quoted class names
-                        // (e.g. `repo: "Repo"`) are domain objects, not user inputs.
                         let param_lower = param.to_lowercase();
                         if param_lower.contains("response")
                             || param_lower.contains("servletresponse")
@@ -1327,6 +1644,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             || clean_param == "this"
                             || is_internal_object_param(param)
                         {
+                            continue;
+                        }
+
+                        // Exclude framework utility/context parameters
+                        let excluded_types = [
+                            "bindingresult", "errors", "model", "modelmap", "modelandview",
+                            "redirectattributes", "sessionstatus", "principal", "authentication",
+                            "locale", "timezone", "zoneid", "inputstream", "outputstream",
+                            "reader", "writer"
+                        ];
+                        if excluded_types.iter().any(|&ex| param_lower.contains(ex)) {
                             continue;
                         }
 
@@ -1967,16 +2295,16 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 let src_lower = src.to_lowercase();
                                 // Source patterns that indicate taint:
                                 let is_source = src_lower.contains("getparameter")
-                                    || src_lower.contains("getheader")
-                                    || src_lower.contains("readline")
-                                    || src_lower.contains("readLine")
-                                    || src_lower.contains("read(")
-                                    || flask_attrs
-                                        .iter()
-                                        .any(|a| src_lower.contains(&a.to_lowercase()))
-                                    || src_lower.contains("getinputstream")
-                                    || src_lower.contains("getcookies")
-                                    || src_lower.contains("getquerystring");
+                                     || src_lower.contains("getheader")
+                                     || src_lower.contains("readline")
+                                     || src_lower.contains("readLine")
+                                     || src_lower.contains("read(")
+                                     || flask_attrs
+                                         .iter()
+                                         .any(|a| src_lower.contains(&a.to_lowercase()))
+                                     || (src_lower.contains("getinputstream") && !src_lower.contains("resource") && !src_lower.contains("classloader") && !src_lower.contains("getresource"))
+                                     || src_lower.contains("getcookies")
+                                     || src_lower.contains("getquerystring");
                                 if is_source {
                                     static_tainted_fields.insert(dest.clone());
                                     // Also insert just the field name part
@@ -2039,6 +2367,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
         // Helper: check if a source expression in the IR is a taint origin.
         let is_taint_origin = |src: &str| -> bool {
             let sl = src.to_lowercase();
+            if sl.contains("classloader") || sl.contains("getresource") || sl.contains("resource.getinputstream") {
+                return false;
+            }
             sl.contains("getparameter")
                 || sl.contains("getheader")
                 || sl.contains("getcookies")
@@ -3831,10 +4162,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 }
                             }
 
+                            let mut has_stub = false;
                             if let Some((class_fqn, method_name)) =
                                 self.resolve_callee_info(node.method_id, callee)
                             {
                                 if let Some(stub) = self.stubs.lookup(&class_fqn, &method_name) {
+                                    has_stub = true;
                                     match stub.kind {
                                         crate::stubs::StubKind::Propagator
                                         | crate::stubs::StubKind::Source
@@ -3922,6 +4255,114 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             return results;
                                         }
                                         _ => {}
+                                    }
+                                }
+                            }
+
+                            if !has_stub {
+                                if let Some(inst_id) = node.instruction_id {
+                                    let callee_method_id = self
+                                        .call_graph
+                                        .edges
+                                        .iter()
+                                        .find(|edge| edge.instruction_id == Some(inst_id))
+                                        .map(|edge| edge.callee);
+                                    if let Some(m_id) = callee_method_id {
+                                        let is_json_binding = self.is_json_binding_method(callee);
+                                        if is_json_binding {
+                                            let mut is_propagating = false;
+                                            if !args.is_empty() {
+                                                if expr_uses_var(&args[0], &fact.var) {
+                                                    is_propagating = true;
+                                                }
+                                            }
+                                            if is_propagating {
+                                                if let Some(d) = dest {
+                                                    results.push((d.clone(), fact.sanitized_for.clone()));
+                                                }
+                                            }
+                                            if !is_overwritten || is_propagating {
+                                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                            }
+                                            return results;
+                                        }
+
+                                        let is_repo_propagation = self.is_repository_propagation(m_id, callee);
+                                        if is_repo_propagation {
+                                            let mut is_propagating = false;
+                                            for arg in args {
+                                                if expr_uses_var(arg, &fact.var) {
+                                                    is_propagating = true;
+                                                }
+                                            }
+                                            if is_propagating {
+                                                if let Some(d) = dest {
+                                                    results.push((d.clone(), fact.sanitized_for.clone()));
+                                                }
+                                            }
+                                            if !is_overwritten || is_propagating {
+                                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                            }
+                                            return results;
+                                        }
+
+                                        let jb_kind = {
+                                            let mut cache = self.javabean_cache.borrow_mut();
+                                            if let Some(&kind) = cache.get(&m_id) {
+                                                kind
+                                            } else {
+                                                let classifier =
+                                                    JavaBeanClassifier::new(self.program, self.gst);
+                                                let kind = classifier.classify(m_id, false);
+                                                cache.insert(m_id, kind);
+                                                kind
+                                            }
+                                        };
+
+                                        if jb_kind != JavaBeanKind::None {
+                                            let mut is_propagating = false;
+                                            if jb_kind == JavaBeanKind::Getter {
+                                                if let Some(receiver) =
+                                                    get_receiver_name_safe(callee)
+                                                {
+                                                    if expr_uses_var(&receiver, &fact.var)
+                                                        || fact
+                                                            .var
+                                                            .starts_with(&format!("{}.", receiver))
+                                                    {
+                                                        is_propagating = true;
+                                                        if let Some(d) = dest {
+                                                            results.push((
+                                                                d.clone(),
+                                                                fact.sanitized_for.clone(),
+                                                            ));
+                                                        }
+                                                    }
+                                                }
+                                            } else if jb_kind == JavaBeanKind::Setter {
+                                                if !args.is_empty()
+                                                    && expr_uses_var(&args[0], &fact.var)
+                                                {
+                                                    is_propagating = true;
+                                                    if let Some(receiver) =
+                                                        get_receiver_name_safe(callee)
+                                                    {
+                                                        results.push((
+                                                            receiver.clone(),
+                                                            fact.sanitized_for.clone(),
+                                                        ));
+                                                    }
+                                                }
+                                            }
+
+                                            if !is_overwritten || is_propagating {
+                                                results.push((
+                                                    fact.var.clone(),
+                                                    fact.sanitized_for.clone(),
+                                                ));
+                                            }
+                                            return results;
+                                        }
                                     }
                                 }
                             }

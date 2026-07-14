@@ -801,7 +801,7 @@ fn populate_symbols(table: &mut SymbolTable, node: &NormalizedNode) {
 
 // ─── File walker ──────────────────────────────────────────────────────────────
 
-fn collect_files(path: &Path, ignore_dirs: &HashSet<String>) -> Vec<PathBuf> {
+fn collect_files(path: &Path, ignore_dirs: &HashSet<String>, scan_tests: bool) -> Vec<PathBuf> {
     let mut result = Vec::new();
     if path.is_file() {
         if is_supported_file(path) {
@@ -818,10 +818,14 @@ fn collect_files(path: &Path, ignore_dirs: &HashSet<String>) -> Vec<PathBuf> {
         if ignore_dirs.contains(&dir_name) || dir_name.starts_with('.') {
             return result;
         }
+        let dir_name_lower = dir_name.to_lowercase();
+        if !scan_tests && (dir_name_lower == "test" || dir_name_lower == "tests") {
+            return result;
+        }
         if let Ok(entries) = fs::read_dir(path) {
             for entry in entries.flatten() {
                 let child = entry.path();
-                let mut sub = collect_files(&child, ignore_dirs);
+                let mut sub = collect_files(&child, ignore_dirs, scan_tests);
                 result.append(&mut sub);
             }
         }
@@ -1050,6 +1054,7 @@ fn main() {
         let mut format = OutputFormat::Text;
         let mut min_severity: u8 = 0;
         let mut output_file: Option<String> = None;
+        let mut scan_tests = false;
 
         let mut i = 3;
         while i < args.len() {
@@ -1074,6 +1079,9 @@ fn main() {
                     output_file = args.get(i + 1).cloned();
                     i += 1;
                 }
+                "--scan-tests" => {
+                    scan_tests = true;
+                }
                 _ => {}
             }
             i += 1;
@@ -1089,7 +1097,7 @@ fn main() {
                 .unwrap_or_else(|| PathBuf::from("."))
         };
         let ignore_dirs = check_taintignore(&base);
-        let files = collect_files(&scan_path, &ignore_dirs);
+        let files = collect_files(&scan_path, &ignore_dirs, scan_tests);
         let scanned = files.len();
 
         // Analyse each file

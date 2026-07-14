@@ -927,14 +927,29 @@ impl RuleEngine {
                 .collect();
 
             let mut is_weak = all_weak_algos.iter().any(|&algo| {
-                // Check callee ends with the algo name or contains it as a segment
-
-                callee_lower == algo
-                    || callee_lower.ends_with(&format!(".{}", algo))
-                    || callee_lower.contains(&format!("_{}", algo))
-                    || callee_lower.contains(&format!("{}(", algo))
-                    || callee_lower.contains(&format!("\"{}\"", algo))
-                    || callee_lower.contains(&format!("'{}'", algo))
+                if callee_lower == algo {
+                    return true;
+                }
+                if callee_lower.ends_with(&format!(".{}", algo)) {
+                    return true;
+                }
+                let check_sub = |pattern: &str| {
+                    if let Some(idx) = callee_lower.find(pattern) {
+                        if idx > 0 {
+                            let prev_char = callee_lower.chars().nth(idx - 1).unwrap_or(' ');
+                            if prev_char.is_alphanumeric() && prev_char != '.' && prev_char != '_' {
+                                return false;
+                            }
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                };
+                check_sub(&format!("_{}", algo))
+                    || check_sub(&format!("{}(", algo))
+                    || check_sub(&format!("\"{}\"", algo))
+                    || check_sub(&format!("'{}'", algo))
             });
 
             // RC73 Task 3: Catch MessageDigest.getInstance("MD5"), Cipher.getInstance("DES"),

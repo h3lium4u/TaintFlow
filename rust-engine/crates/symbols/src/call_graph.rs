@@ -33,6 +33,72 @@ pub struct CallGraph {
     pub callee_to_edges: HashMap<MethodId, Vec<CallEdge>>,
 }
 
+fn find_field_in_hierarchy(
+    gst: &GlobalSymbolTable,
+    program: &Program,
+    class_id: TypeId,
+    field_name: &str,
+) -> Option<(String, bool)> {
+    let mut curr_class_id = Some(class_id);
+    while let Some(c_id) = curr_class_id {
+        let found_field = gst
+            .program_index
+            .fields
+            .values()
+            .find(|f| f.parent_type_id == c_id && f.name == field_name);
+        if let Some(field) = found_field {
+            let has_di_annotation = field
+                .annotations
+                .iter()
+                .any(|a| a.contains("Autowired") || a.contains("Inject") || a.contains("Resource"));
+            let constructor = gst
+                .program_index
+                .methods
+                .values()
+                .find(|m| m.parent_type_id == Some(c_id) && m.name == "<init>");
+            let is_constructor_injected = if let Some(ctor_info) = constructor {
+                if let Some(ctor_method) = program.methods.get(&ctor_info.id) {
+                    ctor_method.body.iter().any(|&inst_id| {
+                        if let Some(inst) = program.instructions.get(&inst_id) {
+                            if let InstructionKind::Assign { dest, src } = &inst.kind {
+                                let is_dest_match = dest == field_name
+                                    || dest.ends_with(&format!(".{}", field_name));
+                                let is_src_match = ctor_method.parameters.contains(src);
+                                is_dest_match && is_src_match
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
+                    })
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+            let is_di = has_di_annotation || is_constructor_injected;
+            return Some((field.field_type.clone().unwrap_or_default(), is_di));
+        }
+
+        if let Some(class_info) = program.types.get(&c_id) {
+            if let Some(ref parent_name) = class_info.parent_type {
+                curr_class_id = program
+                    .types
+                    .values()
+                    .find(|t| &t.name == parent_name)
+                    .map(|t| t.id);
+            } else {
+                curr_class_id = None;
+            }
+        } else {
+            curr_class_id = None;
+        }
+    }
+    None
+}
+
 impl CallGraph {
     pub fn build(program: &Program, gst: &GlobalSymbolTable) -> Self {
         let mut nodes = HashMap::new();
@@ -294,16 +360,31 @@ impl CallGraph {
                                 obj_type_name = Some(clean_type);
                             }
 
-                            // B. Class fields
-                            if obj_type_name.is_none() {
+                            // B. Class fields and Dependency Injection
+                            let mut field_di_opt = None;
+                            let field_name = if receiver_path.starts_with("this.") {
+                                Some(&receiver_path["this.".len()..])
+                            } else if receiver_path.starts_with("self.") {
+                                Some(&receiver_path["self.".len()..])
+                            } else if !receiver_path.is_empty()
+                                && receiver_path != "this"
+                                && receiver_path != "self"
+                            {
+                                Some(receiver_path.as_str())
+                            } else if obj_name != "this" && obj_name != "self" {
+                                Some(obj_name)
+                            } else {
+                                None
+                            };
+
+                            if let Some(f_name) = field_name {
                                 if let Some(class_id) = caller_class_id {
-                                    if let Some(field) =
-                                        gst.program_index.fields.values().find(|f| {
-                                            f.parent_type_id == class_id && f.name == obj_name
-                                        })
+                                    if let Some((ft, is_di)) =
+                                        find_field_in_hierarchy(gst, program, class_id, f_name)
                                     {
-                                        if let Some(ref ft) = field.field_type {
-                                            obj_type_name = Some(ft.clone());
+                                        field_di_opt = Some((ft.clone(), is_di));
+                                        if obj_type_name.is_none() && !ft.is_empty() {
+                                            obj_type_name = Some(ft);
                                         }
                                     }
                                 }
@@ -311,25 +392,14 @@ impl CallGraph {
 
                             // C. Dependency Injection Autowire Fallback
                             if obj_type_name.is_none() {
-                                if let Some(class_id) = caller_class_id {
-                                    if let Some(field) =
-                                        gst.program_index.fields.values().find(|f| {
-                                            f.parent_type_id == class_id && f.name == obj_name
-                                        })
-                                    {
-                                        let has_di = field.annotations.iter().any(|a| {
-                                            a.contains("Autowired")
-                                                || a.contains("Inject")
-                                                || a.contains("Resource")
-                                        });
-                                        if has_di {
-                                            let fallback_type = format!(
-                                                "{}{}",
-                                                obj_name[..1].to_uppercase(),
-                                                &obj_name[1..]
-                                            );
-                                            obj_type_name = Some(fallback_type);
-                                        }
+                                if let Some((_, true)) = field_di_opt {
+                                    if let Some(f_name) = field_name {
+                                        let fallback_type = format!(
+                                            "{}{}",
+                                            f_name[..1].to_uppercase(),
+                                            &f_name[1..]
+                                        );
+                                        obj_type_name = Some(fallback_type);
                                     }
                                 }
                             }
@@ -369,95 +439,168 @@ impl CallGraph {
                                     candidates.push((m_id, EdgeType::DirectCall));
                                 }
 
-                                // Virtual/Interface resolution via CHA
+                                // Virtual/Interface resolution via CHA / DI
                                 if let Some(type_info) = gst.program_index.types.get(&type_id) {
-                                    match type_info.kind {
-                                        TypeKind::Interface => {
-                                            let mut implementors = HashSet::new();
-                                            for key in &[&type_info.fqn, &type_info.name] {
-                                                if let Some(impls) =
-                                                    gst.interface_to_implementors.get(*key)
-                                                {
-                                                    for &impl_type_id in impls {
-                                                        implementors.insert(impl_type_id);
-                                                        let mut visited = HashSet::new();
-                                                        get_all_subclasses(
-                                                            gst,
-                                                            impl_type_id,
-                                                            &mut visited,
-                                                        );
-                                                        implementors.extend(visited);
-                                                    }
-                                                }
-                                            }
-                                            // RTA Check: only resolve to the implementor method if the implementor is instantiated
-                                            let mut instantiated_implementors = Vec::new();
-                                            for &impl_id in &implementors {
-                                                if let Some(impl_info) =
-                                                    gst.program_index.types.get(&impl_id)
-                                                {
-                                                    if instantiated_types.contains(&impl_info.name)
-                                                        || instantiated_types
-                                                            .contains(&impl_info.fqn)
+                                    let mut is_di_resolved = false;
+                                    if let Some((_, true)) = field_di_opt {
+                                        let mut concrete_impls = Vec::new();
+                                        match type_info.kind {
+                                            TypeKind::Interface => {
+                                                let mut implementors = HashSet::new();
+                                                for key in &[&type_info.fqn, &type_info.name] {
+                                                    if let Some(impls) =
+                                                        gst.interface_to_implementors.get(*key)
                                                     {
-                                                        instantiated_implementors.push(impl_id);
+                                                        for &impl_type_id in impls {
+                                                            implementors.insert(impl_type_id);
+                                                            let mut visited = HashSet::new();
+                                                            get_all_subclasses(
+                                                                gst,
+                                                                impl_type_id,
+                                                                &mut visited,
+                                                            );
+                                                            implementors.extend(visited);
+                                                        }
+                                                    }
+                                                }
+                                                for impl_id in implementors {
+                                                    if let Some(impl_info) =
+                                                        gst.program_index.types.get(&impl_id)
+                                                    {
+                                                        if impl_info.kind == TypeKind::Class {
+                                                            concrete_impls.push(impl_id);
+                                                        }
                                                     }
                                                 }
                                             }
-
-                                            let targets_to_resolve =
-                                                if !instantiated_implementors.is_empty() {
-                                                    instantiated_implementors
-                                                } else {
-                                                    implementors.into_iter().collect()
-                                                };
-
-                                            for impl_type_id in targets_to_resolve {
-                                                if let Some(m_id) =
-                                                    gst.resolve_method(impl_type_id, method_name)
-                                                {
-                                                    candidates
-                                                        .push((m_id, EdgeType::InterfaceCall));
+                                            TypeKind::Class => {
+                                                let mut subclasses = HashSet::new();
+                                                subclasses.insert(type_id);
+                                                let mut visited = HashSet::new();
+                                                get_all_subclasses(gst, type_id, &mut visited);
+                                                subclasses.extend(visited);
+                                                for sub_id in subclasses {
+                                                    if let Some(sub_info) =
+                                                        gst.program_index.types.get(&sub_id)
+                                                    {
+                                                        if sub_info.kind == TypeKind::Class {
+                                                            concrete_impls.push(sub_id);
+                                                        }
+                                                    }
                                                 }
+                                            }
+                                            _ => {}
+                                        }
+
+                                        let mut valid_targets = Vec::new();
+                                        for impl_type_id in concrete_impls {
+                                            if let Some(m_id) =
+                                                gst.resolve_method(impl_type_id, method_name)
+                                            {
+                                                valid_targets.push(m_id);
                                             }
                                         }
-                                        TypeKind::Class => {
-                                            let mut subclasses = HashSet::new();
-                                            let mut visited = HashSet::new();
-                                            get_all_subclasses(gst, type_id, &mut visited);
-                                            subclasses.extend(visited);
 
-                                            // RTA Check: only resolve to the subclass method if the subclass is instantiated
-                                            let mut instantiated_subclasses = Vec::new();
-                                            for &sub_id in &subclasses {
-                                                if let Some(sub_info) =
-                                                    gst.program_index.types.get(&sub_id)
-                                                {
-                                                    if instantiated_types.contains(&sub_info.name)
-                                                        || instantiated_types
-                                                            .contains(&sub_info.fqn)
+                                        if !valid_targets.is_empty() {
+                                            is_di_resolved = true;
+                                            for m_id in valid_targets {
+                                                candidates.push((m_id, EdgeType::InterfaceCall));
+                                            }
+                                        }
+                                    }
+
+                                    if !is_di_resolved {
+                                        match type_info.kind {
+                                            TypeKind::Interface => {
+                                                let mut implementors = HashSet::new();
+                                                for key in &[&type_info.fqn, &type_info.name] {
+                                                    if let Some(impls) =
+                                                        gst.interface_to_implementors.get(*key)
                                                     {
-                                                        instantiated_subclasses.push(sub_id);
+                                                        for &impl_type_id in impls {
+                                                            implementors.insert(impl_type_id);
+                                                            let mut visited = HashSet::new();
+                                                            get_all_subclasses(
+                                                                gst,
+                                                                impl_type_id,
+                                                                &mut visited,
+                                                            );
+                                                            implementors.extend(visited);
+                                                        }
+                                                    }
+                                                }
+                                                // RTA Check: only resolve to the implementor method if the implementor is instantiated
+                                                let mut instantiated_implementors = Vec::new();
+                                                for &impl_id in &implementors {
+                                                    if let Some(impl_info) =
+                                                        gst.program_index.types.get(&impl_id)
+                                                    {
+                                                        if instantiated_types
+                                                            .contains(&impl_info.name)
+                                                            || instantiated_types
+                                                                .contains(&impl_info.fqn)
+                                                        {
+                                                            instantiated_implementors.push(impl_id);
+                                                        }
+                                                    }
+                                                }
+
+                                                let targets_to_resolve =
+                                                    if !instantiated_implementors.is_empty() {
+                                                        instantiated_implementors
+                                                    } else {
+                                                        implementors.into_iter().collect()
+                                                    };
+
+                                                for impl_type_id in targets_to_resolve {
+                                                    if let Some(m_id) = gst
+                                                        .resolve_method(impl_type_id, method_name)
+                                                    {
+                                                        candidates
+                                                            .push((m_id, EdgeType::InterfaceCall));
                                                     }
                                                 }
                                             }
+                                            TypeKind::Class => {
+                                                let mut subclasses = HashSet::new();
+                                                let mut visited = HashSet::new();
+                                                get_all_subclasses(gst, type_id, &mut visited);
+                                                subclasses.extend(visited);
 
-                                            let targets_to_resolve =
-                                                if !instantiated_subclasses.is_empty() {
-                                                    instantiated_subclasses
-                                                } else {
-                                                    subclasses.into_iter().collect()
-                                                };
+                                                // RTA Check: only resolve to the subclass method if the subclass is instantiated
+                                                let mut instantiated_subclasses = Vec::new();
+                                                for &sub_id in &subclasses {
+                                                    if let Some(sub_info) =
+                                                        gst.program_index.types.get(&sub_id)
+                                                    {
+                                                        if instantiated_types
+                                                            .contains(&sub_info.name)
+                                                            || instantiated_types
+                                                                .contains(&sub_info.fqn)
+                                                        {
+                                                            instantiated_subclasses.push(sub_id);
+                                                        }
+                                                    }
+                                                }
 
-                                            for sub_type_id in targets_to_resolve {
-                                                if let Some(m_id) =
-                                                    gst.resolve_method(sub_type_id, method_name)
-                                                {
-                                                    candidates.push((m_id, EdgeType::VirtualCall));
+                                                let targets_to_resolve =
+                                                    if !instantiated_subclasses.is_empty() {
+                                                        instantiated_subclasses
+                                                    } else {
+                                                        subclasses.into_iter().collect()
+                                                    };
+
+                                                for sub_type_id in targets_to_resolve {
+                                                    if let Some(m_id) =
+                                                        gst.resolve_method(sub_type_id, method_name)
+                                                    {
+                                                        candidates
+                                                            .push((m_id, EdgeType::VirtualCall));
+                                                    }
                                                 }
                                             }
+                                            TypeKind::Enum => {}
                                         }
-                                        TypeKind::Enum => {}
                                     }
                                 }
 

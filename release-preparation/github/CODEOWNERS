@@ -1,0 +1,10 @@
+# Codeowners Configuration for TaintFlow
+
+# Global fallback maintainers
+*       @taintflow/maintainers
+
+# Rule engine and CWE configurations
+/crates/rules/  @taintflow/rules-maintainers
+
+# Parser normalization models
+/crates/normalizer/     @taintflow/normalizer-maintainers

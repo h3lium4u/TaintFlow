@@ -1,0 +1,27 @@
+name: Feature Request
+description: Propose a new feature, analyzer capability, or language model.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please outline your feature proposal below.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: E.g., The scanner lacks support for tracking...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: A clear description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you've considered.

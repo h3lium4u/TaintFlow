@@ -1,0 +1,29 @@
+name: Generate Compliance SBOM
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  generate_sbom:
+    name: Generate SPDX Compliance File
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate SPDX SBOM
+        run: |
+          cargo install cargo-sbom
+          cargo sbom --format spdx-json > sbom.spdx.json
+        working-directory: rust-engine
+
+      - name: Upload SBOM Compliance Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-compliance
+          path: rust-engine/sbom.spdx.json

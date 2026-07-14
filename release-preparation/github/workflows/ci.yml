@@ -1,0 +1,39 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_and_test:
+    name: Build & Test (Rust stable)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust-engine
+
+      - name: Check Formatting
+        run: cargo fmt --all -- --check
+        working-directory: rust-engine
+
+      - name: Run Clippy Linter
+        run: cargo clippy --all-targets -- -D warnings
+        working-directory: rust-engine
+
+      - name: Run Unit Tests
+        run: cargo test
+        working-directory: rust-engine
