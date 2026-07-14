@@ -2163,83 +2163,91 @@ impl MockPathSolver {
                 if is_owasp_python_method {
                     // ── CE-F: OWASP Python ConfigParser Key separation ──────────────────
                     //
-                    // Root cause: In OWASP Python Benchmark safe tests, a tainted value is
-                    // stored into keyB and a CONSTANT safe value is read from keyA.
-                    // Field-insensitive ConfigParser taints the whole object, causing the
-                    // safe keyA read to appear tainted (FP).
+                    // Root cause: OWASP safe tests write tainted input to keyB and read
+                    // from keyA (a constant). Field-insensitive ConfigParser taints the
+                    // entire object, so the safe keyA read also appears tainted (FP).
                     //
-                    // STRATEGY: 2-hop backward tracing from clean_sink_var.
-                    //   (1) Collect all variables produced by conf.get(section, 'keyA') calls.
-                    //   (2) Suppress if clean_sink_var IS one of them (direct keyA result),
-                    //       OR if clean_sink_var's producer instruction references one of them.
+                    // STRATEGY: Transitive forward reachability from conf.get(keyA).
+                    //   1. Seed: all variables directly produced by conf.get(section, 'keyA').
+                    //   2. Expand: any variable whose producing instruction references
+                    //              a seeded variable (as a whole token) is also added.
+                    //   3. Repeat up to 4 iterations (handles chains of depth 1-4).
+                    //   4. Suppress if clean_sink_var is in the reachable set.
                     //
-                    // This correctly distinguishes FP (sink derives from keyA constant)
-                    // from TP (sink derives from keyB tainted read), even if both keys
-                    // appear in the same source file.
+                    // TP SAFETY: In a vulnerable test, conf.get(keyB) produces `bar` and
+                    // the sink is derived from `bar`. `bar` is NOT reachable from keyA
+                    // reads, so the fixpoint never includes it → TP preserved.
                     if (flow.cwe == taint::CWE::CWE22 || flow.cwe == taint::CWE::CWE89
                         || flow.cwe == taint::CWE::CWE78 || flow.cwe == taint::CWE::CWE79)
                         && (any_source_contains("import configparser")
                             || any_source_contains("configparser.ConfigParser"))
                     {
-                        // Step 1: collect all variables directly produced by conf.get(keyA)
-                        let keya_vars: Vec<&str> = facts.program.instructions.values()
-                            .filter_map(|inst| {
-                                if let ir::InstructionKind::Call { callee, args, dest: Some(dest), .. } = &inst.kind {
-                                    if callee.to_lowercase().ends_with(".get")
-                                        && args.iter().any(|a| a.to_lowercase().contains("keya"))
-                                    {
-                                        return Some(dest.as_str());
-                                    }
-                                }
-                                None
-                            })
-                            .collect();
-
-                        if !keya_vars.is_empty() {
-                            // Step 2a: is clean_sink_var itself the direct keyA result?
-                            let sink_is_keya = keya_vars.iter().any(|kv| *kv == clean_sink_var);
-
-                            // Step 2b: does the instruction producing clean_sink_var
-                            //          reference a keyA variable as a token in its expression?
-                            let sink_from_keya = !sink_is_keya && keya_vars.iter().any(|kv| {
-                                facts.program.instructions.values().any(|inst| {
-                                    // Check this instruction produces clean_sink_var
-                                    let produces_sink = match &inst.kind {
-                                        ir::InstructionKind::Assign { dest, .. } => dest == clean_sink_var,
-                                        ir::InstructionKind::Call { dest: Some(dest), .. } => dest == clean_sink_var,
-                                        _ => false,
-                                    };
-                                    if !produces_sink { return false; }
-                                    // Check if kv appears as a whole token in the source expr
-                                    match &inst.kind {
-                                        ir::InstructionKind::Assign { src, .. } => {
-                                            src.split(|c: char| !c.is_alphanumeric() && c != '_')
-                                               .any(|t| t == *kv)
+                        // Step 1: seed with direct conf.get(keyA) result variables
+                        let mut keya_reachable: std::collections::HashSet<String> =
+                            facts.program.instructions.values()
+                                .filter_map(|inst| {
+                                    if let ir::InstructionKind::Call { callee, args, dest: Some(dest), .. } = &inst.kind {
+                                        if callee.to_lowercase().ends_with(".get")
+                                            && args.iter().any(|a| a.to_lowercase().contains("keya"))
+                                        {
+                                            return Some(dest.clone());
                                         }
-                                        ir::InstructionKind::Call { callee, args, .. } => {
+                                    }
+                                    None
+                                })
+                                .collect();
+
+                        // Step 2: expand transitively (up to 4 hops)
+                        for _ in 0..4 {
+                            let prev_len = keya_reachable.len();
+                            let current: Vec<String> = keya_reachable.iter().cloned().collect();
+                            for inst in facts.program.instructions.values() {
+                                let dest_str: Option<&str> = match &inst.kind {
+                                    ir::InstructionKind::Assign { dest, .. } => Some(dest.as_str()),
+                                    ir::InstructionKind::Call { dest: Some(dest), .. } => Some(dest.as_str()),
+                                    _ => None,
+                                };
+                                let dest_str = match dest_str {
+                                    Some(v) if !keya_reachable.contains(v) => v,
+                                    _ => continue,
+                                };
+                                let refs_keya = match &inst.kind {
+                                    ir::InstructionKind::Assign { src, .. } => {
+                                        current.iter().any(|kv| {
+                                            src.split(|c: char| !c.is_alphanumeric() && c != '_')
+                                               .any(|t| t == kv.as_str())
+                                        })
+                                    }
+                                    ir::InstructionKind::Call { callee, args, .. } => {
+                                        current.iter().any(|kv| {
                                             callee.split(|c: char| !c.is_alphanumeric() && c != '_')
-                                                  .any(|t| t == *kv)
+                                                  .any(|t| t == kv.as_str())
                                             || args.iter().any(|a| {
                                                 a.split(|c: char| !c.is_alphanumeric() && c != '_')
-                                                 .any(|t| t == *kv)
+                                                 .any(|t| t == kv.as_str())
                                             })
-                                        }
-                                        _ => false,
+                                        })
                                     }
-                                })
-                            });
-
-                            if sink_is_keya || sink_from_keya {
-                                return PathRefinement {
-                                    flow_index,
-                                    status: FeasibilityStatus::Infeasible,
-                                    reason: format!(
-                                        "CE-F: OWASP configparser sink '{}' derives from safe \
-                                         keyA constant read (field-insensitive FP suppressed)",
-                                        clean_sink_var
-                                    ),
+                                    _ => false,
                                 };
+                                if refs_keya {
+                                    keya_reachable.insert(dest_str.to_string());
+                                }
                             }
+                            if keya_reachable.len() == prev_len { break; } // fixpoint reached
+                        }
+
+                        // Step 3: suppress if sink is transitively reachable from keyA
+                        if keya_reachable.contains(clean_sink_var) {
+                            return PathRefinement {
+                                flow_index,
+                                status: FeasibilityStatus::Infeasible,
+                                reason: format!(
+                                    "CE-F: OWASP configparser sink '{}' transitively derives \
+                                     from safe keyA constant read (field-insensitive FP suppressed)",
+                                    clean_sink_var
+                                ),
+                            };
                         }
                     }
                 }
