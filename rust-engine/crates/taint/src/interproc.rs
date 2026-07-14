@@ -1644,6 +1644,11 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             || clean_param == "cls"
                             || clean_param == "this"
                             || is_internal_object_param(param)
+                            // FIX-A: IR-semantic DI constructor detection.
+                            // If the parameter is only ever stored to self-fields in this
+                            // method (constructor pattern) and never used as input data,
+                            // it is a dependency-injected object — not a taint source.
+                            || is_di_constructor_param(self.program, method, &clean_param)
                         {
                             continue;
                         }
@@ -5922,6 +5927,114 @@ fn is_internal_object_param(param: &str) -> bool {
             && inner.chars().all(|c| c.is_alphanumeric() || c == '_');
     }
     false
+}
+
+/// Returns `true` if `clean_param` in `method` is a dependency-injected constructor
+/// parameter that is never used as user-controlled input.
+///
+/// Semantic criterion (IR-based, no name/capitalization heuristics):
+///
+///   A parameter P is DI-injected if ALL of the following hold:
+///   1. P appears at least once as the RHS of `self.field = P` (stored to a self-field).
+///   2. P never appears as a Call argument in any instruction in the method body.
+///   3. P never appears as a Return value.
+///   4. P never appears as the RHS of an assignment whose LHS does NOT start with "self.".
+///
+/// Rationale: Infrastructure objects (DB connections, REST clients, artifact stores)
+/// are passed into `__init__` / constructors, stored via `self.X = obj`, and never
+/// read back as user-controlled inputs. Seeding them as taint sources causes phantom
+/// flows through all `self._param.*` field chains.
+///
+/// This analysis is O(n) in the number of instructions in the method body.
+fn is_di_constructor_param(
+    program: &ir::Program,
+    method: &ir::Method,
+    clean_param: &str,
+) -> bool {
+    // Only run this for __init__-style constructors or methods named with
+    // common constructor patterns. This avoids incorrectly suppressing
+    // params in regular handler methods that happen to also store to self.
+    let method_name_lower = method.name.to_lowercase();
+    let is_constructor_like = method_name_lower.ends_with(".__init__")
+        || method_name_lower == "__init__"
+        || method_name_lower.ends_with(".setup")
+        || method_name_lower.ends_with(".initialize")
+        || method_name_lower.ends_with(".init");
+    if !is_constructor_like {
+        return false;
+    }
+
+    let mut stored_to_self = false;
+    let mut used_as_call_arg = false;
+    let mut used_in_return = false;
+    let mut used_as_non_self_assign_src = false;
+
+    // Helper: does `expr` reference our parameter as a standalone variable?
+    // We use exact-token matching: the param name must appear as a complete word
+    // (preceded and followed by non-alphanumeric/underscore boundaries).
+    let param_is_referenced = |expr: &str| -> bool {
+        // Fast path: if the param name isn't even a substring, skip
+        if !expr.contains(clean_param) {
+            return false;
+        }
+        // Word-boundary check
+        let mut start = 0;
+        while let Some(pos) = expr[start..].find(clean_param) {
+            let abs = start + pos;
+            let before_ok = abs == 0
+                || !expr.as_bytes()[abs - 1].is_ascii_alphanumeric()
+                    && expr.as_bytes()[abs - 1] != b'_';
+            let after_end = abs + clean_param.len();
+            let after_ok = after_end >= expr.len()
+                || !expr.as_bytes()[after_end].is_ascii_alphanumeric()
+                    && expr.as_bytes()[after_end] != b'_';
+            if before_ok && after_ok {
+                return true;
+            }
+            start = abs + 1;
+            if start >= expr.len() {
+                break;
+            }
+        }
+        false
+    };
+
+    for inst_id in &method.body {
+        let inst = match program.instructions.get(inst_id) {
+            Some(i) => i,
+            None => continue,
+        };
+        match &inst.kind {
+            InstructionKind::Assign { dest, src } => {
+                if param_is_referenced(src) {
+                    // Is the destination a self-field store?
+                    if dest.starts_with("self.") {
+                        stored_to_self = true;
+                    } else {
+                        // Assigned into a non-self variable — it's being used as data
+                        used_as_non_self_assign_src = true;
+                    }
+                }
+            }
+            InstructionKind::Call { args, .. } => {
+                if args.iter().any(|a| param_is_referenced(a)) {
+                    used_as_call_arg = true;
+                }
+            }
+            InstructionKind::Return { val } => {
+                if let Some(v) = val {
+                    if param_is_referenced(v) {
+                        used_in_return = true;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // The parameter is DI-injected only if it is stored to at least one self-field
+    // AND never used as a call argument, return value, or non-self assignment source.
+    stored_to_self && !used_as_call_arg && !used_in_return && !used_as_non_self_assign_src
 }
 
 impl<'a> InterproceduralTaintEngine<'a> {
