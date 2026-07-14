@@ -2165,49 +2165,6 @@ impl MockPathSolver {
                     };
                 }
             }
-
-            // ── CE-G: OWASP Local Helper Sanitizer Recognition ──────────────────
-            //
-            // Root cause: Safe OWASP tests sanitize user input using a local helper
-            // defined in the benchmark (e.g. `helpers.utils.escape_for_html`).
-            // The engine does not recognize these non-standard local sanitizers.
-            if (flow.cwe == taint::CWE::CWE79 || flow.cwe == taint::CWE::CWE78 || flow.cwe == taint::CWE::CWE22 || flow.cwe == taint::CWE::CWE89)
-                && any_source_contains("helpers.utils")
-            {
-                let src_lower = clean_source_var.to_lowercase();
-                let sink_lower = clean_sink_var.to_lowercase();
-                let has_escape_var = src_lower.contains("escape")
-                    || sink_lower.contains("escape")
-                    || src_lower.contains("sanitiz")
-                    || sink_lower.contains("sanitiz");
-
-                let mut uses_local_escape = has_escape_var;
-                if !uses_local_escape {
-                    for inst in facts.program.instructions.values() {
-                        if let ir::InstructionKind::Call { callee, args, .. } = &inst.kind {
-                            let callee_lower = callee.to_lowercase();
-                            if callee_lower.contains("escape") || callee_lower.contains("clean") {
-                                if args.iter().any(|a| a.contains(clean_source_var) || a.contains(clean_sink_var)) {
-                                    uses_local_escape = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if uses_local_escape {
-                    return PathRefinement {
-                        flow_index,
-                        status: FeasibilityStatus::Infeasible,
-                        reason: format!(
-                            "CE-G: OWASP local helper sanitizer check found for variable (source: '{}', sink: '{}') \
-                             — suppressed as false positive",
-                            clean_source_var, clean_sink_var
-                        ),
-                    };
-                }
-            }
         }
 
         for method in facts.program.methods.values() {
