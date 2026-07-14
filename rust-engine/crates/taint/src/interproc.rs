@@ -7,6 +7,7 @@ use std::rc::Rc;
 use std::time::Instant;
 use symbols::call_graph::CallGraph;
 use symbols::global::GlobalSymbolTable;
+use crate::log_level;
 
 struct ReturnScanStats {
     invocations: u64,
@@ -2984,23 +2985,26 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 }
             }
         }
-        println!("[ENGINE] finished after {} iterations", iterations);
-        RETURN_SCAN_INSTRUMENTATION.with(|stats| {
-            let s = stats.borrow();
-            let avg = if s.invocations > 0 {
-                s.total_candidates as f64 / s.invocations as f64
-            } else {
-                0.0
-            };
-            println!("=================================");
-            println!("RETURN SCAN HOTSPOT ANALYSIS");
-            println!("---------------------------------");
-            println!("Invocations: {}", s.invocations);
-            println!("Average candidates: {:.4}", avg);
-            println!("Maximum candidates: {}", s.max_candidates);
-            println!("Total duration: {} ms", s.total_duration_ns / 1_000_000);
-            println!("=================================");
-        });
+        // ENGINE summary: gated at DEBUG level (not needed for normal runs)
+        if log_level::is_debug() {
+            println!("[ENGINE] finished after {} iterations", iterations);
+            RETURN_SCAN_INSTRUMENTATION.with(|stats| {
+                let s = stats.borrow();
+                let avg = if s.invocations > 0 {
+                    s.total_candidates as f64 / s.invocations as f64
+                } else {
+                    0.0
+                };
+                println!("=================================");
+                println!("RETURN SCAN HOTSPOT ANALYSIS");
+                println!("---------------------------------");
+                println!("Invocations: {}", s.invocations);
+                println!("Average candidates: {:.4}", avg);
+                println!("Maximum candidates: {}", s.max_candidates);
+                println!("Total duration: {} ms", s.total_duration_ns / 1_000_000);
+                println!("=================================");
+            });
+        }
     }
 
     fn check_sink_flow_domain(
@@ -3886,7 +3890,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     results.push((d.clone(), fact.sanitized_for.clone()));
                                 }
                                 if let Some(receiver) = get_receiver_name_safe(callee) {
-                                    println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='deser'", callee, receiver, fact.var, receiver, dest_node_id);
+                                    // TRACE only: hot-path propagation print (primary 35 GB log source)
+                                    if log_level::is_trace() {
+                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='deser'", callee, receiver, fact.var, receiver, dest_node_id);
+                                    }
                                     results.push((receiver, fact.sanitized_for.clone()));
                                 }
                             }
@@ -4180,7 +4187,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         results.push((d.clone(), new_san.clone()));
                                     }
                                     if let Some(receiver) = get_receiver_name_safe(callee) {
-                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='sanitizer'", callee, receiver, fact.var, receiver, dest_node_id);
+                                        // TRACE only: hot-path propagation print
+                                        if log_level::is_trace() {
+                                            println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='sanitizer'", callee, receiver, fact.var, receiver, dest_node_id);
+                                        }
                                         results.push((receiver, new_san.clone()));
                                     }
                                     results.push((fact.var.clone(), new_san));
@@ -4267,7 +4277,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                 if let Some(receiver) =
                                                     get_receiver_name_safe(callee)
                                                 {
-                                                    println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='stub'", callee, receiver, fact.var, receiver, dest_node_id);
+                                                    // TRACE only: hot-path propagation print
+                                                    if log_level::is_trace() {
+                                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='stub'", callee, receiver, fact.var, receiver, dest_node_id);
+                                                    }
                                                     results
                                                         .push((receiver, propagated_san.clone()));
                                                 }
@@ -4519,7 +4532,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             || callee_lower.contains("sql")
                                             || callee_lower.contains("conn"));
                                     if !is_jdbc_setter && !is_db_setter {
-                                        println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='fallback'", callee, receiver, fact.var, receiver, dest_node_id);
+                                        // TRACE only: hot-path propagation print
+                                        if log_level::is_trace() {
+                                            println!("[RC368F_PROP] callee='{}' receiver='{}' active_fact='{}' dest_fact='{}' node_id={} kind='fallback'", callee, receiver, fact.var, receiver, dest_node_id);
+                                        }
                                         results.push((receiver, propagated_san.clone()));
                                     }
                                 }

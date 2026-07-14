@@ -3,6 +3,7 @@
 // This file provides the single-file (intraprocedural) taint engine and shared types.
 
 pub mod interproc;
+pub mod log_level;
 pub mod stubs;
 pub mod vulnerable_tests;
 
