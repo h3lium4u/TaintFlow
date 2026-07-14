@@ -1520,6 +1520,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
             };
 
             // Check GCG caller count, ignoring self-calls (recursive calls) and calls from skipped test files
+            // FIX-C: Also ignore callers whose file is within the target+sibling cohort —
+            // they are intra-cohort edges, not true external entry-point callers.
+            // A method called ONLY by sibling files is still an entry-point for outside users.
             let mut total_callers = 0;
             let has_caller = self.call_graph.edges.iter().any(|edge| {
                 if edge.callee != method_id || edge.caller == method_id {
@@ -1545,12 +1548,20 @@ impl<'a> InterproceduralTaintEngine<'a> {
                     {
                         return false; // ignore this caller since the test file is skipped from seeding
                     }
+                    // FIX-C: if the caller's file is inside the sibling cohort, it is
+                    // an intra-cohort edge, not a true external caller. Don't count it.
+                    if !self.target_and_siblings.is_empty()
+                        && self.target_and_siblings.contains(&path_lower)
+                    {
+                        return false;
+                    }
                 }
                 true
             });
             if !has_caller {
                 is_entry = true;
             }
+
 
             let is_python = if let Some(m_path) = self.get_method_file_path(method_id) {
                 m_path.to_lowercase().ends_with(".py")
