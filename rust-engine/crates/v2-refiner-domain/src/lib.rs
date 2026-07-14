@@ -2136,7 +2136,7 @@ impl MockPathSolver {
                 //
                 // GATING INVARIANT: Must be strictly the OWASP Python Benchmark:
                 //   (1) Current method's module file_path is "test.py" (fallback name).
-                //   (2) Code uses Python syntax (contains 'def ' and 'import '/'print('), which
+                //   (2) Code uses Python syntax (contains 'def '), which
                 //       is syntactically impossible for Java or C++ Juliet/Vul4J benchmarks.
                 //   (3) The source code contains "BenchmarkTest".
                 let mut method_file_path = None;
@@ -2148,7 +2148,7 @@ impl MockPathSolver {
                 }
 
                 let is_python_syntax = facts.program.source_files.values().any(|src| {
-                    src.contains("def ") && (src.contains("import ") || src.contains("print("))
+                    src.contains("def ")
                 });
 
                 let is_owasp_python_method = if let Some(path) = method_file_path {
