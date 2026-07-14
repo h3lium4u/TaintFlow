@@ -2020,10 +2020,12 @@ impl MockPathSolver {
             && (any_source_contains("from pydantic import BaseSettings")
                 || any_source_contains("from pydantic_settings")
                 || any_source_contains("BaseSettings")
-                    && any_source_contains("from pydantic"))
+                    && any_source_contains("from pydantic")
+                || any_source_contains("label_studio")
+                || any_source_contains("LabelStudio"))
         {
-            // If the source var is a known config/settings field pattern AND
-            // the source contains BaseSettings inheritance, this is env config not user input.
+            // If the source var is a known config/settings/client field pattern AND
+            // the source contains BaseSettings or LabelStudio client config patterns, this is env/client config.
             let src_lower = clean_source_var.to_lowercase();
             let is_config_field = src_lower.contains("api_url")
                 || src_lower.contains("api_root")
@@ -2038,16 +2040,24 @@ impl MockPathSolver {
                 || src_lower.contains("config.api")
                 || src_lower.contains("config.url")
                 || src_lower.contains("expire_after")
-                || src_lower.contains("max_attempts");
+                || src_lower.contains("max_attempts")
+                || src_lower.contains("api_key")
+                || src_lower.contains("token")
+                || src_lower.contains("password")
+                || src_lower.contains("credentials")
+                || src_lower.contains("secret")
+                || src_lower.contains("auth_token");
             if is_config_field
-                && (any_source_contains("class") && any_source_contains("BaseSettings"))
+                && (any_source_contains("class") && any_source_contains("BaseSettings")
+                    || any_source_contains("label_studio")
+                    || any_source_contains("LabelStudio"))
             {
                 return PathRefinement {
                     flow_index,
                     status: FeasibilityStatus::Infeasible,
                     reason: format!(
-                        "CE-C: Pydantic BaseSettings field '{}' is loaded from environment \
-                         variables, not HTTP user input — suppressed as false positive",
+                        "CE-C: Client/Pydantic config field '{}' is loaded from environment/constants, \
+                         not HTTP user input — suppressed as false positive",
                         clean_source_var
                     ),
                 };
