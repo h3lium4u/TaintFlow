@@ -12,3 +12,11 @@ scratch/
 # Ignore node_modules
 node_modules/
 **/node_modules/
+
+# Ignore internal logging, coverage and build temps
+internal/
+tmp/
+temp/
+coverage/
+**/debug/
+
