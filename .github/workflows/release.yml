@@ -90,12 +90,13 @@ jobs:
       - name: Generate SPDX SBOM
         run: |
           cargo install cargo-sbom --locked
-          cargo sbom --version
-          cargo sbom --help
+          cargo sbom --output-format spdx_json_2_3 > ../sbom.spdx.json
         working-directory: rust-engine
 
-      - name: Move SBOM to release root
-        run: mv rust-engine/sbom.spdx.json .
+      - name: Verify SBOM Generation
+        run: |
+          ls -la
+          find . -name "sbom.spdx.json"
 
       - name: Create GitHub Release Draft
         uses: softprops/action-gh-release@v2
