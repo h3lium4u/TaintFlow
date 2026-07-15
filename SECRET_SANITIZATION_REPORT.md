@@ -28,7 +28,7 @@ A recursive regex-based scanner searched the repository (excluding target, node_
 * **Details:** Embedded inside the `after` field of the JSONL line (representing vulnerability advisory patch data from `https://github.com/treasure-data/digdag`).
 * **Original Values:**
   - `project_id`: `"dummy-project"`
-  - `private_key_id`: `"1b74fe23959e7ebc0735590ebced3b6a7057ded0"`
+  - `private_key_id`: `"<SANITIZED_PRIVATE_KEY_ID>"`
   - `private_key`: `"-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkq...\n-----END PRIVATE KEY-----\n"`
   - `client_email`: `"dummy-506@dummy-project.iam.gserviceaccount.com"`
   - `client_id`: `"103785715584895261604"`
