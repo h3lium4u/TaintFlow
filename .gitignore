@@ -19,4 +19,9 @@ tmp/
 temp/
 coverage/
 **/debug/
-
+Main/
+fineract/
+keycloak/
+security/
+shopizer/
+spring-petclinic/
