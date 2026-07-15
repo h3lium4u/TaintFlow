@@ -1,0 +1,30 @@
+name: 'TaintFlow'
+author: 'Mohamed Faizaan'
+description: 'Statically scan Python and Java source code for security vulnerabilities (CWE-89, CWE-78, CWE-22, and more).'
+branding:
+  icon: 'shield'
+  color: 'blue'
+inputs:
+  path:
+    description: 'Path to source code folder or file to scan'
+    required: true
+    default: '.'
+  format:
+    description: 'Output format (text, json, sarif)'
+    required: false
+    default: 'sarif'
+  output:
+    description: 'Output file path for the results'
+    required: false
+    default: 'taintflow-results.sarif'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - 'scan'
+    - '--path'
+    - '${{ inputs.path }}'
+    - '--format'
+    - '${{ inputs.format }}'
+    - '--output'
+    - '${{ inputs.output }}'

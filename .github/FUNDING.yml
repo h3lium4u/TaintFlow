@@ -1,0 +1,6 @@
+# Funding configurations
+
+github: [taintflow]
+open_collective: taintflow
+tidelift: cargo/taintflow-cli
+custom: ['https://taintflow.org/donate']

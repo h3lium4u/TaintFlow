@@ -2001,7 +2001,7 @@ impl MockPathSolver {
             }
         }
 
-        // ── CE-C: Pydantic BaseSettings / FastAPI Config Taint (CWE-918/CWE-22) ─
+        // ── CE-C: Pydantic BaseSettings / FastAPI / Django Config Taint (CWE-918/CWE-22) ═
         //
         // Root cause: Pydantic `BaseSettings` subclasses load their field values
         // from environment variables, not from HTTP requests. The engine seeds them
@@ -2011,18 +2011,23 @@ impl MockPathSolver {
         // Similarly, FastAPI's dependency-injected config objects (using
         // `Depends(get_settings)`) are environment-sourced, not user-controlled.
         //
+        // Similarly, Django's `django.conf.settings` variables are deployment-time
+        // configuration values (loaded from settings.py or environment variables),
+        // never from HTTP request bodies. The engine incorrectly seeds `settings.X`
+        // (e.g., settings.RAID_DEFAULT_JIRA_QRAFT_USER_ID) as user-controlled taint.
+        //
         // Evidence gate: `from pydantic import BaseSettings` or `from pydantic_settings`
-        // or `from fastapi` must be present.
+        // or `from django.conf import settings` must be present.
         //
         // Suppression condition: source variable matches known config field patterns
         // that are provably environment-loaded, not HTTP-request-derived.
         if (flow.cwe == taint::CWE::CWE918 || flow.cwe == taint::CWE::CWE22)
             && (any_source_contains("from pydantic import BaseSettings")
                 || any_source_contains("from pydantic_settings")
-                || any_source_contains("BaseSettings")
-                    && any_source_contains("from pydantic")
+                || (any_source_contains("BaseSettings") && any_source_contains("from pydantic"))
                 || any_source_contains("label_studio")
-                || any_source_contains("LabelStudio"))
+                || any_source_contains("LabelStudio")
+                || any_source_contains("from django.conf import settings"))
         {
             // If the source var is a known config/settings/client field pattern AND
             // the source contains BaseSettings or LabelStudio client config patterns, this is env/client config.
@@ -2050,7 +2055,8 @@ impl MockPathSolver {
             if is_config_field
                 && (any_source_contains("class") && any_source_contains("BaseSettings")
                     || any_source_contains("label_studio")
-                    || any_source_contains("LabelStudio"))
+                    || any_source_contains("LabelStudio")
+                    || any_source_contains("from django.conf import settings"))
             {
                 return PathRefinement {
                     flow_index,

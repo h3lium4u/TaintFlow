@@ -1,0 +1,35 @@
+name: Bug Report
+description: Report a bug, scanner crash, or incorrect scan metric.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the form below.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+      placeholder: E.g., TaintFlow crashes when scanning ...
+    validations:
+      required: true
+  - type: textarea
+    id: mwe
+    attributes:
+      label: Minimal Working Example (MWE)
+      description: Please share a code snippet or repository link that reproduces the issue.
+      placeholder: |
+        // Java or Python code snippet
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS version, Rust toolchain version, and TaintFlow version.
+      placeholder: |
+        OS: Ubuntu 22.04
+        TaintFlow: v1.0.0
+        Rust: rustc 1.75.0
+    validations:
+      required: true

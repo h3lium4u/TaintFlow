@@ -1,4 +1,10 @@
 [package]
+authors = ["Mohamed Faizaan"]
+license = "MIT"
+description = "Part of the TaintFlow static application security testing (SAST) engine."
+repository = "https://github.com/MohamedFaizaan/TaintFlow"
+homepage = "https://github.com/MohamedFaizaan/TaintFlow"
+documentation = "https://docs.rs/taintflow"
 name = "taint"
 version = "0.1.0"
 edition = "2021"

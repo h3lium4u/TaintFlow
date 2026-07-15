@@ -1,7 +1,7 @@
 {
   "name": "taintflow",
   "displayName": "TaintFlow Security Scanner",
-  "description": "AI-powered static security analysis for Python and Java. Detects CWE-89, CWE-78, CWE-22, CWE-918, CWE-502, CWE-798, CWE-327 and more using the TaintFlow RC2 taint-analysis engine.",
+  "description": "AI-powered static security analysis for Python and Java. Detects CWE-89, CWE-78, CWE-22, CWE-918, CWE-502, CWE-798, CWE-327 and more using the TaintFlow taint-analysis engine.",
   "version": "1.0.0",
   "publisher": "taintflow",
   "engines": {

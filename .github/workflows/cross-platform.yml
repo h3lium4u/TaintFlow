@@ -1,0 +1,35 @@
+name: Cross-Platform Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate_platforms:
+    name: Validate Solver
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust-engine
+
+      - name: Run Platform Unit Tests
+        run: cargo test
+        working-directory: rust-engine
+
+      # Note: We run lightweight unit tests only. Detailed dataset validation runs
+      # are triggered manually before release sprints (see RELEASE_CHECKLIST.md).
