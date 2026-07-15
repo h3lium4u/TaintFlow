@@ -1,0 +1,32 @@
+name: TaintFlow Security Scan
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  taintflow:
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run TaintFlow SAST Scan
+        uses: h3lium4u/taintflow-action@v1
+        with:
+          path: .
+          format: sarif
+          output: taintflow-results.sarif
+
+      - name: Upload SARIF Report to GitHub Advanced Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: taintflow-results.sarif
