@@ -2,7 +2,7 @@
 
 # 🛡️ TaintFlow
 
-![TaintFlow Banner](assets/readme/hero.png)
+![TaintFlow Banner](assets/readme/hero-v2.png)
 
 ### Context-Sensitive Static Application Security Testing (SAST) Engine
 
