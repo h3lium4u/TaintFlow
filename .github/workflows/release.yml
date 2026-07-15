@@ -89,8 +89,9 @@ jobs:
 
       - name: Generate SPDX SBOM
         run: |
-          cargo install cargo-sbom
-          cargo sbom --format spdx-json > sbom.spdx.json
+          cargo install cargo-sbom --locked
+          cargo sbom --version
+          cargo sbom --help
         working-directory: rust-engine
 
       - name: Move SBOM to release root
