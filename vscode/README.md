@@ -5,7 +5,7 @@
 <h1 align="center">TaintFlow SAST</h1>
 
 <p align="center">
-  <strong>Offline Context-Sensitive Static Application Security Testing (SAST) Engine for VS Code</strong>
+  <strong>Fast, Offline Static Application Security Testing (SAST) powered by Context-Sensitive Taint Analysis</strong>
 </p>
 
 <p align="center">

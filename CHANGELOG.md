@@ -4,6 +4,17 @@ All notable changes to the TaintFlow project will be documented in this file.
 
 ---
 
+## [1.1.2] - 2026-07-15
+
+### Changed
+- **Branding Update**: Updated VS Code Marketplace README sub-logo description text for improved consistency.
+
+## [1.1.1] - 2026-07-15
+
+### Changed
+- **Branding Update**: Updated VS Code Marketplace short description to improve branding.
+- **Asset Cache-Busting**: Transitioned extension hero banner to branch-based raw GitHub URL referencing new `hero-v2.png` file to bypass Marketplace CDN caching.
+
 ## [1.0.0] - 2026-07-13
 
 ### Added

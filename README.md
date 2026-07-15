@@ -6,7 +6,7 @@
 
 ### Context-Sensitive Static Application Security Testing (SAST) Engine
 
-**Version: v1.0.0**
+**Version: v1.1.2**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-6366f1.svg?style=for-the-badge)](LICENSE)
 [![Rust](https://img.shields.io/badge/Engine-Rust-f97316.svg?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
@@ -101,26 +101,86 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the complete technical breakdown.
 
 ## ⚡ Installation
 
-### Prerequisites
+### Local Installation
+
+#### Prerequisites
 - Python 3.9+
 - Rust toolchain (`cargo`, `rustc`)
 
-### 1. Clone and build the Rust engine
+#### 1. Clone and build the Rust engine
 ```bash
 git clone https://github.com/h3lium4u/TaintFlow.git
 cd TaintFlow/rust-engine
 cargo build --release -p taintflow-cli
 ```
 
-### 2. Install Python dependencies
+#### 2. Install Python dependencies
 ```bash
 pip install lightgbm scikit-learn onnxruntime numpy pandas
 ```
 
-### 3. Verify installation
+#### 3. Verify installation
 ```bash
 echo "x = input(); eval(x)" | rust-engine/target/release/taintflow-cli.exe --extract
 ```
+
+---
+
+### Docker Installation
+
+TaintFlow SAST is distributed as a lightweight, production-grade container image.
+
+#### Docker Hub
+
+Pull the image from Docker Hub:
+
+```bash
+docker pull h3lium4u/taintflow:latest
+docker pull h3lium4u/taintflow:1.1.2
+```
+
+#### GitHub Container Registry (GHCR)
+
+TaintFlow SAST is also distributed through GitHub Container Registry (GHCR).
+
+##### Pull the latest release
+
+```bash
+docker pull ghcr.io/h3lium4u/taintflow:latest
+```
+
+##### Pull a specific version
+
+```bash
+docker pull ghcr.io/h3lium4u/taintflow:1.1.2
+```
+
+##### Verify the installation
+
+```bash
+docker run --rm ghcr.io/h3lium4u/taintflow:latest --help
+```
+
+##### Scan a project
+
+Linux/macOS
+
+```bash
+docker run --rm \
+  -v "$(pwd):/workspace" \
+  ghcr.io/h3lium4u/taintflow:latest \
+  scan /workspace
+```
+
+Windows PowerShell
+
+```powershell
+docker run --rm `
+  -v ${PWD}:/workspace `
+  ghcr.io/h3lium4u/taintflow:latest `
+  scan /workspace
+```
+
 
 ---
 
