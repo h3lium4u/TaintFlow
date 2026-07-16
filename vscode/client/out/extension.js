@@ -39,6 +39,7 @@ const vscode = __importStar(require("vscode"));
 const cp = __importStar(require("child_process"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const reviewManager_1 = require("./reviewManager");
 // ─────────────────────────────────────────────────────────────
 // Diagnostic collection (persists across scans)
 // ─────────────────────────────────────────────────────────────
@@ -56,6 +57,8 @@ const SEVERITY_MAP = {
 function activate(context) {
     diagnosticCollection = vscode.languages.createDiagnosticCollection('taintflow');
     context.subscriptions.push(diagnosticCollection);
+    // Review manager — tracks usage organically, no telemetry
+    const reviewManager = new reviewManager_1.ReviewManager(context);
     // Command: Scan current file
     context.subscriptions.push(vscode.commands.registerCommand('taintflow.scanFile', async () => {
         const editor = vscode.window.activeTextEditor;
@@ -63,7 +66,7 @@ function activate(context) {
             vscode.window.showWarningMessage('TaintFlow: No active file to scan.');
             return;
         }
-        await scanTargetPath(editor.document.uri.fsPath, context);
+        await scanTargetPath(editor.document.uri.fsPath, context, reviewManager);
     }));
     // Command: Scan workspace
     context.subscriptions.push(vscode.commands.registerCommand('taintflow.scanWorkspace', async () => {
@@ -73,7 +76,7 @@ function activate(context) {
             return;
         }
         for (const folder of folders) {
-            await scanTargetPath(folder.uri.fsPath, context);
+            await scanTargetPath(folder.uri.fsPath, context, reviewManager);
         }
     }));
     // Command: Clear all diagnostics
@@ -81,12 +84,16 @@ function activate(context) {
         diagnosticCollection.clear();
         vscode.window.showInformationMessage('TaintFlow: All findings cleared.');
     }));
+    // Command: Rate extension — opens Open VSX review page directly
+    context.subscriptions.push(vscode.commands.registerCommand('taintflow.rateExtension', async () => {
+        await reviewManager.openReviewPage();
+    }));
     // Auto-scan on save (if enabled)
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(async (doc) => {
         const config = vscode.workspace.getConfiguration('taintflow');
         if (config.get('autoScanOnSave', false)) {
             if (doc.languageId === 'python' || doc.languageId === 'java') {
-                await scanTargetPath(doc.uri.fsPath, context);
+                await scanTargetPath(doc.uri.fsPath, context, reviewManager);
             }
         }
     }));
@@ -98,7 +105,7 @@ function deactivate() {
 // ─────────────────────────────────────────────────────────────
 // Core scan logic
 // ─────────────────────────────────────────────────────────────
-async function scanTargetPath(targetPath, context) {
+async function scanTargetPath(targetPath, context, reviewManager) {
     const config = vscode.workspace.getConfiguration('taintflow');
     const pythonPath = config.get('pythonPath', 'python');
     const scriptPath = resolveScriptPath(config, context);
@@ -113,8 +120,8 @@ async function scanTargetPath(targetPath, context) {
     }, async () => {
         const findings = await runScan(pythonPath, scriptPath, targetPath);
         applyDiagnostics(findings, targetPath);
-        const config = vscode.workspace.getConfiguration('taintflow');
-        if (config.get('showInformationMessages', true)) {
+        const cfg = vscode.workspace.getConfiguration('taintflow');
+        if (cfg.get('showInformationMessages', true)) {
             if (findings.length === 0) {
                 vscode.window.showInformationMessage(`TaintFlow: ✅ No vulnerabilities found in ${path.basename(targetPath)}.`);
             }
@@ -122,6 +129,8 @@ async function scanTargetPath(targetPath, context) {
                 vscode.window.showWarningMessage(`TaintFlow: ⚠️ Found ${findings.length} issue(s) in ${path.basename(targetPath)}. See Problems panel.`);
             }
         }
+        // Record scan and conditionally show review prompt
+        await reviewManager.recordScanAndCheck();
     });
 }
 function resolveScriptPath(config, context) {

@@ -151,6 +151,24 @@ Here is how findings are structured in JSON when run via the bundled CLI:
 
 ---
 
+## Support TaintFlow+
+
+If TaintFlow+ helps you find security issues in your code, consider leaving a review on Open VSX — it helps other developers discover the extension and motivates continued development.
+
+👉 **[Leave a review on Open VSX](https://open-vsx.org/extension/F1ZZ4N/taintflow-sast)**
+
+You can also open the review page at any time from within VS Code:
+
+1. Open the **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+2. Run **`TaintFlow+: Rate Extension`**
+
+> **Privacy note:** TaintFlow+ never sends telemetry or tracks your usage externally.
+> Review prompts are evaluated entirely from local state stored in your VS Code profile.
+> You can disable them permanently via:
+> **Settings → `taintflow.enableReviewPrompt` → `false`**
+
+---
+
 ## License
 
 This extension is licensed under the [MIT License](LICENSE.txt).

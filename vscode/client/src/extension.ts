@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import { ReviewManager } from './reviewManager';
 
 // ─────────────────────────────────────────────────────────────
 // Diagnostic collection (persists across scans)
@@ -33,6 +34,9 @@ export function activate(context: vscode.ExtensionContext): void {
     diagnosticCollection = vscode.languages.createDiagnosticCollection('taintflow');
     context.subscriptions.push(diagnosticCollection);
 
+    // Review manager — tracks usage organically, no telemetry
+    const reviewManager = new ReviewManager(context);
+
     // Command: Scan current file
     context.subscriptions.push(
         vscode.commands.registerCommand('taintflow.scanFile', async () => {
@@ -41,7 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 vscode.window.showWarningMessage('TaintFlow: No active file to scan.');
                 return;
             }
-            await scanTargetPath(editor.document.uri.fsPath, context);
+            await scanTargetPath(editor.document.uri.fsPath, context, reviewManager);
         })
     );
 
@@ -54,7 +58,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 return;
             }
             for (const folder of folders) {
-                await scanTargetPath(folder.uri.fsPath, context);
+                await scanTargetPath(folder.uri.fsPath, context, reviewManager);
             }
         })
     );
@@ -67,13 +71,20 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
+    // Command: Rate extension — opens Open VSX review page directly
+    context.subscriptions.push(
+        vscode.commands.registerCommand('taintflow.rateExtension', async () => {
+            await reviewManager.openReviewPage();
+        })
+    );
+
     // Auto-scan on save (if enabled)
     context.subscriptions.push(
         vscode.workspace.onDidSaveTextDocument(async (doc) => {
             const config = vscode.workspace.getConfiguration('taintflow');
             if (config.get<boolean>('autoScanOnSave', false)) {
                 if (doc.languageId === 'python' || doc.languageId === 'java') {
-                    await scanTargetPath(doc.uri.fsPath, context);
+                    await scanTargetPath(doc.uri.fsPath, context, reviewManager);
                 }
             }
         })
@@ -91,7 +102,8 @@ export function deactivate(): void {
 // ─────────────────────────────────────────────────────────────
 async function scanTargetPath(
     targetPath: string,
-    context: vscode.ExtensionContext
+    context: vscode.ExtensionContext,
+    reviewManager: ReviewManager
 ): Promise<void> {
     const config       = vscode.workspace.getConfiguration('taintflow');
     const pythonPath   = config.get<string>('pythonPath', 'python');
@@ -114,8 +126,8 @@ async function scanTargetPath(
             const findings = await runScan(pythonPath, scriptPath, targetPath);
             applyDiagnostics(findings, targetPath);
 
-            const config = vscode.workspace.getConfiguration('taintflow');
-            if (config.get<boolean>('showInformationMessages', true)) {
+            const cfg = vscode.workspace.getConfiguration('taintflow');
+            if (cfg.get<boolean>('showInformationMessages', true)) {
                 if (findings.length === 0) {
                     vscode.window.showInformationMessage(
                         `TaintFlow: ✅ No vulnerabilities found in ${path.basename(targetPath)}.`
@@ -126,6 +138,9 @@ async function scanTargetPath(
                     );
                 }
             }
+
+            // Record scan and conditionally show review prompt
+            await reviewManager.recordScanAndCheck();
         }
     );
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.3
+
+- **3-Stage Calm Review Request System:** Non-intrusive review prompts that never interrupt scan results.
+  - Stage 1: Calm welcome message 30 seconds after first install.
+  - Stage 2: Warm follow-up 5 minutes after next VS Code startup (if Stage 1 was deferred).
+  - Stage 3: Heartfelt message after 7 days of use (if Stage 2 was deferred).
+- **New Command:** `TaintFlow+: Rate Extension` — opens Open VSX review page at any time from the Command Palette.
+- **New Setting:** `taintflow.enableReviewPrompt` — set to `false` to permanently silence all review prompts.
+- All review state stored locally in VS Code globalState. Zero telemetry. Zero external tracking.
+
 ## 1.1.2
 
 - Updated VS Code Marketplace README sub-logo description text.
