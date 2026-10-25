@@ -173,6 +173,19 @@ pub fn get_word_tokens(s: &str) -> Vec<String> {
     tokens
 }
 
+/// Helper to extract clean parameter name by stripping type annotations and defaults.
+pub fn clean_parameter_name(param: &str) -> String {
+    let base = if let Some(idx) = param.find(':').or_else(|| param.find('=')) {
+        &param[..idx]
+    } else {
+        param
+    };
+    let last = base.split_whitespace().last().unwrap_or(base);
+    last.replace("[]", "")
+        .trim_matches(|c: char| !c.is_alphanumeric() && c != '_')
+        .to_string()
+}
+
 // ─── CWE heuristic mapping (shared between single-file and interproc engines) ─
 
 pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Option<CWE> {
@@ -773,19 +786,6 @@ impl TaintEngine {
 
     pub fn get_taint(&self, name: &str) -> Option<TaintState> {
         self.is_symbol_tainted(name)
-    }
-
-    /// Helper to extract clean parameter name by stripping type annotations and defaults.
-    pub fn clean_parameter_name(param: &str) -> String {
-        let base = if let Some(idx) = param.find(':').or_else(|| param.find('=')) {
-            &param[..idx]
-        } else {
-            param
-        };
-        let last = base.split_whitespace().last().unwrap_or(base);
-        last.replace("[]", "")
-            .trim_matches(|c: char| !c.is_alphanumeric() && c != '_')
-            .to_string()
     }
 
     pub fn index_functions(&mut self, node: &NormalizedNode) {
