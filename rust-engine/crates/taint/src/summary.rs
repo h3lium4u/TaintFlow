@@ -35,7 +35,7 @@ pub struct SinkInvocation {
     /// CWE category detected.
     pub cwe: CWE,
     /// Severity rating.
-    pub severity: &'static str,
+    pub severity: String,
     /// Line number inside the source file where the sink call occurs.
     pub call_line: usize,
     /// Argument index of the sink call that receives the parameter data.
@@ -309,7 +309,7 @@ impl SummaryInferer {
                                     param_idx,
                                     sink_callee: callee.clone(),
                                     cwe,
-                                    severity,
+                                    severity: severity.to_string(),
                                     call_line: node.span.start_line,
                                     arg_index: arg_idx,
                                 });
@@ -329,7 +329,7 @@ impl SummaryInferer {
                                             param_idx: caller_param,
                                             sink_callee: sink_inv.sink_callee.clone(),
                                             cwe: sink_inv.cwe,
-                                            severity: sink_inv.severity,
+                                            severity: sink_inv.severity.clone(),
                                             call_line: node.span.start_line,
                                             arg_index: sink_inv.arg_index,
                                         });
@@ -879,7 +879,7 @@ impl ProjectSummaryRegistry {
                                                 param_idx: caller_p,
                                                 sink_callee: target_sink.sink_callee.clone(),
                                                 cwe: target_sink.cwe,
-                                                severity: target_sink.severity,
+                                                severity: target_sink.severity.clone(),
                                                 call_line: call.call_line,
                                                 arg_index: target_sink.arg_index,
                                             },
