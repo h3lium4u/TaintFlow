@@ -4865,7 +4865,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         } else if let Some((container, key)) =
                                             parse_java_or_python_container_read(tainted_var)
                                         {
-                                            if expr_uses_var(v, &container) {
+                                            if let Some((ret_container, ret_key)) =
+                                                parse_java_or_python_container_read(v)
+                                            {
+                                                if ret_container.to_lowercase()
+                                                    == container.to_lowercase()
+                                                    && (ret_key == key
+                                                        || key == "*"
+                                                        || ret_key == "*")
+                                                {
+                                                    returns_tainted = true;
+                                                    break;
+                                                }
+                                            } else if expr_uses_var(v, &container) {
                                                 if let Some(d) = dest {
                                                     tainted_return_var =
                                                         Some(format!("{}[\"{}\"]", d, key));
