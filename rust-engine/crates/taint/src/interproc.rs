@@ -4699,20 +4699,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         }
                         // Bind arguments to parameters by position
                         for (i, arg) in args.iter().enumerate() {
-                            if expr_uses_var(arg, tainted_var) {
-                                let param_opt = if is_synthetic {
-                                    Some(&method.parameters[0])
-                                } else {
-                                    method.parameters.get(i + param_offset)
-                                };
-                                if let Some(param) = param_opt {
-                                    let clean_param = clean_parameter_name(param);
-                                    results.push(clean_param);
-                                }
-                            } else if let Some((container, key)) =
+                            if let Some((container, key)) =
                                 parse_java_or_python_container_read(tainted_var)
                             {
-                                if expr_uses_var(arg, &container) {
+                                if parse_java_or_python_container_read(arg).is_none()
+                                    && expr_uses_var(arg, &container)
+                                {
                                     let param_opt = if is_synthetic {
                                         Some(&method.parameters[0])
                                     } else {
@@ -4722,6 +4714,18 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                         let clean_param = clean_parameter_name(param);
                                         results.push(format!("{}[\"{}\"]", clean_param, key));
                                     }
+                                    continue;
+                                }
+                            }
+                            if expr_uses_var(arg, tainted_var) {
+                                let param_opt = if is_synthetic {
+                                    Some(&method.parameters[0])
+                                } else {
+                                    method.parameters.get(i + param_offset)
+                                };
+                                if let Some(param) = param_opt {
+                                    let clean_param = clean_parameter_name(param);
+                                    results.push(clean_param);
                                 }
                             }
                         }
@@ -4859,10 +4863,7 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                     if let InstructionKind::Return { val: Some(v) } =
                                         &body_inst.kind
                                     {
-                                        if expr_uses_var(v, tainted_var) {
-                                            returns_tainted = true;
-                                            break;
-                                        } else if let Some((container, key)) =
+                                        if let Some((container, key)) =
                                             parse_java_or_python_container_read(tainted_var)
                                         {
                                             if let Some((ret_container, ret_key)) =
@@ -4877,13 +4878,18 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                     returns_tainted = true;
                                                     break;
                                                 }
-                                            } else if expr_uses_var(v, &container) {
+                                            } else if parse_java_or_python_container_read(v).is_none()
+                                                && expr_uses_var(v, &container)
+                                            {
                                                 if let Some(d) = dest {
                                                     tainted_return_var =
                                                         Some(format!("{}[\"{}\"]", d, key));
                                                 }
                                                 break;
                                             }
+                                        } else if expr_uses_var(v, tainted_var) {
+                                            returns_tainted = true;
+                                            break;
                                         }
                                     }
                                 }
