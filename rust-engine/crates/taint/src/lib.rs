@@ -365,7 +365,7 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
     }
 
     // XSS / HTML injection (CWE-79)
-    if c.contains("write")
+    if (c.contains("write")
         || c.contains("print")
         || c.contains("println")
         || c.contains("render_template_string")
@@ -373,7 +373,9 @@ pub fn map_sink_to_cwe_heuristic(callee: &str, file_path: Option<&str>) -> Optio
         || c.contains("out.print")
         || c.contains("getwriter")
         || c.contains("badsink")
-        || c.contains("dangerous_sink")
+        || c.contains("dangerous_sink"))
+        && !c.contains("system.out")
+        && !c.contains("system.err")
     {
         return Some(CWE::CWE79);
     }

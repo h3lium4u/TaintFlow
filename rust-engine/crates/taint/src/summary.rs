@@ -278,7 +278,7 @@ impl SummaryInferer {
                         || method == "write";
 
                     if is_mutation_method {
-                        if let Some(receiver) = callee_lower.rsplit('.').nth(1) {
+                        if let Some((receiver, _)) = callee_lower.rsplit_once('.') {
                             let r = receiver.trim();
                             if r == "this"
                                 || r == "self"
@@ -347,18 +347,18 @@ impl SummaryInferer {
                 }
 
                 NormalizedKind::Return(expr) => {
-                    let inf = Self::eval_expr_influences(
-                        expr,
-                        var_influences,
-                        summary,
-                        existing_registry,
-                        depth + 1,
-                    );
-                    summary.param_to_return.extend(inf);
-
-                    // Check if return is a pure boolean predicate (no parameters returned)
-                    if Self::is_boolean_expr(expr) && summary.param_to_return.is_empty() {
+                    let is_bool = Self::is_boolean_expr(expr);
+                    if is_bool {
                         summary.is_pure_predicate = true;
+                    } else {
+                        let inf = Self::eval_expr_influences(
+                            expr,
+                            var_influences,
+                            summary,
+                            existing_registry,
+                            depth + 1,
+                        );
+                        summary.param_to_return.extend(inf);
                     }
                 }
 
@@ -726,6 +726,9 @@ impl SummaryInferer {
             || r.contains("||")
             || r.contains(" is ")
             || r.contains(" in ")
+            || r.contains(" and ")
+            || r.contains(" or ")
+            || r.starts_with("not ")
     }
 }
 
