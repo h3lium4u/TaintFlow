@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 use taint::models::ActiveModelRegistry;
+use taint::summary::{ProjectSummaryRegistry, SinkInvocation};
 use taint::{TaintEngine, CWE};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -55,6 +56,8 @@ pub struct RuleEngine {
     seen_keys: HashSet<String>,
 
     pub model_registry: Option<std::sync::Arc<ActiveModelRegistry>>,
+
+    pub summary_registry: Option<std::sync::Arc<ProjectSummaryRegistry>>,
 
     pub language: Option<String>,
 }
@@ -216,6 +219,8 @@ impl RuleEngine {
             seen_keys: HashSet::new(),
 
             model_registry: None,
+
+            summary_registry: None,
 
             language: None,
         }
@@ -507,10 +512,10 @@ impl RuleEngine {
             if let Some(matched) = matched_sink {
                 for (idx, arg) in arguments.iter().enumerate() {
                     if matched.arg_indices.is_empty() || matched.arg_indices.contains(&idx) {
-                        if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine) {
-                            let suppressed =
-                                state.external_sanitized_for.contains(&matched.cwe)
-                                    || state.sanitized_for.contains(&matched.cwe);
+                        if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine)
+                        {
+                            let suppressed = state.external_sanitized_for.contains(&matched.cwe)
+                                || state.sanitized_for.contains(&matched.cwe);
                             if !suppressed {
                                 let cwe_str = format!("{:?}", matched.cwe);
                                 self.push_finding(Finding {
@@ -532,6 +537,108 @@ impl RuleEngine {
                         }
                     }
                 }
+            }
+            // ── Cross-File Inferred Sink Evaluation ─────────────────────────
+            let cross_file_sinks: Vec<(SinkInvocation, String, usize, String, String)> =
+                if let Some(ref sum_reg) = self.summary_registry {
+                    let mut matched = Vec::new();
+                    if let Some(summary) =
+                        sum_reg.find_summary_for_caller(callee, arguments.len(), file_path)
+                    {
+                        for sink_inv in &summary.sink_invocations {
+                            if let Some(arg) = arguments.get(sink_inv.param_idx) {
+                                if let Some((name, state)) =
+                                    self.get_tainted_identifier(arg, taint_engine)
+                                {
+                                    // If callee only conditionally sanitized the parameter, do not suppress
+                                    let is_only_conditionally_sanitized = summary
+                                        .conditional_sanitizes_for
+                                        .contains_key(&sink_inv.param_idx);
+                                    let suppressed = (state.sanitized_for.contains(&sink_inv.cwe)
+                                        || state.external_sanitized_for.contains(&sink_inv.cwe))
+                                        && !is_only_conditionally_sanitized;
+
+                                    if !suppressed {
+                                        matched.push((
+                                            sink_inv.clone(),
+                                            name,
+                                            node.span.start_line,
+                                            summary.file_path.clone(),
+                                            summary.original_name.clone(),
+                                        ));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    matched
+                } else {
+                    Vec::new()
+                };
+
+            for (sink_inv, name, line, def_file, fn_name) in cross_file_sinks {
+                let cwe_str = format!("{:?}", sink_inv.cwe);
+                self.push_finding(Finding {
+                    cwe: cwe_str.clone(),
+                    title: format!("Cross-File Data Flow Vulnerability ({}) [Inferred]", cwe_str),
+                    description: format!(
+                        "Unsanitized tainted variable '{}' flows to cross-file function '{}', which reaches sink '{}' at {}:{}. (Evidence: Interprocedural summary inference)",
+                        name, fn_name, sink_inv.sink_callee, def_file, sink_inv.call_line
+                    ),
+                    file_path: file_path.to_string(),
+                    line_number: line,
+                    severity: sink_inv.severity.to_string(),
+                    ..Default::default()
+                });
+            }
+
+            // ── Broken Sanitization Chain / Context Mismatch ────────────────
+            let context_mismatches: Vec<(String, String, CWE, String, usize)> = {
+                let mut mismatches = Vec::new();
+                for arg in arguments {
+                    if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine) {
+                        if !state.sanitized_for.is_empty() {
+                            if let Some(sink_cwe) =
+                                taint::map_sink_to_cwe_heuristic(callee, Some(file_path))
+                            {
+                                if !state.sanitized_for.contains(&sink_cwe) {
+                                    let sanitized_list: Vec<String> = state
+                                        .sanitized_for
+                                        .iter()
+                                        .map(|c| format!("{:?}", c))
+                                        .collect();
+                                    mismatches.push((
+                                        name,
+                                        sanitized_list.join(", "),
+                                        sink_cwe,
+                                        callee.clone(),
+                                        node.span.start_line,
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+                mismatches
+            };
+
+            for (name, san_str, sink_cwe, sink_callee, line) in context_mismatches {
+                let cwe_str = format!("{:?}", sink_cwe);
+                self.push_finding(Finding {
+                    cwe: cwe_str.clone(),
+                    title: format!(
+                        "Broken Sanitization Chain / Context Mismatch ({}) [Heuristic Candidate]",
+                        cwe_str
+                    ),
+                    description: format!(
+                        "Tainted variable '{}' was sanitized for [{}], but flows into {} sink '{}'. (Evidence: Sanitization does not neutralize vulnerabilities in different execution contexts)",
+                        name, san_str, cwe_str, sink_callee
+                    ),
+                    file_path: file_path.to_string(),
+                    line_number: line,
+                    severity: "HIGH".to_string(),
+                    ..Default::default()
+                });
             }
         } else if let NormalizedKind::Identifier(name) = &node.kind {
             if name.contains('(') || name.contains('/') || name.contains('+') {

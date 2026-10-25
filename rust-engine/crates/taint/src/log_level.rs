@@ -1,4 +1,4 @@
-﻿// taint/src/log_level.rs -- TaintFlow structured logging subsystem
+// taint/src/log_level.rs -- TaintFlow structured logging subsystem
 //
 // Controlled by the TAINTFLOW_LOG environment variable:
 //
@@ -13,8 +13,8 @@ use std::sync::OnceLock;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum LogLevel {
-    Off   = 0,
-    Info  = 1,
+    Off = 0,
+    Info = 1,
     Debug = 2,
     Trace = 3,
 }
@@ -31,22 +31,28 @@ pub fn get() -> LogLevel {
             .to_lowercase()
             .as_str()
         {
-            "off"   => LogLevel::Off,
+            "off" => LogLevel::Off,
             "debug" => LogLevel::Debug,
             "trace" => LogLevel::Trace,
-            _       => LogLevel::Info,
+            _ => LogLevel::Info,
         }
     })
 }
 
 /// True when TRACE logging is active.
 #[inline]
-pub fn is_trace() -> bool { get() >= LogLevel::Trace }
+pub fn is_trace() -> bool {
+    get() >= LogLevel::Trace
+}
 
 /// True when DEBUG or higher is active.
 #[inline]
-pub fn is_debug() -> bool { get() >= LogLevel::Debug }
+pub fn is_debug() -> bool {
+    get() >= LogLevel::Debug
+}
 
 /// True when INFO or higher is active.
 #[inline]
-pub fn is_info()  -> bool { get() >= LogLevel::Info }
+pub fn is_info() -> bool {
+    get() >= LogLevel::Info
+}

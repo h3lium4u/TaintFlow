@@ -64,14 +64,26 @@ pub struct RawEntry {
     pub id: String,
     pub kind: String,
     pub callee: String,
+    #[serde(default)]
     pub cwe: String,
     pub languages: Vec<String>,
+    #[serde(default)]
     pub severity: String,
     #[serde(default)]
     pub arg_indices: Vec<usize>,
+    #[serde(default)]
+    pub input_args: Vec<usize>,
+    #[serde(default)]
+    pub propagates_to: Option<String>,
 }
 
 // ─── Internal normalised types ────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PropagationTarget {
+    Return,
+    Receiver,
+}
 
 /// A compiled, validated model entry ready for matching.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,6 +99,8 @@ pub struct ModelEntry {
     pub languages: Vec<String>,
     pub severity: &'static str,
     pub arg_indices: Vec<usize>,
+    pub input_args: Vec<usize>,
+    pub propagates_to: PropagationTarget,
     /// Origin — used for deterministic tie-breaking.
     pub pack_id: String,
     pub entry_index: usize,
@@ -97,6 +111,7 @@ pub enum ModelKind {
     Source,
     Sink,
     Sanitizer,
+    Propagator,
 }
 
 /// Return value from a successful external sink match.
@@ -112,6 +127,13 @@ pub struct MatchedSink {
 pub struct MatchedSanitizer {
     pub cwes: HashSet<CWE>,
     pub arg_indices: Vec<usize>,
+}
+
+/// Return value from a successful external propagator match.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MatchedPropagator {
+    pub input_args: Vec<usize>,
+    pub propagates_to: PropagationTarget,
 }
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
@@ -400,6 +422,52 @@ impl ActiveModelRegistry {
 
         false
     }
+
+    /// Match an external propagator by callee string and language.
+    /// Returns the first matching propagator using 2-tier deterministic precedence.
+    ///
+    /// Tier 1: exact qualified (`callee_lower == rule.callee_lower`)
+    /// Tier 2: exact unqualified method (`callee_method == rule.callee_lower` or `callee_method_lower`)
+    pub fn match_propagator(&self, callee: &str, language: &str) -> Option<MatchedPropagator> {
+        let callee_clean = callee.replace('"', "").replace('\'', "");
+        let callee_lower = callee_clean.to_lowercase();
+        let callee_method = callee_lower
+            .rsplit('.')
+            .next()
+            .unwrap_or(&callee_lower)
+            .to_string();
+        let lang_lower = language.to_lowercase();
+
+        let propagators: Vec<&ModelEntry> = self
+            .entries
+            .iter()
+            .filter(|e| {
+                e.kind == ModelKind::Propagator && language_matches(&e.languages, &lang_lower)
+            })
+            .collect();
+
+        // Tier 1 — exact qualified
+        for e in &propagators {
+            if callee_lower == e.callee_lower {
+                return Some(MatchedPropagator {
+                    input_args: e.input_args.clone(),
+                    propagates_to: e.propagates_to,
+                });
+            }
+        }
+
+        // Tier 2 — exact unqualified method
+        for e in &propagators {
+            if callee_method == e.callee_lower {
+                return Some(MatchedPropagator {
+                    input_args: e.input_args.clone(),
+                    propagates_to: e.propagates_to,
+                });
+            }
+        }
+
+        None
+    }
 }
 
 // ─── Validation helpers ───────────────────────────────────────────────────────
@@ -483,6 +551,7 @@ pub fn compile_entry(
         "source" => ModelKind::Source,
         "sink" => ModelKind::Sink,
         "sanitizer" => ModelKind::Sanitizer,
+        "propagator" => ModelKind::Propagator,
         other => return Err(format!("Entry '{}': unknown kind '{}'", raw.id, other)),
     };
 
@@ -504,8 +573,12 @@ pub fn compile_entry(
         .unwrap_or(&callee_lower)
         .to_string();
 
-    let cwe = parse_cwe(&raw.cwe)
-        .ok_or_else(|| format!("Entry '{}': unknown CWE '{}'", raw.id, raw.cwe))?;
+    let cwe = if kind == ModelKind::Propagator && raw.cwe.is_empty() {
+        CWE::CWE89
+    } else {
+        parse_cwe(&raw.cwe)
+            .ok_or_else(|| format!("Entry '{}': unknown CWE '{}'", raw.id, raw.cwe))?
+    };
 
     let mut languages = Vec::new();
     for lang in &raw.languages {
@@ -526,8 +599,29 @@ pub fn compile_entry(
         return Err(format!("Entry '{}': languages list is empty", raw.id));
     }
 
-    let severity = parse_severity(&raw.severity)
-        .ok_or_else(|| format!("Entry '{}': unknown severity '{}'", raw.id, raw.severity))?;
+    let severity = if kind == ModelKind::Propagator && raw.severity.is_empty() {
+        "MEDIUM"
+    } else {
+        parse_severity(&raw.severity)
+            .ok_or_else(|| format!("Entry '{}': unknown severity '{}'", raw.id, raw.severity))?
+    };
+
+    let input_args = if !raw.input_args.is_empty() {
+        raw.input_args
+    } else {
+        raw.arg_indices.clone()
+    };
+
+    let propagates_to = match raw.propagates_to.as_deref() {
+        Some("receiver") => PropagationTarget::Receiver,
+        Some("return") | None => PropagationTarget::Return,
+        Some(other) => {
+            return Err(format!(
+                "Entry '{}': unknown propagates_to '{}' (expected 'return' or 'receiver')",
+                raw.id, other
+            ))
+        }
+    };
 
     Ok(ModelEntry {
         id: raw.id,
@@ -538,6 +632,8 @@ pub fn compile_entry(
         languages,
         severity,
         arg_indices: raw.arg_indices,
+        input_args,
+        propagates_to,
         pack_id: pack_id.to_string(),
         entry_index: idx,
     })
@@ -974,5 +1070,141 @@ mod tests {
         let m = reg.match_sanitizer("ExtSan.clean", "java");
         assert!(m.is_some());
         assert!(m.unwrap().cwes.contains(&CWE::CWE89));
+    }
+
+    // ── Propagator matching (M2) ───────────────────────────────────────────
+
+    #[test]
+    fn test_propagator_match_exact_qualified() {
+        let pack_json = r#"{
+  "schema_version": 1,
+  "pack_id": "test-pack",
+  "min_engine_version": "1.0.0",
+  "entries": [
+    {
+      "id": "prop1",
+      "kind": "propagator",
+      "callee": "StringUtils.join",
+      "languages": ["java"],
+      "input_args": [0],
+      "propagates_to": "return"
+    }
+  ]
+}"#;
+        let entries = ActiveModelRegistry::load_pack_from_str(pack_json, "test.json").unwrap();
+        let mut reg = ActiveModelRegistry::new();
+        reg.entries = entries;
+        let m = reg.match_propagator("StringUtils.join", "java");
+        assert!(m.is_some(), "Should match exact qualified propagator");
+        let matched = m.unwrap();
+        assert_eq!(matched.input_args, vec![0]);
+        assert_eq!(matched.propagates_to, PropagationTarget::Return);
+    }
+
+    #[test]
+    fn test_propagator_match_unqualified() {
+        let pack_json = r#"{
+  "schema_version": 1,
+  "pack_id": "test-pack",
+  "min_engine_version": "1.0.0",
+  "entries": [
+    {
+      "id": "prop1",
+      "kind": "propagator",
+      "callee": "custom_transform",
+      "languages": ["python"],
+      "input_args": [1],
+      "propagates_to": "return"
+    }
+  ]
+}"#;
+        let entries = ActiveModelRegistry::load_pack_from_str(pack_json, "test.json").unwrap();
+        let mut reg = ActiveModelRegistry::new();
+        reg.entries = entries;
+        let m = reg.match_propagator("module.custom_transform", "python");
+        assert!(
+            m.is_some(),
+            "Should match unqualified method part of propagator"
+        );
+        let matched = m.unwrap();
+        assert_eq!(matched.input_args, vec![1]);
+    }
+
+    #[test]
+    fn test_propagator_receiver_target() {
+        let pack_json = r#"{
+  "schema_version": 1,
+  "pack_id": "test-pack",
+  "min_engine_version": "1.0.0",
+  "entries": [
+    {
+      "id": "prop1",
+      "kind": "propagator",
+      "callee": "CustomBuilder.appendData",
+      "languages": ["java"],
+      "input_args": [0],
+      "propagates_to": "receiver"
+    }
+  ]
+}"#;
+        let entries = ActiveModelRegistry::load_pack_from_str(pack_json, "test.json").unwrap();
+        let mut reg = ActiveModelRegistry::new();
+        reg.entries = entries;
+        let m = reg.match_propagator("CustomBuilder.appendData", "java");
+        assert!(m.is_some());
+        assert_eq!(m.unwrap().propagates_to, PropagationTarget::Receiver);
+    }
+
+    #[test]
+    fn test_propagator_unknown_target_rejected() {
+        let pack_json = r#"{
+  "schema_version": 1,
+  "pack_id": "test-pack",
+  "min_engine_version": "1.0.0",
+  "entries": [
+    {
+      "id": "prop1",
+      "kind": "propagator",
+      "callee": "test.foo",
+      "languages": ["java"],
+      "input_args": [0],
+      "propagates_to": "invalid_target"
+    }
+  ]
+}"#;
+        assert!(ActiveModelRegistry::load_pack_from_str(pack_json, "test.json").is_err());
+    }
+
+    #[test]
+    fn test_propagator_no_match_different_class() {
+        let pack_json = r#"{
+  "schema_version": 1,
+  "pack_id": "test-pack",
+  "min_engine_version": "1.0.0",
+  "entries": [
+    {
+      "id": "prop1",
+      "kind": "propagator",
+      "callee": "CustomUtils.transform",
+      "languages": ["java"],
+      "input_args": [0],
+      "propagates_to": "return"
+    }
+  ]
+}"#;
+        let entries = ActiveModelRegistry::load_pack_from_str(pack_json, "test.json").unwrap();
+        let mut reg = ActiveModelRegistry::new();
+        reg.entries = entries;
+
+        // Unrelated class method with same method name must NOT match qualified propagator
+        assert!(reg
+            .match_propagator("OtherClass.transform", "java")
+            .is_none());
+        assert!(reg.match_propagator("thread.transform", "java").is_none());
+
+        // Exact qualified call MUST match
+        assert!(reg
+            .match_propagator("CustomUtils.transform", "java")
+            .is_some());
     }
 }

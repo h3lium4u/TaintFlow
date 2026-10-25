@@ -6,6 +6,7 @@ pub mod interproc;
 pub mod log_level;
 pub mod models;
 pub mod stubs;
+pub mod summary;
 pub mod vulnerable_tests;
 
 use normalizer::{NormalizedKind, NormalizedNode};
@@ -604,6 +605,15 @@ impl ChaTable {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct FunctionDef {
+    pub name: String,
+    pub params: Vec<String>,
+    pub body: Vec<NormalizedNode>,
+    pub start_line: usize,
+    pub end_line: usize,
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct TaintEngine {
     pub tainted_symbols: HashMap<String, TaintState>,
@@ -618,6 +628,8 @@ pub struct TaintEngine {
     pub aliases: HashMap<String, Vec<String>>,
     pub functions: HashMap<String, (Vec<String>, Vec<NormalizedNode>)>,
     pub functions_list: HashMap<String, Vec<(Vec<String>, Vec<NormalizedNode>)>>,
+    pub function_defs: HashMap<String, FunctionDef>,
+    pub function_defs_list: HashMap<String, Vec<FunctionDef>>,
     pub active_calls: Vec<String>,
     warning_emitted: bool,
     pub map_taint_store: HashMap<String, Vec<String>>,
@@ -625,6 +637,8 @@ pub struct TaintEngine {
     pub list_lengths: HashMap<String, usize>,
     /// Optional external model registry for M1 external sink/sanitizer matching.
     pub model_registry: Option<std::sync::Arc<crate::models::ActiveModelRegistry>>,
+    /// Optional project-wide summary registry for cross-file taint and sink resolution.
+    pub summary_registry: Option<std::sync::Arc<crate::summary::ProjectSummaryRegistry>>,
     /// Language being analysed — set by CLI before propagation.
     pub language: Option<String>,
 }
@@ -648,12 +662,15 @@ impl TaintEngine {
             aliases: HashMap::new(),
             functions: HashMap::new(),
             functions_list: HashMap::new(),
+            function_defs: HashMap::new(),
+            function_defs_list: HashMap::new(),
             active_calls: Vec::new(),
             warning_emitted: false,
             map_taint_store: HashMap::new(),
             cha: ChaTable::new(),
             list_lengths: HashMap::new(),
             model_registry: None,
+            summary_registry: None,
             language: None,
         }
     }
@@ -672,12 +689,15 @@ impl TaintEngine {
             aliases: HashMap::new(),
             functions: HashMap::new(),
             functions_list: HashMap::new(),
+            function_defs: HashMap::new(),
+            function_defs_list: HashMap::new(),
             active_calls: Vec::new(),
             warning_emitted: false,
             map_taint_store: HashMap::new(),
             cha: ChaTable::new(),
             list_lengths: HashMap::new(),
             model_registry: None,
+            summary_registry: None,
             language: None,
         }
     }
@@ -696,12 +716,477 @@ impl TaintEngine {
         None
     }
 
-    pub fn is_symbol_tainted_at(&self, name: &str, _line: usize) -> Option<TaintState> {
+    pub fn is_symbol_tainted_at(&self, name: &str, line: usize) -> Option<TaintState> {
+        if line > 0 {
+            let name_lower = name.to_lowercase();
+            for def in self.function_defs.values() {
+                if line >= def.start_line && line <= def.end_line {
+                    let is_param = def.params.iter().any(|p| p.eq_ignore_ascii_case(name));
+
+                    // If currently executing inside this function, prioritize current call context
+                    if self
+                        .active_calls
+                        .iter()
+                        .any(|c| c.eq_ignore_ascii_case(&def.name))
+                    {
+                        if let Some(st) = self.is_symbol_tainted(name) {
+                            if st.tainted {
+                                return Some(st);
+                            }
+                        }
+                        if is_param {
+                            return None;
+                        }
+                    }
+
+                    // Outside active execution (e.g. RuleEngine scan), check if symbol was tainted by any call
+                    let def_name_lower = def.name.to_lowercase();
+                    let target_prefix = format!("{}::", def_name_lower);
+                    for (k, state) in &self.tainted_symbols {
+                        let k_lower = k.to_lowercase();
+                        if k_lower.starts_with(&target_prefix)
+                            && &k_lower[target_prefix.len()..] == name_lower
+                        {
+                            if state.tainted {
+                                return Some(state.clone());
+                            }
+                        }
+                    }
+                    if is_param {
+                        return None;
+                    }
+                }
+            }
+        }
         self.is_symbol_tainted(name)
     }
 
     pub fn get_taint(&self, name: &str) -> Option<TaintState> {
         self.is_symbol_tainted(name)
+    }
+
+    pub fn index_functions(&mut self, node: &NormalizedNode) {
+        match &node.kind {
+            NormalizedKind::FunctionDefinition { name, params, body } => {
+                let def = FunctionDef {
+                    name: name.clone(),
+                    params: params.clone(),
+                    body: body.clone(),
+                    start_line: node.span.start_line,
+                    end_line: node.span.end_line,
+                };
+                let clean_name = name.replace('"', "").replace('\'', "").to_lowercase();
+                let method_part = clean_name
+                    .rsplit('.')
+                    .next()
+                    .unwrap_or(&clean_name)
+                    .to_string();
+
+                self.function_defs.insert(clean_name.clone(), def.clone());
+                self.function_defs_list
+                    .entry(clean_name.clone())
+                    .or_default()
+                    .push(def.clone());
+                if method_part != clean_name {
+                    self.function_defs
+                        .entry(method_part.clone())
+                        .or_insert_with(|| def.clone());
+                    self.function_defs_list
+                        .entry(method_part)
+                        .or_default()
+                        .push(def.clone());
+                }
+
+                // Also populate legacy fields for compatibility
+                self.functions
+                    .insert(clean_name.clone(), (params.clone(), body.clone()));
+                self.functions_list
+                    .entry(clean_name)
+                    .or_default()
+                    .push((params.clone(), body.clone()));
+
+                // Recurse into body to index any nested functions
+                for child in body {
+                    self.index_functions(child);
+                }
+            }
+            NormalizedKind::Block(children) | NormalizedKind::Concat { parts: children } => {
+                for child in children {
+                    self.index_functions(child);
+                }
+            }
+            NormalizedKind::If {
+                condition,
+                consequent,
+                alternate,
+            } => {
+                self.index_functions(condition);
+                self.index_functions(consequent);
+                if let Some(alt) = alternate {
+                    self.index_functions(alt);
+                }
+            }
+            NormalizedKind::Try {
+                body,
+                catch_clauses,
+                finally_clause,
+            } => {
+                self.index_functions(body);
+                for c in catch_clauses {
+                    self.index_functions(c);
+                }
+                if let Some(f) = finally_clause {
+                    self.index_functions(f);
+                }
+            }
+            NormalizedKind::For { body, .. }
+            | NormalizedKind::While { body, .. }
+            | NormalizedKind::DoWhile { body, .. }
+            | NormalizedKind::Catch { body, .. } => {
+                self.index_functions(body);
+            }
+            _ => {}
+        }
+    }
+
+    pub fn find_function_def(&self, callee: &str, arg_count: usize) -> Option<FunctionDef> {
+        let clean = callee.replace('"', "").replace('\'', "").to_lowercase();
+        let method = clean.rsplit('.').next().unwrap_or(&clean);
+
+        if let Some(list) = self.function_defs_list.get(&clean) {
+            for f in list {
+                if f.params.len() == arg_count {
+                    return Some(f.clone());
+                }
+            }
+            if let Some(first) = list.first() {
+                return Some(first.clone());
+            }
+        }
+        if let Some(list) = self.function_defs_list.get(method) {
+            for f in list {
+                if f.params.len() == arg_count {
+                    return Some(f.clone());
+                }
+            }
+            if let Some(first) = list.first() {
+                return Some(first.clone());
+            }
+        }
+        self.function_defs
+            .get(&clean)
+            .cloned()
+            .or_else(|| self.function_defs.get(method).cloned())
+    }
+
+    fn find_return_taint(&self, node: &NormalizedNode, depth: usize) -> Option<TaintState> {
+        match &node.kind {
+            NormalizedKind::Return(expr) => self.evaluate_taint_state_recursive(expr, depth + 1),
+            NormalizedKind::Block(children) => {
+                for child in children {
+                    if let Some(st) = self.find_return_taint(child, depth) {
+                        if st.tainted {
+                            return Some(st);
+                        }
+                    }
+                }
+                None
+            }
+            NormalizedKind::If {
+                consequent,
+                alternate,
+                ..
+            } => {
+                if let Some(st) = self.find_return_taint(consequent, depth) {
+                    if st.tainted {
+                        return Some(st);
+                    }
+                }
+                if let Some(alt) = alternate {
+                    if let Some(st) = self.find_return_taint(alt, depth) {
+                        if st.tainted {
+                            return Some(st);
+                        }
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
+    pub fn check_receiver_propagator(&mut self, callee: &str, arguments: &[NormalizedNode]) {
+        if let Some(registry) = self.model_registry.as_ref() {
+            let lang = self.language.as_deref().unwrap_or("java");
+            if let Some(prop) = registry.match_propagator(callee, lang) {
+                if prop.propagates_to == crate::models::PropagationTarget::Receiver {
+                    let input_taint = if prop.input_args.is_empty() {
+                        arguments
+                            .iter()
+                            .find_map(|arg| self.evaluate_taint_state_recursive(arg, 0))
+                    } else {
+                        prop.input_args.iter().find_map(|&idx| {
+                            arguments
+                                .get(idx)
+                                .and_then(|arg| self.evaluate_taint_state_recursive(arg, 0))
+                        })
+                    };
+                    if let Some(taint_state) = input_taint {
+                        if taint_state.tainted {
+                            if let Some(receiver) = callee.rsplit('.').nth(1) {
+                                let receiver = receiver.trim();
+                                if !receiver.is_empty() {
+                                    self.tainted_symbols
+                                        .insert(receiver.to_string(), taint_state);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(ref sum_reg) = self.summary_registry {
+            let caller_file = self.file_path.as_deref().unwrap_or("");
+            if let Some(summary) =
+                sum_reg.find_summary_for_caller(callee, arguments.len(), caller_file)
+            {
+                for &param_idx in &summary.param_to_receiver {
+                    if let Some(arg) = arguments.get(param_idx) {
+                        if let Some(ts) = self.evaluate_taint_state_recursive(arg, 0) {
+                            if ts.tainted {
+                                if let Some(receiver) = callee.rsplit('.').nth(1) {
+                                    let receiver = receiver.trim();
+                                    if !receiver.is_empty() {
+                                        self.tainted_symbols.insert(receiver.to_string(), ts);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn execute_helper_call(
+        &mut self,
+        callee: &str,
+        arguments: &[NormalizedNode],
+        depth: usize,
+    ) -> Option<TaintState> {
+        if depth >= 5 || self.active_calls.len() >= 5 {
+            return None;
+        }
+
+        let func_def = self.find_function_def(callee, arguments.len())?;
+
+        // Cycle detection
+        if self.active_calls.contains(&func_def.name) {
+            return None;
+        }
+
+        // Evaluate argument taint states from caller context
+        let mut param_bindings: Vec<(String, Option<TaintState>)> = Vec::new();
+        for (i, param_name) in func_def.params.iter().enumerate() {
+            let arg_state = if i < arguments.len() {
+                self.evaluate_taint_state_recursive(&arguments[i], depth + 1)
+            } else {
+                None
+            };
+            param_bindings.push((param_name.clone(), arg_state));
+        }
+
+        // Bind actual arguments to formal parameters
+        let mut saved_symbols: Vec<(String, Option<TaintState>)> = Vec::new();
+        for (param, state_opt) in &param_bindings {
+            saved_symbols.push((param.clone(), self.tainted_symbols.get(param).cloned()));
+            if let Some(state) = state_opt {
+                if state.tainted {
+                    self.tainted_symbols.insert(param.clone(), state.clone());
+                    self.tainted_symbols
+                        .insert(format!("{}::{}", func_def.name, param), state.clone());
+                } else {
+                    self.tainted_symbols.remove(param);
+                    self.tainted_symbols
+                        .remove(&format!("{}::{}", func_def.name, param));
+                }
+            } else {
+                self.tainted_symbols.remove(param);
+                self.tainted_symbols
+                    .remove(&format!("{}::{}", func_def.name, param));
+            }
+        }
+
+        self.active_calls.push(func_def.name.clone());
+        let pre_body_keys: HashSet<String> = self.tainted_symbols.keys().cloned().collect();
+
+        // Execute function body statements
+        let mut returned_taint: Option<TaintState> = None;
+        for stmt in &func_def.body {
+            self.propagate_node(stmt);
+            if let Some(ts) = self.find_return_taint(stmt, depth) {
+                if ts.tainted {
+                    returned_taint = Some(ts);
+                }
+            }
+        }
+
+        self.active_calls.pop();
+
+        // Clean up un-scoped local variables created inside helper body
+        let post_body_keys: Vec<String> = self.tainted_symbols.keys().cloned().collect();
+        for k in post_body_keys {
+            if !k.contains("::") && !pre_body_keys.contains(&k) {
+                self.tainted_symbols.remove(&k);
+            }
+        }
+
+        // Restore outer symbols, but preserve scoped bindings for RuleEngine
+        for (param, old_opt) in saved_symbols {
+            if let Some(old) = old_opt {
+                self.tainted_symbols.insert(param, old);
+            } else {
+                self.tainted_symbols.remove(&param);
+            }
+        }
+
+        returned_taint
+    }
+
+    fn evaluate_local_function_return(
+        &self,
+        callee: &str,
+        arguments: &[NormalizedNode],
+        depth: usize,
+    ) -> Option<TaintState> {
+        if depth >= 5 || self.active_calls.len() >= 5 {
+            return None;
+        }
+
+        let func_def = self.find_function_def(callee, arguments.len())?;
+        if self.active_calls.contains(&func_def.name) {
+            return None;
+        }
+
+        // Map formal parameters to caller argument taint
+        let mut param_taints: HashMap<String, TaintState> = HashMap::new();
+        for (i, param_name) in func_def.params.iter().enumerate() {
+            if i < arguments.len() {
+                if let Some(st) = self.evaluate_taint_state_recursive(&arguments[i], depth + 1) {
+                    if st.tainted {
+                        param_taints.insert(param_name.clone(), st);
+                    }
+                }
+            }
+        }
+
+        // Walk body statements to trace return
+        Self::eval_return_from_body(&func_def.body, &param_taints, depth)
+    }
+
+    fn eval_return_from_body(
+        body: &[NormalizedNode],
+        param_taints: &HashMap<String, TaintState>,
+        depth: usize,
+    ) -> Option<TaintState> {
+        let mut local_taints = param_taints.clone();
+
+        for node in body {
+            match &node.kind {
+                NormalizedKind::Assignment { lhs, rhs } => {
+                    let dest = match &lhs.kind {
+                        NormalizedKind::Identifier(n) => n.clone(),
+                        _ => lhs.raw.clone(),
+                    };
+                    if let Some(st) = Self::eval_node_taint_with_context(rhs, &local_taints, depth)
+                    {
+                        if st.tainted {
+                            local_taints.insert(dest, st);
+                        } else {
+                            local_taints.remove(&dest);
+                        }
+                    } else {
+                        local_taints.remove(&dest);
+                    }
+                }
+                NormalizedKind::Return(expr) => {
+                    return Self::eval_node_taint_with_context(expr, &local_taints, depth);
+                }
+                NormalizedKind::Block(children) => {
+                    if let Some(st) = Self::eval_return_from_body(children, &local_taints, depth) {
+                        return Some(st);
+                    }
+                }
+                NormalizedKind::If {
+                    consequent,
+                    alternate,
+                    ..
+                } => {
+                    let b = vec![(**consequent).clone()];
+                    if let Some(st) = Self::eval_return_from_body(&b, &local_taints, depth) {
+                        if st.tainted {
+                            return Some(st);
+                        }
+                    }
+                    if let Some(alt) = alternate {
+                        let alt_b = vec![(**alt).clone()];
+                        if let Some(st) = Self::eval_return_from_body(&alt_b, &local_taints, depth)
+                        {
+                            if st.tainted {
+                                return Some(st);
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+
+    fn eval_node_taint_with_context(
+        node: &NormalizedNode,
+        context: &HashMap<String, TaintState>,
+        depth: usize,
+    ) -> Option<TaintState> {
+        if depth > 20 {
+            return None;
+        }
+        match &node.kind {
+            NormalizedKind::Identifier(name) => context.get(name).cloned(),
+            NormalizedKind::Literal(_) => None,
+            NormalizedKind::Concat { parts } => {
+                let mut combined = TaintState::default();
+                for part in parts {
+                    if let Some(st) = Self::eval_node_taint_with_context(part, context, depth + 1) {
+                        if st.tainted {
+                            combined.tainted = true;
+                            combined.sanitized_for.extend(st.sanitized_for);
+                            combined
+                                .external_sanitized_for
+                                .extend(st.external_sanitized_for);
+                        }
+                    }
+                }
+                if combined.tainted {
+                    Some(combined)
+                } else {
+                    None
+                }
+            }
+            NormalizedKind::Call { arguments, .. } => {
+                for arg in arguments {
+                    if let Some(st) = Self::eval_node_taint_with_context(arg, context, depth + 1) {
+                        if st.tainted {
+                            return Some(st);
+                        }
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
     }
 
     pub fn evaluate_taint_state_recursive(
@@ -712,7 +1197,8 @@ impl TaintEngine {
         if depth > 20 {
             return None;
         }
-        if let Some(state) = self.is_symbol_tainted(&node.raw) {
+        let line = node.span.start_line;
+        if let Some(state) = self.is_symbol_tainted_at(&node.raw, line) {
             if state.tainted {
                 return Some(state);
             }
@@ -741,7 +1227,7 @@ impl TaintEngine {
         }
         match &node.kind {
             NormalizedKind::Identifier(name) => {
-                if let Some(state) = self.is_symbol_tainted(name) {
+                if let Some(state) = self.is_symbol_tainted_at(name, line) {
                     if state.tainted {
                         return Some(state);
                     }
@@ -831,7 +1317,96 @@ impl TaintEngine {
                     }
                 }
 
-                // Check if any argument is tainted
+                // 1. Check local helper function definition
+                if let Some(state) = self.evaluate_local_function_return(callee, arguments, depth) {
+                    if state.tainted {
+                        return Some(state);
+                    }
+                }
+                // If it was a known local function and didn't return taint, do NOT blanket-taint
+                if self.find_function_def(callee, arguments.len()).is_some() {
+                    return None;
+                }
+
+                // 1b. Check cross-file project summary registry
+                if let Some(ref sum_reg) = self.summary_registry {
+                    let caller_file = self.file_path.as_deref().unwrap_or("");
+                    if let Some(summary) =
+                        sum_reg.find_summary_for_caller(callee, arguments.len(), caller_file)
+                    {
+                        let mut return_tainted: Option<TaintState> = None;
+                        for &param_idx in &summary.param_to_return {
+                            if let Some(arg) = arguments.get(param_idx) {
+                                if let Some(st) =
+                                    self.evaluate_taint_state_recursive(arg, depth + 1)
+                                {
+                                    if st.tainted {
+                                        return_tainted = Some(st);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if let Some(st) = return_tainted {
+                            return Some(st);
+                        }
+                        if !summary.param_to_return.is_empty() {
+                            return None;
+                        }
+                    }
+                }
+
+                // 2. Check external model propagator
+                if let Some(reg) = self.model_registry.as_ref() {
+                    let lang = self.language.as_deref().unwrap_or("java");
+                    if let Some(prop) = reg.match_propagator(callee, lang) {
+                        if prop.propagates_to == crate::models::PropagationTarget::Return {
+                            let any_input_tainted = if prop.input_args.is_empty() {
+                                arguments.iter().find_map(|arg| {
+                                    self.evaluate_taint_state_recursive(arg, depth + 1)
+                                })
+                            } else {
+                                prop.input_args.iter().find_map(|&idx| {
+                                    arguments.get(idx).and_then(|arg| {
+                                        self.evaluate_taint_state_recursive(arg, depth + 1)
+                                    })
+                                })
+                            };
+                            if let Some(st) = any_input_tainted {
+                                if st.tainted {
+                                    return Some(st);
+                                }
+                            }
+                            return None;
+                        }
+                    }
+                }
+
+                // 3. Check if callee is a boolean predicate (returns boolean, not tainted data)
+                let c_lower = callee.to_lowercase();
+                let method = c_lower.split('.').last().unwrap_or("");
+                let is_predicate = method.starts_with("is")
+                    || method.starts_with("has")
+                    || method == "check"
+                    || method == "validate"
+                    || method == "contains"
+                    || method == "containskey"
+                    || method == "containsvalue"
+                    || method == "equals"
+                    || method == "equalsignorecase"
+                    || method == "matches"
+                    || method == "startswith"
+                    || method == "endswith"
+                    || method == "isempty"
+                    || method == "isblank"
+                    || method == "exists"
+                    || method == "isfile"
+                    || method == "isdir";
+                if is_predicate {
+                    return None;
+                }
+
+                // 4. Fallback for unmodeled calls: check if any argument is tainted
                 for arg in arguments {
                     if let Some(state) = self.evaluate_taint_state_recursive(arg, depth + 1) {
                         if state.tainted {
@@ -905,6 +1480,10 @@ impl TaintEngine {
         }
         self.paths_explored += 1;
 
+        if self.function_defs.is_empty() {
+            self.index_functions(node);
+        }
+
         match &node.kind {
             NormalizedKind::Assignment { lhs, rhs } => {
                 let dest = match &lhs.kind {
@@ -912,9 +1491,43 @@ impl TaintEngine {
                     _ => lhs.raw.clone(),
                 };
 
+                let mut helper_state = None;
+                if let NormalizedKind::Call {
+                    callee, arguments, ..
+                } = &rhs.kind
+                {
+                    helper_state = self.execute_helper_call(callee, arguments, 0);
+                    self.check_receiver_propagator(callee, arguments);
+
+                    if helper_state.is_none() {
+                        if let Some(ref sum_reg) = self.summary_registry {
+                            let caller_file = self.file_path.as_deref().unwrap_or("");
+                            if let Some(summary) = sum_reg.find_summary_for_caller(
+                                callee,
+                                arguments.len(),
+                                caller_file,
+                            ) {
+                                for &param_idx in &summary.param_to_return {
+                                    if let Some(arg) = arguments.get(param_idx) {
+                                        if let Some(st) =
+                                            self.evaluate_taint_state_recursive(arg, 0)
+                                        {
+                                            if st.tainted {
+                                                helper_state = Some(st);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Check if RHS is a taint source or is tainted
                 let fp = self.file_path.clone();
-                let is_source = contains_source_expression(&rhs.raw, fp.as_deref())
+                let is_source = helper_state.as_ref().map(|s| s.tainted).unwrap_or(false)
+                    || contains_source_expression(&rhs.raw, fp.as_deref())
                     || self
                         .model_registry
                         .as_ref()
@@ -935,8 +1548,8 @@ impl TaintEngine {
                         .unwrap_or(false);
 
                 if is_source {
-                    let mut inherited_state = self
-                        .evaluate_taint_state_recursive(rhs, 0)
+                    let mut inherited_state = helper_state
+                        .or_else(|| self.evaluate_taint_state_recursive(rhs, 0))
                         .unwrap_or_else(|| TaintState {
                             tainted: true,
                             sanitized_for: HashSet::new(),
@@ -964,6 +1577,12 @@ impl TaintEngine {
 
                     self.tainted_symbols
                         .insert(dest.clone(), inherited_state.clone());
+                    if let Some(current_func) = self.active_calls.last() {
+                        self.tainted_symbols.insert(
+                            format!("{}::{}", current_func, dest),
+                            inherited_state.clone(),
+                        );
+                    }
 
                     // If RHS is a Block representing a collection literal, propagate to elements!
                     if let NormalizedKind::Block(children) = &rhs.kind {
@@ -1049,6 +1668,12 @@ impl TaintEngine {
                         return;
                     }
                 }
+
+                // Execute local helper function if defined
+                self.execute_helper_call(callee, arguments, 0);
+
+                // Check external propagator with receiver target
+                self.check_receiver_propagator(callee, arguments);
 
                 // Collection mutation methods
                 let c_lower = callee.to_lowercase();
