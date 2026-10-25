@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use std::collections::HashSet;
 
+use taint::models::ActiveModelRegistry;
 use taint::{TaintEngine, CWE};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -52,6 +53,10 @@ pub struct RuleEngine {
     findings: Vec<Finding>,
 
     seen_keys: HashSet<String>,
+
+    pub model_registry: Option<std::sync::Arc<ActiveModelRegistry>>,
+
+    pub language: Option<String>,
 }
 
 // --- Precision helpers ---
@@ -209,6 +214,10 @@ impl RuleEngine {
             findings: Vec::new(),
 
             seen_keys: HashSet::new(),
+
+            model_registry: None,
+
+            language: None,
         }
     }
 
@@ -473,6 +482,48 @@ impl RuleEngine {
 
                                         ..Default::default()
 
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── External model sink evaluation (M1) ──────────────────────────
+            if let Some(registry) = &self.model_registry {
+                let lang = self.language.as_deref().unwrap_or_else(|| {
+                    if file_path.ends_with(".py") {
+                        "python"
+                    } else {
+                        "java"
+                    }
+                });
+
+                for (idx, arg) in arguments.iter().enumerate() {
+                    if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine) {
+                        if let Some(matched) = registry.match_sink(callee, lang) {
+                            if matched.arg_indices.is_empty() || matched.arg_indices.contains(&idx)
+                            {
+                                let suppressed =
+                                    state.external_sanitized_for.contains(&matched.cwe)
+                                        || state.sanitized_for.contains(&matched.cwe);
+                                if !suppressed {
+                                    let cwe_str = format!("{:?}", matched.cwe);
+                                    self.push_finding(Finding {
+                                        cwe: cwe_str.clone(),
+                                        title: format!(
+                                            "Data Flow Vulnerability ({}) [External Model]",
+                                            cwe_str
+                                        ),
+                                        description: format!(
+                                            "Unsanitized tainted variable '{}' flows to external-model sink '{}' at parameter index {}.",
+                                            name, callee, idx
+                                        ),
+                                        file_path: file_path.to_string(),
+                                        line_number: node.span.start_line,
+                                        severity: matched.severity.to_string(),
+                                        ..Default::default()
                                     });
                                 }
                             }
@@ -1257,5 +1308,83 @@ impl RuleEngine {
         } else {
             None
         }
+    }
+}
+
+pub fn evaluate_rules_recursive(
+    rule_engine: &mut RuleEngine,
+    file_path: &str,
+    node: &NormalizedNode,
+    taint_engine: &TaintEngine,
+) {
+    rule_engine.evaluate_flow_rules(file_path, node, taint_engine);
+    rule_engine.evaluate_pattern_rules(file_path, node);
+    rule_engine.evaluate_call_pattern_rules(file_path, node);
+    match &node.kind {
+        NormalizedKind::Block(children)
+        | NormalizedKind::Concat { parts: children }
+        | NormalizedKind::FunctionDefinition { body: children, .. } => {
+            for child in children {
+                evaluate_rules_recursive(rule_engine, file_path, child, taint_engine);
+            }
+        }
+        NormalizedKind::Assignment { lhs, rhs } => {
+            evaluate_rules_recursive(rule_engine, file_path, lhs, taint_engine);
+            evaluate_rules_recursive(rule_engine, file_path, rhs, taint_engine);
+        }
+        NormalizedKind::If {
+            condition,
+            consequent,
+            alternate,
+        } => {
+            evaluate_rules_recursive(rule_engine, file_path, condition, taint_engine);
+            evaluate_rules_recursive(rule_engine, file_path, consequent, taint_engine);
+            if let Some(alt) = alternate {
+                evaluate_rules_recursive(rule_engine, file_path, alt, taint_engine);
+            }
+        }
+        NormalizedKind::For {
+            init,
+            condition,
+            update,
+            body,
+        } => {
+            if let Some(i) = init {
+                evaluate_rules_recursive(rule_engine, file_path, i, taint_engine);
+            }
+            if let Some(c) = condition {
+                evaluate_rules_recursive(rule_engine, file_path, c, taint_engine);
+            }
+            if let Some(u) = update {
+                evaluate_rules_recursive(rule_engine, file_path, u, taint_engine);
+            }
+            evaluate_rules_recursive(rule_engine, file_path, body, taint_engine);
+        }
+        NormalizedKind::While { condition, body } | NormalizedKind::DoWhile { condition, body } => {
+            evaluate_rules_recursive(rule_engine, file_path, condition, taint_engine);
+            evaluate_rules_recursive(rule_engine, file_path, body, taint_engine);
+        }
+        NormalizedKind::Try {
+            body,
+            catch_clauses,
+            finally_clause,
+        } => {
+            evaluate_rules_recursive(rule_engine, file_path, body, taint_engine);
+            for catch in catch_clauses {
+                evaluate_rules_recursive(rule_engine, file_path, catch, taint_engine);
+            }
+            if let Some(finally) = finally_clause {
+                evaluate_rules_recursive(rule_engine, file_path, finally, taint_engine);
+            }
+        }
+        NormalizedKind::Return(expr) => {
+            evaluate_rules_recursive(rule_engine, file_path, expr, taint_engine);
+        }
+        NormalizedKind::Call { arguments, .. } => {
+            for arg in arguments {
+                evaluate_rules_recursive(rule_engine, file_path, arg, taint_engine);
+            }
+        }
+        _ => {}
     }
 }

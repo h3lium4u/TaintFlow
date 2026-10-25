@@ -491,6 +491,15 @@ fn trace_backwards(
 }
 
 fn analyse_code(code: &str, file_path: &str, language: &str) -> Vec<Finding> {
+    analyse_code_with_registry(code, file_path, language, None)
+}
+
+fn analyse_code_with_registry(
+    code: &str,
+    file_path: &str,
+    language: &str,
+    registry: Option<std::sync::Arc<taint::models::ActiveModelRegistry>>,
+) -> Vec<Finding> {
     let parsed = UnifiedParser::parse(code, language);
     match parsed {
         Ok(ast) => {
@@ -498,12 +507,20 @@ fn analyse_code(code: &str, file_path: &str, language: &str) -> Vec<Finding> {
             let normalized = norm.normalize(&ast, language);
             // 1. Taint analysis
             let mut taint_engine = TaintEngine::new(10, 5, 200);
+            taint_engine.language = Some(language.to_string());
+            if let Some(ref reg) = registry {
+                taint_engine.model_registry = Some(reg.clone());
+            }
             // Build CHA table from source text before propagation
             taint_engine.build_cha_from_code(code);
             taint_engine.propagate_node(&normalized);
 
             // 2. Rule evaluation
             let mut rule_engine = RuleEngine::new();
+            rule_engine.language = Some(language.to_string());
+            if let Some(ref reg) = registry {
+                rule_engine.model_registry = Some(reg.clone());
+            }
             evaluate_rules_recursive(&mut rule_engine, file_path, &normalized, &taint_engine);
             let mut findings = rule_engine.get_findings();
 
@@ -1055,6 +1072,7 @@ fn main() {
         let mut min_severity: u8 = 0;
         let mut output_file: Option<String> = None;
         let mut scan_tests = false;
+        let mut models_dir: Option<PathBuf> = None;
 
         let mut i = 3;
         while i < args.len() {
@@ -1079,6 +1097,12 @@ fn main() {
                     output_file = args.get(i + 1).cloned();
                     i += 1;
                 }
+                "--models-dir" => {
+                    if let Some(m) = args.get(i + 1) {
+                        models_dir = Some(PathBuf::from(m));
+                        i += 1;
+                    }
+                }
                 "--scan-tests" => {
                     scan_tests = true;
                 }
@@ -1086,6 +1110,24 @@ fn main() {
             }
             i += 1;
         }
+
+        // Load external model registry if --models-dir was provided
+        let registry = models_dir.as_ref().and_then(|dir| {
+            if dir.is_dir() {
+                let reg = taint::models::ActiveModelRegistry::load_from_dir(dir);
+                if reg.is_empty() {
+                    None
+                } else {
+                    Some(std::sync::Arc::new(reg))
+                }
+            } else {
+                eprintln!(
+                    "[taintflow models] --models-dir {:?} is not a directory",
+                    dir
+                );
+                None
+            }
+        });
 
         // Collect files
         let base = if scan_path.is_dir() {
@@ -1111,7 +1153,8 @@ fn main() {
             if let Ok(code) = fs::read_to_string(file) {
                 let lang = detect_language(&code, &ext);
                 let path_str = file.to_string_lossy().to_string();
-                let mut findings = analyse_code(&code, &path_str, lang);
+                let mut findings =
+                    analyse_code_with_registry(&code, &path_str, lang, registry.clone());
                 // Apply severity filter
                 findings.retain(|f| severity_level(&f.severity) >= min_severity);
                 all_findings.append(&mut findings);
@@ -1161,13 +1204,35 @@ fn main() {
     eprintln!("  taintflow-cli scan <path> --format sarif          # SARIF 2.1 report");
     eprintln!("  taintflow-cli scan <path> --severity HIGH         # filter by minimum severity");
     eprintln!("  taintflow-cli scan <path> --output report.json --format json");
-    eprintln!("  taintflow-cli --extract                           # legacy feature extraction mode (stdin)");
+    eprintln!(
+        "  taintflow-cli scan <path> --models-dir <dir>      # load external JSON model packs"
+    );
+    eprintln!(
+        "  taintflow-cli --extract [--models-dir <dir>]      # feature extraction mode (stdin)"
+    );
     std::process::exit(1);
 }
 
 // ─── Legacy extract mode ───────────────────────────────────────────────────────
 
 fn run_extract_mode() {
+    // Parse optional --models-dir argument from extract-mode CLI args.
+    let args: Vec<String> = std::env::args().collect();
+    let models_dir: Option<std::path::PathBuf> = {
+        let mut found = None;
+        let mut i = 0;
+        while i < args.len() {
+            if args[i] == "--models-dir" {
+                if let Some(p) = args.get(i + 1) {
+                    found = Some(std::path::PathBuf::from(p));
+                    i += 1;
+                }
+            }
+            i += 1;
+        }
+        found
+    };
+
     let mut code = String::new();
     if let Err(e) = io::stdin().read_to_string(&mut code) {
         let err_out = ExtractOutput {
@@ -1188,11 +1253,37 @@ fn run_extract_mode() {
             let mut norm = Normalizer::new();
             let normalized = norm.normalize(&ast, lang);
 
+            // Load external model registry if --models-dir was provided
+            let registry = models_dir.as_ref().and_then(|dir| {
+                if dir.is_dir() {
+                    let reg = taint::models::ActiveModelRegistry::load_from_dir(dir);
+                    if reg.is_empty() {
+                        None
+                    } else {
+                        Some(std::sync::Arc::new(reg))
+                    }
+                } else {
+                    eprintln!(
+                        "[taintflow models] --models-dir {:?} is not a directory",
+                        dir
+                    );
+                    None
+                }
+            });
+
             let mut taint_engine = TaintEngine::new(10, 5, 200);
+            taint_engine.language = Some(lang.to_string());
+            if let Some(ref reg) = registry {
+                taint_engine.model_registry = Some(reg.clone());
+            }
             taint_engine.build_cha_from_code(&code);
             taint_engine.propagate_node(&normalized);
 
             let mut rule_engine = RuleEngine::new();
+            rule_engine.language = Some(lang.to_string());
+            if let Some(ref reg) = registry {
+                rule_engine.model_registry = Some(reg.clone());
+            }
             evaluate_rules_recursive(&mut rule_engine, "sample.code", &normalized, &taint_engine);
             let findings = rule_engine.get_findings();
 

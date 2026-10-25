@@ -268,8 +268,21 @@ def analyze_file(file_path, model_info=None):
 
     # Run Rust CLI
     try:
+        cli_cmd = [CLI_PATH, "--extract"]
+        models_dir = os.environ.get("TAINTFLOW_MODELS_DIR")
+        if not models_dir:
+            cand = os.path.expanduser("~/.taintflow/models")
+            if os.path.isdir(cand):
+                models_dir = cand
+            else:
+                cand_local = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+                if os.path.isdir(cand_local):
+                    models_dir = cand_local
+        if models_dir and os.path.isdir(models_dir):
+            cli_cmd.extend(["--models-dir", models_dir])
+
         res = subprocess.run(
-            [CLI_PATH, "--extract"],
+            cli_cmd,
             input=code,
             text=True,
             capture_output=True,

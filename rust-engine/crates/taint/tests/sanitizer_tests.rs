@@ -111,3 +111,28 @@ else:
         "url should be sanitized for CWE-918 in alternate of negated check"
     );
 }
+
+// ── M1 external_sanitized_for field tests ─────────────────────────────────────
+
+/// Verify external_sanitized_for field exists and is empty on a fresh TaintState.
+#[test]
+fn test_external_sanitized_for_default_empty() {
+    let state = taint::TaintState::new(true);
+    assert!(
+        state.external_sanitized_for.is_empty(),
+        "external_sanitized_for must be empty by default"
+    );
+    // Verify built-in field is unaffected
+    assert!(state.sanitized_for.is_empty());
+}
+
+/// Verify that populating external_sanitized_for does NOT affect sanitized_for.
+#[test]
+fn test_external_sanitized_for_does_not_pollute_sanitized_for() {
+    let mut state = taint::TaintState::new(true);
+    state.external_sanitized_for.insert(CWE::CWE89);
+    assert!(
+        !state.sanitized_for.contains(&CWE::CWE89),
+        "external_sanitized_for must not affect sanitized_for"
+    );
+}

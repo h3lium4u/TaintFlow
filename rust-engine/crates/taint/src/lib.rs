@@ -4,6 +4,7 @@
 
 pub mod interproc;
 pub mod log_level;
+pub mod models;
 pub mod stubs;
 pub mod vulnerable_tests;
 
@@ -42,7 +43,11 @@ pub enum CWE {
 #[derive(Debug, Clone, Default)]
 pub struct TaintState {
     pub tainted: bool,
+    /// Built-in sanitizer coverage — read by built-in sink checks ONLY.
     pub sanitized_for: HashSet<CWE>,
+    /// External model sanitizer coverage — read by external sink checks ONLY.
+    /// Must never be read by built-in sink suppression logic.
+    pub external_sanitized_for: HashSet<CWE>,
     pub source_line: Option<usize>,
     pub source_var: Option<String>,
 }
@@ -52,6 +57,7 @@ impl TaintState {
         Self {
             tainted,
             sanitized_for: HashSet::new(),
+            external_sanitized_for: HashSet::new(),
             source_line: None,
             source_var: None,
         }
@@ -617,6 +623,10 @@ pub struct TaintEngine {
     pub map_taint_store: HashMap<String, Vec<String>>,
     pub cha: ChaTable,
     pub list_lengths: HashMap<String, usize>,
+    /// Optional external model registry for M1 external sink/sanitizer matching.
+    pub model_registry: Option<std::sync::Arc<crate::models::ActiveModelRegistry>>,
+    /// Language being analysed — set by CLI before propagation.
+    pub language: Option<String>,
 }
 
 impl TaintEngine {
@@ -643,6 +653,8 @@ impl TaintEngine {
             map_taint_store: HashMap::new(),
             cha: ChaTable::new(),
             list_lengths: HashMap::new(),
+            model_registry: None,
+            language: None,
         }
     }
 
@@ -665,6 +677,8 @@ impl TaintEngine {
             map_taint_store: HashMap::new(),
             cha: ChaTable::new(),
             list_lengths: HashMap::new(),
+            model_registry: None,
+            language: None,
         }
     }
 
@@ -703,10 +717,17 @@ impl TaintEngine {
                 return Some(state);
             }
         }
-        if contains_source_expression(&node.raw, self.file_path.as_deref()) {
+        if contains_source_expression(&node.raw, self.file_path.as_deref())
+            || self
+                .model_registry
+                .as_ref()
+                .map(|r| r.match_source(&node.raw, self.language.as_deref().unwrap_or("java")))
+                .unwrap_or(false)
+        {
             return Some(TaintState {
                 tainted: true,
                 sanitized_for: HashSet::new(),
+                external_sanitized_for: HashSet::new(),
                 source_line: Some(node.span.start_line),
                 source_var: Some(node.raw.clone()),
             });
@@ -718,10 +739,17 @@ impl TaintEngine {
                         return Some(state);
                     }
                 }
-                if contains_source_expression(name, self.file_path.as_deref()) {
+                if contains_source_expression(name, self.file_path.as_deref())
+                    || self
+                        .model_registry
+                        .as_ref()
+                        .map(|r| r.match_source(name, self.language.as_deref().unwrap_or("java")))
+                        .unwrap_or(false)
+                {
                     return Some(TaintState {
                         tainted: true,
                         sanitized_for: HashSet::new(),
+                        external_sanitized_for: HashSet::new(),
                         source_line: None,
                         source_var: Some(name.clone()),
                     });
@@ -735,6 +763,9 @@ impl TaintEngine {
                         if state.tainted {
                             combined.tainted = true;
                             combined.sanitized_for.extend(state.sanitized_for);
+                            combined
+                                .external_sanitized_for
+                                .extend(state.external_sanitized_for);
                         }
                     }
                 }
@@ -878,6 +909,13 @@ impl TaintEngine {
                 let fp = self.file_path.clone();
                 let is_source = contains_source_expression(&rhs.raw, fp.as_deref())
                     || self
+                        .model_registry
+                        .as_ref()
+                        .map(|r| {
+                            r.match_source(&rhs.raw, self.language.as_deref().unwrap_or("java"))
+                        })
+                        .unwrap_or(false)
+                    || self
                         .evaluate_taint_state_recursive(rhs, 0)
                         .map(|s| s.tainted)
                         .unwrap_or(false);
@@ -888,6 +926,7 @@ impl TaintEngine {
                         .unwrap_or_else(|| TaintState {
                             tainted: true,
                             sanitized_for: HashSet::new(),
+                            external_sanitized_for: HashSet::new(),
                             source_line: Some(rhs.span.start_line),
                             source_var: Some(rhs.raw.clone()),
                         });
@@ -897,6 +936,15 @@ impl TaintEngine {
                         if Self::is_sanitizer_call(callee) {
                             let sanitized_cwes = get_sanitized_cwes_for_callee(callee);
                             inherited_state.sanitized_for.extend(sanitized_cwes);
+                        }
+                        // External model sanitizer — assignment RHS: writes external_sanitized_for
+                        // on the destination variable only. Does NOT modify source variable.
+                        // Does NOT write sanitized_for (built-in field).
+                        if let Some(registry) = self.model_registry.as_ref() {
+                            let lang = self.language.as_deref().unwrap_or("java");
+                            if let Some(matched) = registry.match_sanitizer(callee, lang) {
+                                inherited_state.external_sanitized_for.extend(matched.cwes);
+                            }
                         }
                     }
 
@@ -952,7 +1000,7 @@ impl TaintEngine {
             NormalizedKind::Call {
                 callee, arguments, ..
             } => {
-                // Check sanitizer
+                // Check built-in sanitizer (standalone call — clears tainted flag)
                 if Self::is_sanitizer_call(callee) {
                     // Mark all arguments as sanitized
                     for arg in arguments {
@@ -963,6 +1011,29 @@ impl TaintEngine {
                         }
                     }
                     return;
+                }
+
+                // External model sanitizer — standalone call: writes external_sanitized_for
+                // on matched argument variables. Does NOT clear the tainted flag.
+                // This preserves built-in sink findings while enabling external suppression.
+                if let Some(registry) = self.model_registry.as_ref() {
+                    let lang = self.language.as_deref().unwrap_or("java");
+                    if let Some(matched) = registry.match_sanitizer(callee, lang) {
+                        for (arg_idx, arg) in arguments.iter().enumerate() {
+                            if matched.arg_indices.is_empty()
+                                || matched.arg_indices.contains(&arg_idx)
+                            {
+                                if let NormalizedKind::Identifier(name) = &arg.kind {
+                                    if let Some(state) = self.tainted_symbols.get_mut(name) {
+                                        state
+                                            .external_sanitized_for
+                                            .extend(matched.cwes.iter().cloned());
+                                    }
+                                }
+                            }
+                        }
+                        return;
+                    }
                 }
 
                 // Collection mutation methods
@@ -1428,6 +1499,7 @@ impl TaintEngine {
                         TaintState {
                             tainted: true,
                             sanitized_for: HashSet::new(),
+                            external_sanitized_for: HashSet::new(),
                             source_line: Some(rhs.span.start_line),
                             source_var: Some(rhs.raw.clone()),
                         },

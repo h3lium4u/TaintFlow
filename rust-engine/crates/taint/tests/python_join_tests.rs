@@ -22,6 +22,7 @@ query = ",".join(items)
         taint::TaintState {
             tainted: true,
             sanitized_for: std::collections::HashSet::new(),
+            external_sanitized_for: std::collections::HashSet::new(),
             source_line: None,
             source_var: None,
         },

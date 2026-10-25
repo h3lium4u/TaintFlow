@@ -5,6 +5,7 @@ fn test_taint_path_merging_policy() {
     let path_a = TaintState {
         tainted: true,
         sanitized_for: vec![CWE::CWE89].into_iter().collect(),
+        external_sanitized_for: std::collections::HashSet::new(),
         source_line: None,
         source_var: None,
     };
@@ -12,6 +13,7 @@ fn test_taint_path_merging_policy() {
     let path_b = TaintState {
         tainted: true,
         sanitized_for: vec![].into_iter().collect(),
+        external_sanitized_for: std::collections::HashSet::new(),
         source_line: None,
         source_var: None,
     };
@@ -22,6 +24,7 @@ fn test_taint_path_merging_policy() {
     let merged = TaintState {
         tainted: path_a.tainted || path_b.tainted,
         sanitized_for: merged_sanitized,
+        external_sanitized_for: std::collections::HashSet::new(),
         source_line: None,
         source_var: None,
     };
