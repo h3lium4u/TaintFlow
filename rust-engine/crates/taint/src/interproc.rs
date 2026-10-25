@@ -1,3 +1,4 @@
+use crate::log_level;
 use cfg::icfg::{IcfgEdge, IcfgEdgeKind, IcfgNode, InterproceduralCFG};
 use ir::{InstructionKind, MethodId, Program};
 use serde::{Deserialize, Serialize};
@@ -7,7 +8,6 @@ use std::rc::Rc;
 use std::time::Instant;
 use symbols::call_graph::CallGraph;
 use symbols::global::GlobalSymbolTable;
-use crate::log_level;
 
 struct ReturnScanStats {
     invocations: u64,
@@ -399,22 +399,34 @@ impl<'a> InterproceduralTaintEngine<'a> {
             if let Some(type_info) = self.gst.program_index.types.get(&curr_id) {
                 let name = &type_info.name;
                 let fqn = &type_info.fqn;
-                if name == "JpaRepository" || fqn.contains("JpaRepository")
-                    || name == "CrudRepository" || fqn.contains("CrudRepository")
-                    || name == "PagingAndSortingRepository" || fqn.contains("PagingAndSortingRepository")
-                    || name == "Repository" || fqn.contains("Repository")
+                if name == "JpaRepository"
+                    || fqn.contains("JpaRepository")
+                    || name == "CrudRepository"
+                    || fqn.contains("CrudRepository")
+                    || name == "PagingAndSortingRepository"
+                    || fqn.contains("PagingAndSortingRepository")
+                    || name == "Repository"
+                    || fqn.contains("Repository")
                 {
                     return true;
                 }
 
                 if type_info.annotations.iter().any(|a| {
-                    a.contains("Repository") || a.contains("Mapper") || a.contains("RepositoryDefinition")
+                    a.contains("Repository")
+                        || a.contains("Mapper")
+                        || a.contains("RepositoryDefinition")
                 }) {
                     return true;
                 }
 
                 if let Some(parent_name) = self.gst.child_to_parent.get(&curr_id) {
-                    if let Some(parent_info) = self.gst.program_index.types.values().find(|t| &t.fqn == parent_name || &t.name == parent_name) {
+                    if let Some(parent_info) = self
+                        .gst
+                        .program_index
+                        .types
+                        .values()
+                        .find(|t| &t.fqn == parent_name || &t.name == parent_name)
+                    {
                         queue.push(parent_info.id);
                     }
                 }
@@ -453,7 +465,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
         let method_name = callee.split('.').last().unwrap_or(callee);
         let name_lower = method_name.to_lowercase();
-        if name_lower.starts_with("exists") || name_lower.starts_with("count") || name_lower.starts_with("delete") {
+        if name_lower.starts_with("exists")
+            || name_lower.starts_with("count")
+            || name_lower.starts_with("delete")
+        {
             return false;
         }
 
@@ -461,10 +476,21 @@ impl<'a> InterproceduralTaintEngine<'a> {
             if let Some(ref rt) = m_info.return_type {
                 let rt_lower = rt.to_lowercase();
                 let primitives = [
-                    "void", "boolean", "int", "long", "double", "float",
-                    "char", "byte", "short", "java.lang.boolean", "java.lang.integer",
-                    "java.lang.long", "java.lang.double", "java.lang.float",
-                    "java.lang.void"
+                    "void",
+                    "boolean",
+                    "int",
+                    "long",
+                    "double",
+                    "float",
+                    "char",
+                    "byte",
+                    "short",
+                    "java.lang.boolean",
+                    "java.lang.integer",
+                    "java.lang.long",
+                    "java.lang.double",
+                    "java.lang.float",
+                    "java.lang.void",
                 ];
                 if primitives.iter().any(|&p| rt_lower == p) {
                     return false;
@@ -481,7 +507,12 @@ impl<'a> InterproceduralTaintEngine<'a> {
             let clean_name = method_name.split('(').next().unwrap_or(method_name).trim();
             matches!(
                 clean_name,
-                "readValue" | "convertValue" | "treeToValue" | "valueToTree" | "fromJson" | "toJson"
+                "readValue"
+                    | "convertValue"
+                    | "treeToValue"
+                    | "valueToTree"
+                    | "fromJson"
+                    | "toJson"
             )
         } else {
             false
@@ -1562,7 +1593,6 @@ impl<'a> InterproceduralTaintEngine<'a> {
                 is_entry = true;
             }
 
-
             let is_python = if let Some(m_path) = self.get_method_file_path(method_id) {
                 m_path.to_lowercase().ends_with(".py")
             } else {
@@ -1666,16 +1696,32 @@ impl<'a> InterproceduralTaintEngine<'a> {
 
                         // Exclude framework utility/context parameters
                         let excluded_types = [
-                            "bindingresult", "errors", "model", "modelmap", "modelandview",
-                            "redirectattributes", "sessionstatus", "principal", "authentication",
-                            "locale", "timezone", "zoneid", "inputstream", "outputstream",
-                            "reader", "writer",
+                            "bindingresult",
+                            "errors",
+                            "model",
+                            "modelmap",
+                            "modelandview",
+                            "redirectattributes",
+                            "sessionstatus",
+                            "principal",
+                            "authentication",
+                            "locale",
+                            "timezone",
+                            "zoneid",
+                            "inputstream",
+                            "outputstream",
+                            "reader",
+                            "writer",
                             // RC700 Fix 2: Exclude database infrastructure parameters.
                             // These are internal infrastructure objects (DB connections, cursors,
                             // engines, pools, managers) that are never user-controlled taint sources.
                             // Seeding them causes massive over-taint in large DB-heavy codebases.
-                            "dbconn", "db_conn", "dbconnection", "db_connection",
-                            "dbcursor", "db_cursor",
+                            "dbconn",
+                            "db_conn",
+                            "dbconnection",
+                            "db_connection",
+                            "dbcursor",
+                            "db_cursor",
                         ];
                         if excluded_types.iter().any(|&ex| param_lower.contains(ex)) {
                             continue;
@@ -1685,8 +1731,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         // DB infrastructure parameter names. Using exact-match (not contains) to
                         // avoid false suppressions (e.g. "connector" should still be allowed).
                         let excluded_exact = [
-                            "conn", "cur", "cursor", "db", "engine", "driver",
-                            "pool", "dispatcher", "transaction", "tx", "txn",
+                            "conn",
+                            "cur",
+                            "cursor",
+                            "db",
+                            "engine",
+                            "driver",
+                            "pool",
+                            "dispatcher",
+                            "transaction",
+                            "tx",
+                            "txn",
                         ];
                         if excluded_exact.iter().any(|&ex| clean_param == ex) {
                             continue;
@@ -1897,7 +1952,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Assign { dest, src } => {
                             if self.contains_source_expression(src) {
                                 let domain = crate::map_source_to_domain(src);
-                                let is_container = parse_java_or_python_container_read(dest).is_none()
+                                let is_container = parse_java_or_python_container_read(dest)
+                                    .is_none()
                                     && parse_java_or_python_container_read(src).is_none()
                                     && self.is_container_source_expression(src);
                                 let seeded_var = if is_container {
@@ -1920,7 +1976,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if self.contains_source_expression(arg) {
                                     is_src = true;
                                     let domain = crate::map_source_to_domain(arg);
-                                    let is_container = parse_java_or_python_container_read(arg).is_none()
+                                    let is_container = parse_java_or_python_container_read(arg)
+                                        .is_none()
                                         && self.is_container_source_expression(arg);
                                     let seeded_var = if is_container {
                                         format!("{}[\"*\"]", arg)
@@ -1939,7 +1996,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if is_src {
                                 if let Some(d) = dest {
                                     let domain = crate::map_source_to_domain(callee);
-                                    let is_container = parse_java_or_python_container_read(d).is_none()
+                                    let is_container = parse_java_or_python_container_read(d)
+                                        .is_none()
                                         && parse_java_or_python_container_read(callee).is_none()
                                         && self.is_container_source_expression(callee);
                                     let seeded_var = if is_container {
@@ -1960,7 +2018,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Return { val: Some(expr) } => {
                             if self.contains_source_expression(expr) {
                                 let domain = crate::map_source_to_domain(expr);
-                                let is_container = parse_java_or_python_container_read(expr).is_none()
+                                let is_container = parse_java_or_python_container_read(expr)
+                                    .is_none()
                                     && self.is_container_source_expression(expr);
                                 let seeded_var = if is_container {
                                     format!("{}[\"*\"]", expr)
@@ -2340,16 +2399,19 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 let src_lower = src.to_lowercase();
                                 // Source patterns that indicate taint:
                                 let is_source = src_lower.contains("getparameter")
-                                     || src_lower.contains("getheader")
-                                     || src_lower.contains("readline")
-                                     || src_lower.contains("readLine")
-                                     || src_lower.contains("read(")
-                                     || flask_attrs
-                                         .iter()
-                                         .any(|a| src_lower.contains(&a.to_lowercase()))
-                                     || (src_lower.contains("getinputstream") && !src_lower.contains("resource") && !src_lower.contains("classloader") && !src_lower.contains("getresource"))
-                                     || src_lower.contains("getcookies")
-                                     || src_lower.contains("getquerystring");
+                                    || src_lower.contains("getheader")
+                                    || src_lower.contains("readline")
+                                    || src_lower.contains("readLine")
+                                    || src_lower.contains("read(")
+                                    || flask_attrs
+                                        .iter()
+                                        .any(|a| src_lower.contains(&a.to_lowercase()))
+                                    || (src_lower.contains("getinputstream")
+                                        && !src_lower.contains("resource")
+                                        && !src_lower.contains("classloader")
+                                        && !src_lower.contains("getresource"))
+                                    || src_lower.contains("getcookies")
+                                    || src_lower.contains("getquerystring");
                                 if is_source {
                                     static_tainted_fields.insert(dest.clone());
                                     // Also insert just the field name part
@@ -2412,7 +2474,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
         // Helper: check if a source expression in the IR is a taint origin.
         let is_taint_origin = |src: &str| -> bool {
             let sl = src.to_lowercase();
-            if sl.contains("classloader") || sl.contains("getresource") || sl.contains("resource.getinputstream") {
+            if sl.contains("classloader")
+                || sl.contains("getresource")
+                || sl.contains("resource.getinputstream")
+            {
                 return false;
             }
             sl.contains("getparameter")
@@ -4348,16 +4413,23 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             }
                                             if is_propagating {
                                                 if let Some(d) = dest {
-                                                    results.push((d.clone(), fact.sanitized_for.clone()));
+                                                    results.push((
+                                                        d.clone(),
+                                                        fact.sanitized_for.clone(),
+                                                    ));
                                                 }
                                             }
                                             if !is_overwritten || is_propagating {
-                                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                                results.push((
+                                                    fact.var.clone(),
+                                                    fact.sanitized_for.clone(),
+                                                ));
                                             }
                                             return results;
                                         }
 
-                                        let is_repo_propagation = self.is_repository_propagation(m_id, callee);
+                                        let is_repo_propagation =
+                                            self.is_repository_propagation(m_id, callee);
                                         if is_repo_propagation {
                                             let mut is_propagating = false;
                                             for arg in args {
@@ -4367,11 +4439,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                             }
                                             if is_propagating {
                                                 if let Some(d) = dest {
-                                                    results.push((d.clone(), fact.sanitized_for.clone()));
+                                                    results.push((
+                                                        d.clone(),
+                                                        fact.sanitized_for.clone(),
+                                                    ));
                                                 }
                                             }
                                             if !is_overwritten || is_propagating {
-                                                results.push((fact.var.clone(), fact.sanitized_for.clone()));
+                                                results.push((
+                                                    fact.var.clone(),
+                                                    fact.sanitized_for.clone(),
+                                                ));
                                             }
                                             return results;
                                         }
@@ -4893,7 +4971,8 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                                     returns_tainted = true;
                                                     break;
                                                 }
-                                            } else if parse_java_or_python_container_read(v).is_none()
+                                            } else if parse_java_or_python_container_read(v)
+                                                .is_none()
                                                 && expr_uses_var(v, &container)
                                             {
                                                 if let Some(d) = dest {
@@ -5990,11 +6069,7 @@ fn is_internal_object_param(param: &str) -> bool {
 /// flows through all `self._param.*` field chains.
 ///
 /// This analysis is O(n) in the number of instructions in the method body.
-fn is_di_constructor_param(
-    program: &ir::Program,
-    method: &ir::Method,
-    clean_param: &str,
-) -> bool {
+fn is_di_constructor_param(program: &ir::Program, method: &ir::Method, clean_param: &str) -> bool {
     // Only run this for __init__-style constructors or methods named with
     // common constructor patterns. This avoids incorrectly suppressing
     // params in regular handler methods that happen to also store to self.

@@ -491,7 +491,7 @@ fn trace_backwards(
 }
 
 fn analyse_code(code: &str, file_path: &str, language: &str) -> Vec<Finding> {
-    analyse_code_with_registry(code, file_path, language, None)
+    analyse_code_with_registry(code, file_path, language, None, None)
 }
 
 fn analyse_code_with_registry(
@@ -499,6 +499,7 @@ fn analyse_code_with_registry(
     file_path: &str,
     language: &str,
     registry: Option<std::sync::Arc<taint::models::ActiveModelRegistry>>,
+    summary_registry: Option<std::sync::Arc<taint::summary::ProjectSummaryRegistry>>,
 ) -> Vec<Finding> {
     let parsed = UnifiedParser::parse(code, language);
     match parsed {
@@ -507,9 +508,13 @@ fn analyse_code_with_registry(
             let normalized = norm.normalize(&ast, language);
             // 1. Taint analysis
             let mut taint_engine = TaintEngine::new(10, 5, 200);
+            taint_engine.file_path = Some(file_path.to_string());
             taint_engine.language = Some(language.to_string());
             if let Some(ref reg) = registry {
                 taint_engine.model_registry = Some(reg.clone());
+            }
+            if let Some(ref sreg) = summary_registry {
+                taint_engine.summary_registry = Some(sreg.clone());
             }
             // Build CHA table from source text before propagation
             taint_engine.build_cha_from_code(code);
@@ -520,6 +525,9 @@ fn analyse_code_with_registry(
             rule_engine.language = Some(language.to_string());
             if let Some(ref reg) = registry {
                 rule_engine.model_registry = Some(reg.clone());
+            }
+            if let Some(ref sreg) = summary_registry {
+                rule_engine.summary_registry = Some(sreg.clone());
             }
             evaluate_rules_recursive(&mut rule_engine, file_path, &normalized, &taint_engine);
             let mut findings = rule_engine.get_findings();
@@ -1142,6 +1150,36 @@ fn main() {
         let files = collect_files(&scan_path, &ignore_dirs, scan_tests);
         let scanned = files.len();
 
+        // Multi-file semantic inference pre-pass:
+        // Pre-indexes function summaries across all project files to resolve cross-file dataflow.
+        let mut project_summaries = taint::summary::ProjectSummaryRegistry::new();
+        for file in &files {
+            let ext = file
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_string();
+            if let Ok(code) = fs::read_to_string(file) {
+                let lang = detect_language(&code, &ext);
+                let path_str = file.to_string_lossy().to_string();
+                project_summaries.index_code(
+                    &path_str,
+                    &code,
+                    lang,
+                    registry.as_ref().map(|r| r.as_ref()),
+                );
+            }
+        }
+        // Multi-hop transitive resolution pass:
+        // Connects multi-hop call chains (e.g. Controller -> Service -> DAO -> Sink) until fixpoint.
+        project_summaries.resolve_inter_summary_dependencies();
+
+        let summary_registry = if project_summaries.is_empty() {
+            None
+        } else {
+            Some(std::sync::Arc::new(project_summaries))
+        };
+
         // Analyse each file
         let mut all_findings: Vec<Finding> = Vec::new();
         for file in &files {
@@ -1153,8 +1191,13 @@ fn main() {
             if let Ok(code) = fs::read_to_string(file) {
                 let lang = detect_language(&code, &ext);
                 let path_str = file.to_string_lossy().to_string();
-                let mut findings =
-                    analyse_code_with_registry(&code, &path_str, lang, registry.clone());
+                let mut findings = analyse_code_with_registry(
+                    &code,
+                    &path_str,
+                    lang,
+                    registry.clone(),
+                    summary_registry.clone(),
+                );
                 // Apply severity filter
                 findings.retain(|f| severity_level(&f.severity) >= min_severity);
                 all_findings.append(&mut findings);
@@ -1271,10 +1314,27 @@ fn run_extract_mode() {
                 }
             });
 
+            // Inferred summaries for code snippet
+            let mut summary_reg = taint::summary::ProjectSummaryRegistry::new();
+            summary_reg.index_node(
+                "sample.code",
+                &normalized,
+                lang,
+                registry.as_ref().map(|r| r.as_ref()),
+            );
+            let summary_registry = if summary_reg.is_empty() {
+                None
+            } else {
+                Some(std::sync::Arc::new(summary_reg))
+            };
+
             let mut taint_engine = TaintEngine::new(10, 5, 200);
             taint_engine.language = Some(lang.to_string());
             if let Some(ref reg) = registry {
                 taint_engine.model_registry = Some(reg.clone());
+            }
+            if let Some(ref sreg) = summary_registry {
+                taint_engine.summary_registry = Some(sreg.clone());
             }
             taint_engine.build_cha_from_code(&code);
             taint_engine.propagate_node(&normalized);
@@ -1283,6 +1343,9 @@ fn run_extract_mode() {
             rule_engine.language = Some(lang.to_string());
             if let Some(ref reg) = registry {
                 rule_engine.model_registry = Some(reg.clone());
+            }
+            if let Some(ref sreg) = summary_registry {
+                rule_engine.summary_registry = Some(sreg.clone());
             }
             evaluate_rules_recursive(&mut rule_engine, "sample.code", &normalized, &taint_engine);
             let findings = rule_engine.get_findings();
