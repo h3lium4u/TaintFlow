@@ -721,7 +721,14 @@ impl TaintEngine {
             || self
                 .model_registry
                 .as_ref()
-                .map(|r| r.match_source(&node.raw, self.language.as_deref().unwrap_or("java")))
+                .map(|r| {
+                    let lang = self.language.as_deref().unwrap_or("java");
+                    r.match_source(&node.raw, lang)
+                        || match &node.kind {
+                            NormalizedKind::Call { callee, .. } => r.match_source(callee, lang),
+                            _ => false,
+                        }
+                })
                 .unwrap_or(false)
         {
             return Some(TaintState {
@@ -912,7 +919,14 @@ impl TaintEngine {
                         .model_registry
                         .as_ref()
                         .map(|r| {
-                            r.match_source(&rhs.raw, self.language.as_deref().unwrap_or("java"))
+                            let lang = self.language.as_deref().unwrap_or("java");
+                            r.match_source(&rhs.raw, lang)
+                                || match &rhs.kind {
+                                    NormalizedKind::Call { callee, .. } => {
+                                        r.match_source(callee, lang)
+                                    }
+                                    _ => false,
+                                }
                         })
                         .unwrap_or(false)
                     || self

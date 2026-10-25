@@ -366,7 +366,12 @@ impl ActiveModelRegistry {
     /// Match an external source by raw expression and language.
     pub fn match_source(&self, expression: &str, language: &str) -> bool {
         let expr_clean = expression.replace('"', "").replace('\'', "");
-        let expr_lower = expr_clean.to_lowercase();
+        let expr_no_args = if let Some(idx) = expr_clean.find('(') {
+            expr_clean[..idx].trim()
+        } else {
+            expr_clean.trim()
+        };
+        let expr_lower = expr_no_args.to_lowercase();
         let expr_method = expr_lower
             .rsplit('.')
             .next()
@@ -380,13 +385,15 @@ impl ActiveModelRegistry {
             .filter(|e| e.kind == ModelKind::Source && language_matches(&e.languages, &lang_lower))
             .collect();
 
+        // Tier 1 — exact qualified match
         for e in &sources {
             if expr_lower == e.callee_lower {
                 return true;
             }
         }
+        // Tier 2 — exact unqualified method match
         for e in &sources {
-            if expr_method == e.callee_lower {
+            if expr_method == e.callee_lower || expr_method == e.callee_method_lower {
                 return true;
             }
         }
