@@ -745,6 +745,10 @@ pub struct ProjectSummaryRegistry {
     pub by_file: HashMap<String, Vec<FunctionSummary>>,
     /// File path -> map of imported names (e.g. `DBHelper` -> `com.example.db.DBHelper`)
     pub file_imports: HashMap<String, HashMap<String, String>>,
+    /// File path -> declared package (e.g. `com.example.db`)
+    pub file_packages: HashMap<String, String>,
+    /// File path -> enclosing class name (e.g. `SqlHelper`)
+    pub file_classes: HashMap<String, String>,
 }
 
 impl ProjectSummaryRegistry {
@@ -768,14 +772,17 @@ impl ProjectSummaryRegistry {
         self.by_qualified
             .insert(orig_lower.clone(), summary.clone());
         self.by_qualified.insert(
-            format!("{}.{}", summary.file_path, method_lower),
+            format!("{}.{}", summary.file_path.to_lowercase(), method_lower),
             summary.clone(),
         );
         if let Some(ref enc) = summary.enclosing_type {
-            self.by_qualified.insert(
-                format!("{}.{}", enc.to_lowercase(), method_lower),
-                summary.clone(),
-            );
+            let enc_lower = enc.to_lowercase();
+            self.by_qualified
+                .insert(format!("{}.{}", enc_lower, method_lower), summary.clone());
+            if let Some(short_class) = enc_lower.rsplit('.').next() {
+                self.by_qualified
+                    .insert(format!("{}.{}", short_class, method_lower), summary.clone());
+            }
         }
 
         self.by_method
@@ -831,8 +838,33 @@ impl ProjectSummaryRegistry {
             }
         }
 
-        // 4. Method match with matching parameter count
+        // 4. Method match with matching parameter count and optional receiver check
+        let (receiver_opt, method) = if let Some((r, m)) = clean.rsplit_once('.') {
+            (Some(r), m)
+        } else {
+            (None, clean.as_str())
+        };
+
         if let Some(list) = self.by_method.get(method) {
+            if let Some(r) = receiver_opt {
+                for s in list {
+                    if s.param_names.len() == arg_count {
+                        if let Some(ref enc) = s.enclosing_type {
+                            let enc_lower = enc.to_lowercase();
+                            if enc_lower == r
+                                || enc_lower.ends_with(&format!(".{}", r))
+                                || r.ends_with(&format!(".{}", enc_lower))
+                            {
+                                return Some(s);
+                            }
+                        }
+                        let fp_lower = s.file_path.to_lowercase();
+                        if fp_lower.starts_with(r) || fp_lower.contains(r) {
+                            return Some(s);
+                        }
+                    }
+                }
+            }
             for s in list {
                 if s.param_names.len() == arg_count {
                     return Some(s);
@@ -954,6 +986,28 @@ impl ProjectSummaryRegistry {
         language: &str,
         model_registry: Option<&ActiveModelRegistry>,
     ) {
+        // Extract package declaration if present in source text
+        for line in code.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("package ") && trimmed.ends_with(';') {
+                let pkg = trimmed["package ".len()..trimmed.len() - 1].trim();
+                if !pkg.is_empty() {
+                    self.file_packages
+                        .insert(file_path.to_string(), pkg.to_lowercase());
+                }
+                break;
+            }
+        }
+
+        let stem = std::path::Path::new(file_path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("");
+        if !stem.is_empty() {
+            self.file_classes
+                .insert(file_path.to_string(), stem.to_string());
+        }
+
         if let Ok(ast) = UnifiedParser::parse(code, language) {
             let mut norm = Normalizer::new();
             let normalized = norm.normalize(&ast, language);
@@ -969,6 +1023,30 @@ impl ProjectSummaryRegistry {
         language: &str,
         model_registry: Option<&ActiveModelRegistry>,
     ) {
+        if !self.file_packages.contains_key(file_path) {
+            for line in node.raw.lines() {
+                let trimmed = line.trim();
+                if trimmed.starts_with("package ") && trimmed.ends_with(';') {
+                    let pkg = trimmed["package ".len()..trimmed.len() - 1].trim();
+                    if !pkg.is_empty() {
+                        self.file_packages
+                            .insert(file_path.to_string(), pkg.to_lowercase());
+                    }
+                    break;
+                }
+            }
+        }
+        if !self.file_classes.contains_key(file_path) {
+            let stem = std::path::Path::new(file_path)
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("");
+            if !stem.is_empty() {
+                self.file_classes
+                    .insert(file_path.to_string(), stem.to_string());
+            }
+        }
+
         match &node.kind {
             NormalizedKind::Import {
                 class_name,
@@ -980,7 +1058,7 @@ impl ProjectSummaryRegistry {
             NormalizedKind::FunctionDefinition {
                 name, params, body, ..
             } => {
-                let summary = SummaryInferer::infer_from_definition(
+                let mut summary = SummaryInferer::infer_from_definition(
                     name,
                     params,
                     body,
@@ -991,6 +1069,21 @@ impl ProjectSummaryRegistry {
                     model_registry,
                     Some(self),
                 );
+
+                if summary.enclosing_type.is_none() {
+                    let pkg = self.file_packages.get(file_path);
+                    let cls = self.file_classes.get(file_path);
+                    match (pkg, cls) {
+                        (Some(p), Some(c)) => {
+                            summary.enclosing_type = Some(format!("{}.{}", p, c));
+                        }
+                        (None, Some(c)) => {
+                            summary.enclosing_type = Some(c.clone());
+                        }
+                        _ => {}
+                    }
+                }
+
                 self.register(summary);
 
                 // Recurse into body to index any nested functions
