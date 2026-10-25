@@ -491,7 +491,7 @@ impl RuleEngine {
             }
 
             // ── External model sink evaluation (M1) ──────────────────────────
-            if let Some(registry) = &self.model_registry {
+            let matched_sink = if let Some(registry) = &self.model_registry {
                 let lang = self.language.as_deref().unwrap_or_else(|| {
                     if file_path.ends_with(".py") {
                         "python"
@@ -499,33 +499,35 @@ impl RuleEngine {
                         "java"
                     }
                 });
+                registry.match_sink(callee, lang)
+            } else {
+                None
+            };
 
+            if let Some(matched) = matched_sink {
                 for (idx, arg) in arguments.iter().enumerate() {
-                    if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine) {
-                        if let Some(matched) = registry.match_sink(callee, lang) {
-                            if matched.arg_indices.is_empty() || matched.arg_indices.contains(&idx)
-                            {
-                                let suppressed =
-                                    state.external_sanitized_for.contains(&matched.cwe)
-                                        || state.sanitized_for.contains(&matched.cwe);
-                                if !suppressed {
-                                    let cwe_str = format!("{:?}", matched.cwe);
-                                    self.push_finding(Finding {
-                                        cwe: cwe_str.clone(),
-                                        title: format!(
-                                            "Data Flow Vulnerability ({}) [External Model]",
-                                            cwe_str
-                                        ),
-                                        description: format!(
-                                            "Unsanitized tainted variable '{}' flows to external-model sink '{}' at parameter index {}.",
-                                            name, callee, idx
-                                        ),
-                                        file_path: file_path.to_string(),
-                                        line_number: node.span.start_line,
-                                        severity: matched.severity.to_string(),
-                                        ..Default::default()
-                                    });
-                                }
+                    if matched.arg_indices.is_empty() || matched.arg_indices.contains(&idx) {
+                        if let Some((name, state)) = self.get_tainted_identifier(arg, taint_engine) {
+                            let suppressed =
+                                state.external_sanitized_for.contains(&matched.cwe)
+                                    || state.sanitized_for.contains(&matched.cwe);
+                            if !suppressed {
+                                let cwe_str = format!("{:?}", matched.cwe);
+                                self.push_finding(Finding {
+                                    cwe: cwe_str.clone(),
+                                    title: format!(
+                                        "Data Flow Vulnerability ({}) [External Model]",
+                                        cwe_str
+                                    ),
+                                    description: format!(
+                                        "Unsanitized tainted variable '{}' flows to external-model sink '{}' at parameter index {}.",
+                                        name, callee, idx
+                                    ),
+                                    file_path: file_path.to_string(),
+                                    line_number: node.span.start_line,
+                                    severity: matched.severity.to_string(),
+                                    ..Default::default()
+                                });
                             }
                         }
                     }
