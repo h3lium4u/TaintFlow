@@ -195,11 +195,11 @@ fn preprocess_python(code: &str) -> String {
         if is_class {
             in_class_header = true;
             inserted_pass = false;
-        } else if is_def {
+        } else if is_def || stripped.starts_with('@') {
             in_class_header = false;
         }
 
-        if in_class_header && !is_class {
+        if in_class_header && !is_class && !stripped.starts_with('@') {
             let mut line_parens = 0i32;
             for c in stripped.chars() {
                 if c == '(' || c == '[' || c == '{' {
