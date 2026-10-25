@@ -165,15 +165,20 @@ impl GlobalSymbolTable {
 
             // Generic package-root discovery using __init__.py traversal in program.source_files
             let mut package_start_idx = 0;
-            for i in 1..=parts_init.len() {
-                let parent_dir = parts_init[..i].join("/");
-                let init_py = format!("{}/__init__.py", parent_dir);
-                let init_pyc = format!("{}/__init__.pyc", parent_dir);
-                if program.source_files.contains_key(&init_py)
-                    || program.source_files.contains_key(&init_pyc)
-                {
-                    package_start_idx = i.saturating_sub(1);
-                    break;
+            if parts_init
+                .first()
+                .map_or(false, |p| matches!(*p, "src" | "lib" | "source" | "sources"))
+            {
+                for i in 1..=parts_init.len() {
+                    let parent_dir = parts_init[..i].join("/");
+                    let init_py = format!("{}/__init__.py", parent_dir);
+                    let init_pyc = format!("{}/__init__.pyc", parent_dir);
+                    if program.source_files.contains_key(&init_py)
+                        || program.source_files.contains_key(&init_pyc)
+                    {
+                        package_start_idx = i.saturating_sub(1);
+                        break;
+                    }
                 }
             }
 
@@ -572,7 +577,7 @@ impl GlobalSymbolTable {
                         _ => "",
                     };
                     if ct == "decorator" {
-                        decs.push(child.raw.clone());
+                        decs.push(child.raw.trim().to_string());
                     } else if ct == "class_definition" || ct == "function_definition" {
                         inner_def = Some(child);
                     }
@@ -1357,7 +1362,7 @@ fn extract_annotations(node: &AstNode) -> Vec<String> {
                 _ => "",
             };
             if t == "annotation" || t == "marker_annotation" {
-                anns.push(child.raw.clone());
+                anns.push(child.raw.trim().to_string());
             }
         }
     }
@@ -1367,7 +1372,7 @@ fn extract_annotations(node: &AstNode) -> Vec<String> {
             _ => "",
         };
         if t == "annotation" || t == "marker_annotation" {
-            anns.push(child.raw.clone());
+            anns.push(child.raw.trim().to_string());
         }
     }
     anns
