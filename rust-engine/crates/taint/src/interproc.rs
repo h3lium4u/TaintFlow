@@ -1849,21 +1849,23 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             is_prefixed && suffix_check
                         });
                         if is_flask_attr {
-                            let seeded_var = if src_lower.contains("form")
-                                || src_lower.contains("args")
-                                || src_lower.contains("json")
-                                || src_lower.contains("files")
-                                || src_lower.contains("headers")
-                                || src_lower.contains("cookies")
-                                || src_lower.contains("values")
-                                || src_lower.contains("get_json")
-                                || src_lower.contains("get_data")
-                                || src_lower.contains(".get")
-                                || src_lower.contains(".post")
-                                || src_lower.contains(".files")
-                                || src_lower.contains(".meta")
-                                || src_lower.contains("query_params")
-                            {
+                            let is_container = parse_java_or_python_container_read(dest).is_none()
+                                && parse_java_or_python_container_read(src).is_none()
+                                && (src_lower.contains("form")
+                                    || src_lower.contains("args")
+                                    || src_lower.contains("json")
+                                    || src_lower.contains("files")
+                                    || src_lower.contains("headers")
+                                    || src_lower.contains("cookies")
+                                    || src_lower.contains("values")
+                                    || src_lower.contains("get_json")
+                                    || src_lower.contains("get_data")
+                                    || src_lower.contains(".get")
+                                    || src_lower.contains(".post")
+                                    || src_lower.contains(".files")
+                                    || src_lower.contains(".meta")
+                                    || src_lower.contains("query_params"));
+                            let seeded_var = if is_container {
                                 format!("{}[\"*\"]", dest)
                             } else {
                                 dest.clone()
@@ -1895,7 +1897,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Assign { dest, src } => {
                             if self.contains_source_expression(src) {
                                 let domain = crate::map_source_to_domain(src);
-                                let seeded_var = if self.is_container_source_expression(src) {
+                                let is_container = parse_java_or_python_container_read(dest).is_none()
+                                    && parse_java_or_python_container_read(src).is_none()
+                                    && self.is_container_source_expression(src);
+                                let seeded_var = if is_container {
                                     format!("{}[\"*\"]", dest)
                                 } else {
                                     dest.clone()
@@ -1915,7 +1920,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 if self.contains_source_expression(arg) {
                                     is_src = true;
                                     let domain = crate::map_source_to_domain(arg);
-                                    let seeded_var = if self.is_container_source_expression(arg) {
+                                    let is_container = parse_java_or_python_container_read(arg).is_none()
+                                        && self.is_container_source_expression(arg);
+                                    let seeded_var = if is_container {
                                         format!("{}[\"*\"]", arg)
                                     } else {
                                         arg.clone()
@@ -1932,8 +1939,10 @@ impl<'a> InterproceduralTaintEngine<'a> {
                             if is_src {
                                 if let Some(d) = dest {
                                     let domain = crate::map_source_to_domain(callee);
-                                    let seeded_var = if self.is_container_source_expression(callee)
-                                    {
+                                    let is_container = parse_java_or_python_container_read(d).is_none()
+                                        && parse_java_or_python_container_read(callee).is_none()
+                                        && self.is_container_source_expression(callee);
+                                    let seeded_var = if is_container {
                                         format!("{}[\"*\"]", d)
                                     } else {
                                         d.clone()
@@ -1951,7 +1960,9 @@ impl<'a> InterproceduralTaintEngine<'a> {
                         InstructionKind::Return { val: Some(expr) } => {
                             if self.contains_source_expression(expr) {
                                 let domain = crate::map_source_to_domain(expr);
-                                let seeded_var = if self.is_container_source_expression(expr) {
+                                let is_container = parse_java_or_python_container_read(expr).is_none()
+                                    && self.is_container_source_expression(expr);
+                                let seeded_var = if is_container {
                                     format!("{}[\"*\"]", expr)
                                 } else {
                                     expr.clone()
@@ -3826,13 +3837,17 @@ impl<'a> InterproceduralTaintEngine<'a> {
                                 && src_to_check.trim().to_lowercase()
                                     == fact_container.to_lowercase()
                             {
-                                let key_str = self
-                                    .evaluate_constant(node.method_id, fact_key)
-                                    .unwrap_or_else(|| "*".to_string());
-                                results.push((
-                                    format!("{}[\"{}\"]", dest, key_str),
-                                    fact.sanitized_for.clone(),
-                                ));
+                                if parse_java_or_python_container_read(dest).is_none() {
+                                    let key_str = self
+                                        .evaluate_constant(node.method_id, fact_key)
+                                        .unwrap_or_else(|| "*".to_string());
+                                    results.push((
+                                        format!("{}[\"{}\"]", dest, key_str),
+                                        fact.sanitized_for.clone(),
+                                    ));
+                                } else {
+                                    results.push((dest.clone(), fact.sanitized_for.clone()));
+                                }
                                 propagated = true;
                             }
                         }
