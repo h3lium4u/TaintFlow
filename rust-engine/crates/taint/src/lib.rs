@@ -737,11 +737,12 @@ impl TaintEngine {
                     let is_param = def.params.iter().any(|p| p.eq_ignore_ascii_case(name));
 
                     // If currently executing inside this function, prioritize current call context
-                    if self
-                        .active_calls
-                        .iter()
-                        .any(|c| c.eq_ignore_ascii_case(&def.name))
-                    {
+                    if self.active_calls.iter().any(|c| {
+                        c.eq_ignore_ascii_case(&def.name)
+                            || c.replace('"', "")
+                                .replace('\'', "")
+                                .eq_ignore_ascii_case(&def.name.replace('"', "").replace('\'', ""))
+                    }) {
                         if let Some(st) = self.is_symbol_tainted(name) {
                             if st.tainted {
                                 return Some(st);
@@ -776,6 +777,11 @@ impl TaintEngine {
                         }
                     }
                     if is_param {
+                        if let Some(st) = self.is_symbol_tainted(name) {
+                            if st.tainted {
+                                return Some(st);
+                            }
+                        }
                         return None;
                     }
                 }
@@ -2158,10 +2164,13 @@ impl TaintEngine {
             NormalizedKind::Catch { body, .. } => {
                 self.propagate_node(body);
             }
-            NormalizedKind::FunctionDefinition { body, .. } => {
+            NormalizedKind::FunctionDefinition { name, body, .. } => {
+                let clean_name = name.replace('"', "").replace('\'', "");
+                self.active_calls.push(clean_name);
                 for child in body {
                     self.propagate_node(child);
                 }
+                self.active_calls.pop();
             }
             _ => {}
         }
