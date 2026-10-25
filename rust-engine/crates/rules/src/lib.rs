@@ -227,9 +227,15 @@ impl RuleEngine {
     }
 
     fn push_finding(&mut self, f: Finding) {
-        // Deduplicate by (file, line, cwe)
-
-        let key = format!("{}:{}:{}", f.file_path, f.line_number, f.cwe);
+        // Deduplicate by (file, line, cwe, category)
+        let category = if f.title.contains("Broken Sanitization Chain") {
+            "mismatch"
+        } else if f.title.contains("[Inferred]") {
+            "inferred"
+        } else {
+            "standard"
+        };
+        let key = format!("{}:{}:{}:{}", f.file_path, f.line_number, f.cwe, category);
 
         if self.seen_keys.insert(key) {
             self.findings.push(f);
