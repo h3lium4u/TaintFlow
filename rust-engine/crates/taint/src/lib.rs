@@ -742,10 +742,20 @@ impl TaintEngine {
                     // Outside active execution (e.g. RuleEngine scan), check if symbol was tainted by any call
                     let def_name_lower = def.name.to_lowercase();
                     let target_prefix = format!("{}::", def_name_lower);
+                    let method_prefix = def_name_lower
+                        .rsplit('.')
+                        .next()
+                        .map(|m| format!("{}::", m));
                     for (k, state) in &self.tainted_symbols {
                         let k_lower = k.to_lowercase();
-                        if k_lower.starts_with(&target_prefix)
-                            && &k_lower[target_prefix.len()..] == name_lower
+                        if (k_lower.starts_with(&target_prefix)
+                            && &k_lower[target_prefix.len()..] == name_lower)
+                            || method_prefix
+                                .as_ref()
+                                .map(|mp| {
+                                    k_lower.starts_with(mp) && &k_lower[mp.len()..] == name_lower
+                                })
+                                .unwrap_or(false)
                         {
                             if state.tainted {
                                 return Some(state.clone());
@@ -765,12 +775,26 @@ impl TaintEngine {
         self.is_symbol_tainted(name)
     }
 
+    /// Helper to extract clean parameter name by stripping type annotations and defaults.
+    pub fn clean_parameter_name(param: &str) -> String {
+        let base = if let Some(idx) = param.find(':').or_else(|| param.find('=')) {
+            &param[..idx]
+        } else {
+            param
+        };
+        let last = base.split_whitespace().last().unwrap_or(base);
+        last.replace("[]", "")
+            .trim_matches(|c: char| !c.is_alphanumeric() && c != '_')
+            .to_string()
+    }
+
     pub fn index_functions(&mut self, node: &NormalizedNode) {
         match &node.kind {
             NormalizedKind::FunctionDefinition { name, params, body } => {
+                let cleaned_params = params.iter().map(|p| clean_parameter_name(p)).collect();
                 let def = FunctionDef {
                     name: name.clone(),
-                    params: params.clone(),
+                    params: cleaned_params,
                     body: body.clone(),
                     start_line: node.span.start_line,
                     end_line: node.span.end_line,
@@ -1006,15 +1030,41 @@ impl TaintEngine {
                     self.tainted_symbols.insert(param.clone(), state.clone());
                     self.tainted_symbols
                         .insert(format!("{}::{}", func_def.name, param), state.clone());
+                    self.tainted_symbols.insert(
+                        format!("{}::{}", func_def.name.to_lowercase(), param),
+                        state.clone(),
+                    );
+                    if let Some(m) = func_def.name.rsplit('.').next() {
+                        self.tainted_symbols
+                            .insert(format!("{}::{}", m.to_lowercase(), param), state.clone());
+                    }
                 } else {
                     self.tainted_symbols.remove(param);
                     self.tainted_symbols
                         .remove(&format!("{}::{}", func_def.name, param));
+                    self.tainted_symbols.remove(&format!(
+                        "{}::{}",
+                        func_def.name.to_lowercase(),
+                        param
+                    ));
+                    if let Some(m) = func_def.name.rsplit('.').next() {
+                        self.tainted_symbols
+                            .remove(&format!("{}::{}", m.to_lowercase(), param));
+                    }
                 }
             } else {
                 self.tainted_symbols.remove(param);
                 self.tainted_symbols
                     .remove(&format!("{}::{}", func_def.name, param));
+                self.tainted_symbols.remove(&format!(
+                    "{}::{}",
+                    func_def.name.to_lowercase(),
+                    param
+                ));
+                if let Some(m) = func_def.name.rsplit('.').next() {
+                    self.tainted_symbols
+                        .remove(&format!("{}::{}", m.to_lowercase(), param));
+                }
             }
         }
 

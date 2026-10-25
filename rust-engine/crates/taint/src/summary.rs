@@ -140,7 +140,10 @@ impl SummaryInferer {
             file_path: file_path.to_string(),
             start_line,
             end_line,
-            param_names: params.to_vec(),
+            param_names: params
+                .iter()
+                .map(|p| crate::clean_parameter_name(p))
+                .collect(),
             param_to_return: HashSet::new(),
             param_to_receiver: HashSet::new(),
             sink_invocations: Vec::new(),
@@ -153,8 +156,11 @@ impl SummaryInferer {
         // Symbol map: variable name -> set of parameter indices that influence it
         let mut var_influences: HashMap<String, HashSet<usize>> = HashMap::new();
         for (idx, param) in params.iter().enumerate() {
+            let clean = crate::clean_parameter_name(param);
             let mut set = HashSet::new();
             set.insert(idx);
+            var_influences.insert(clean.clone(), set.clone());
+            var_influences.insert(clean.to_lowercase(), set.clone());
             var_influences.insert(param.clone(), set.clone());
             var_influences.insert(param.to_lowercase(), set);
         }
