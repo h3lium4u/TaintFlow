@@ -2366,6 +2366,8 @@ pub fn get_sanitized_cwes_for_callee(callee: &str) -> Vec<CWE> {
         || c.contains("escape_string")
         || c.contains("escapesql")
         || c.contains("escape_sql")
+        || c.contains("encodeforsql")
+        || c.contains("encode_for_sql")
         || c.contains("escapestring")
         || c.contains("quote_ident")
         || c.contains("mogrify")
