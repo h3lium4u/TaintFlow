@@ -81,7 +81,7 @@ jobs:
             }
             Write-Host "VSIX verified: size $len, hash $hash"
           } else {
-            Write-Host "NOTE: Protected VSIX is an untracked local release asset; skipped on clean runner checkout."
+            Write-Host "NOTE: Protected VSIX is an untracked local release asset; remote binary verification was skipped on clean runner checkout."
           }
 
       - name: Checkout Baseline Commit
@@ -98,10 +98,10 @@ jobs:
         shell: pwsh
         run: |
           # Test 1: Java snippet
-          $fixtureJava = @"
-String id = request.getParameter("id");
-stmt.executeQuery(id);
-"@
+          $fixtureJava = @(
+            'String id = request.getParameter("id");',
+            'stmt.executeQuery(id);'
+          ) -join "`r`n"
           $fixtureJava | .\baseline-repo\rust-engine\target\release\taintflow-cli.exe --extract > baseline_java.json
           $baseExitJava = $LASTEXITCODE
           if ($baseExitJava -ne 0) {
@@ -129,10 +129,10 @@ stmt.executeQuery(id);
           Write-Host "TEST-PAR-01 Java PASSED: byte-for-byte stdout parity confirmed ($($m1BytesJava.Length) bytes identical, exit code: $m1ExitJava)"
 
           # Test 2: Python snippet
-          $fixturePy = @"
-user = request.args["id"]
-cursor.execute(user)
-"@
+          $fixturePy = @(
+            'user = request.args["id"]',
+            'cursor.execute(user)'
+          ) -join "`r`n"
           $fixturePy | .\baseline-repo\rust-engine\target\release\taintflow-cli.exe --extract > baseline_py.json
           $baseExitPy = $LASTEXITCODE
           if ($baseExitPy -ne 0) {
